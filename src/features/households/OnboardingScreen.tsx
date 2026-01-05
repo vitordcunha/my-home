@@ -1,17 +1,28 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "../auth/useAuth";
+import { useProfileQuery } from "../auth/useProfileQuery";
 import { useCreateHousehold } from "./useCreateHousehold";
 import { useJoinHousehold } from "./useJoinHousehold";
 
 export function OnboardingScreen() {
   const { user } = useAuth();
+  const { data: profile } = useProfileQuery(user?.id);
   const [mode, setMode] = useState<"choose" | "create" | "join">("choose");
   const [householdName, setHouseholdName] = useState("");
   const [inviteCode, setInviteCode] = useState("");
 
   const createHousehold = useCreateHousehold();
   const joinHousehold = useJoinHousehold();
+
+  // Reset form state when profile is updated (household created/joined)
+  useEffect(() => {
+    if (profile?.household_id) {
+      setMode("choose");
+      setHouseholdName("");
+      setInviteCode("");
+    }
+  }, [profile?.household_id]);
 
   const handleCreateHousehold = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,13 +46,13 @@ export function OnboardingScreen() {
 
   if (mode === "choose") {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center p-4">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="max-w-md w-full space-y-8 text-center">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            <h1 className="text-4xl font-bold text-foreground mb-2">
               🏠 Bem-vindo!
             </h1>
-            <p className="text-lg text-gray-600">Escolha como deseja começar</p>
+            <p className="text-lg text-muted-foreground">Escolha como deseja começar</p>
           </div>
 
           <div className="space-y-4">
@@ -53,7 +64,7 @@ export function OnboardingScreen() {
               <span className="text-3xl">🏡</span>
               <div>
                 <div className="font-semibold text-base">Criar nova casa</div>
-                <div className="text-sm text-gray-500 font-normal">
+                <div className="text-sm text-muted-foreground font-normal">
                   Comece sua própria casa e convide membros
                 </div>
               </div>
@@ -69,7 +80,7 @@ export function OnboardingScreen() {
                 <div className="font-semibold text-base">
                   Entrar em uma casa
                 </div>
-                <div className="text-sm text-gray-500 font-normal">
+                <div className="text-sm text-muted-foreground font-normal">
                   Use um código de convite para entrar
                 </div>
               </div>
@@ -82,26 +93,26 @@ export function OnboardingScreen() {
 
   if (mode === "create") {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center p-4">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="max-w-md w-full space-y-8">
           <div className="text-center">
             <button
               onClick={() => setMode("choose")}
-              className="text-gray-500 hover:text-gray-700 mb-4"
+              className="text-muted-foreground hover:text-foreground mb-4 transition-colors"
             >
               ← Voltar
             </button>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-3xl font-bold text-foreground mb-2">
               🏡 Criar nova casa
             </h1>
-            <p className="text-gray-600">Dê um nome para sua casa</p>
+            <p className="text-muted-foreground">Dê um nome para sua casa</p>
           </div>
 
           <form onSubmit={handleCreateHousehold} className="space-y-6">
             <div>
               <label
                 htmlFor="householdName"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium text-foreground mb-2"
               >
                 Nome da casa
               </label>
@@ -111,7 +122,7 @@ export function OnboardingScreen() {
                 value={householdName}
                 onChange={(e) => setHouseholdName(e.target.value)}
                 placeholder="Ex: Família Silva"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-border bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
                 required
               />
             </div>
@@ -131,26 +142,26 @@ export function OnboardingScreen() {
 
   if (mode === "join") {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center p-4">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="max-w-md w-full space-y-8">
           <div className="text-center">
             <button
               onClick={() => setMode("choose")}
-              className="text-gray-500 hover:text-gray-700 mb-4"
+              className="text-muted-foreground hover:text-foreground mb-4 transition-colors"
             >
               ← Voltar
             </button>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-3xl font-bold text-foreground mb-2">
               🚪 Entrar em uma casa
             </h1>
-            <p className="text-gray-600">Digite o código de convite</p>
+            <p className="text-muted-foreground">Digite o código de convite</p>
           </div>
 
           <form onSubmit={handleJoinHousehold} className="space-y-6">
             <div>
               <label
                 htmlFor="inviteCode"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium text-foreground mb-2"
               >
                 Código de convite
               </label>
@@ -160,11 +171,11 @@ export function OnboardingScreen() {
                 value={inviteCode}
                 onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
                 placeholder="Ex: ABC12345"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center text-2xl font-mono tracking-wider uppercase"
+                className="w-full px-4 py-3 border border-border bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent text-center text-2xl font-mono tracking-wider uppercase transition-all"
                 maxLength={8}
                 required
               />
-              <p className="text-xs text-gray-500 mt-2 text-center">
+              <p className="text-xs text-muted-foreground mt-2 text-center">
                 O código tem 8 caracteres
               </p>
             </div>

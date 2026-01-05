@@ -111,6 +111,96 @@
     @apply text-xl;
     letter-spacing: -0.015em;
   }
+
+  /* Input, textarea, select styling for dark theme - alta especificidade */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"],
+  textarea,
+  select {
+    background-color: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
+    border-color: hsl(var(--border)) !important;
+    color-scheme: light dark;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+
+  /* Dark mode específico para garantir que funcione */
+  .dark input[type="text"],
+  .dark input[type="email"],
+  .dark input[type="password"],
+  .dark input[type="number"],
+  .dark input[type="search"],
+  .dark input[type="tel"],
+  .dark input[type="url"],
+  .dark input[type="date"],
+  .dark input[type="time"],
+  .dark input[type="datetime-local"],
+  .dark textarea,
+  .dark select {
+    background-color: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
+    border-color: hsl(var(--border)) !important;
+  }
+
+  input[type="text"]::placeholder,
+  input[type="email"]::placeholder,
+  input[type="password"]::placeholder,
+  input[type="number"]::placeholder,
+  input[type="search"]::placeholder,
+  input[type="tel"]::placeholder,
+  input[type="url"]::placeholder,
+  input[type="date"]::placeholder,
+  input[type="time"]::placeholder,
+  input[type="datetime-local"]::placeholder,
+  textarea::placeholder {
+    color: hsl(var(--muted-foreground)) !important;
+    opacity: 1;
+  }
+
+  input[type="text"]:focus,
+  input[type="email"]:focus,
+  input[type="password"]:focus,
+  input[type="number"]:focus,
+  input[type="search"]:focus,
+  input[type="tel"]:focus,
+  input[type="url"]:focus,
+  input[type="date"]:focus,
+  input[type="time"]:focus,
+  input[type="datetime-local"]:focus,
+  textarea:focus,
+  select:focus {
+    outline: none !important;
+    border-color: hsl(var(--ring)) !important;
+    box-shadow: 0 0 0 2px hsl(var(--ring) / 0.2) !important;
+    background-color: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
+  }
+
+  input[type="text"]:disabled,
+  input[type="email"]:disabled,
+  input[type="password"]:disabled,
+  input[type="number"]:disabled,
+  input[type="search"]:disabled,
+  input[type="tel"]:disabled,
+  input[type="url"]:disabled,
+  input[type="date"]:disabled,
+  input[type="time"]:disabled,
+  input[type="datetime-local"]:disabled,
+  textarea:disabled,
+  select:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }
 
 /* Mobile-first utilities */
@@ -188,5 +278,69 @@
   .shadow-soft-lg {
     box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.06),
                 0 8px 48px -8px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Classe utilitária para inputs com tema dark correto */
+  .input-theme {
+    background-color: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
+    border-color: hsl(var(--border)) !important;
+  }
+
+  .input-theme::placeholder {
+    color: hsl(var(--muted-foreground)) !important;
+  }
+
+  .input-theme:focus {
+    outline: none !important;
+    border-color: hsl(var(--ring)) !important;
+    box-shadow: 0 0 0 2px hsl(var(--ring) / 0.2) !important;
+  }
+
+  /* Garantir que inputs dentro de qualquer container funcionem */
+  [class*="SheetContent"] input[type="text"],
+  [class*="SheetContent"] input[type="email"],
+  [class*="SheetContent"] input[type="password"],
+  [class*="SheetContent"] input[type="number"],
+  [class*="SheetContent"] input[type="search"],
+  [class*="SheetContent"] textarea,
+  [class*="sheet-content"] input[type="text"],
+  [class*="sheet-content"] input[type="email"],
+  [class*="sheet-content"] input[type="password"],
+  [class*="sheet-content"] input[type="number"],
+  [class*="sheet-content"] input[type="search"],
+  [class*="sheet-content"] textarea {
+    background-color: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
+    border-color: hsl(var(--border)) !important;
+  }
+
+  [class*="SheetContent"] input::placeholder,
+  [class*="SheetContent"] textarea::placeholder,
+  [class*="sheet-content"] input::placeholder,
+  [class*="sheet-content"] textarea::placeholder {
+    color: hsl(var(--muted-foreground)) !important;
+    opacity: 1;
+  }
+
+  /* Estilos para autocomplete do navegador */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px hsl(var(--background)) inset !important;
+    -webkit-text-fill-color: hsl(var(--foreground)) !important;
+    background-color: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
+  }
+
+  .dark input:-webkit-autofill,
+  .dark input:-webkit-autofill:hover,
+  .dark input:-webkit-autofill:focus,
+  .dark input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px hsl(var(--background)) inset !important;
+    -webkit-text-fill-color: hsl(var(--foreground)) !important;
+    background-color: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
   }
 }

@@ -71,7 +71,7 @@ export function SearchBar({
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder={placeholder}
-                  className="w-full h-12 pl-11 pr-4 bg-secondary/60 rounded-xl border-0 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                  className="w-full h-12 pl-11 pr-4 bg-secondary/60 text-foreground placeholder:text-muted-foreground rounded-xl border-0 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                   autoFocus
                 />
               </div>

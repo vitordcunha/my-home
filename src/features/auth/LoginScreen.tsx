@@ -183,7 +183,7 @@ export default function LoginScreen() {
                   type="text"
                   value={nome}
                   onChange={(e) => setNome(e.target.value)}
-                  className="w-full h-11 px-3 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
+                  className="w-full h-11 px-3 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
                   placeholder="Seu nome"
                 />
               </div>
@@ -202,7 +202,7 @@ export default function LoginScreen() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full h-11 px-3 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
+                className="w-full h-11 px-3 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
                 placeholder="seu@email.com"
               />
             </div>
@@ -221,7 +221,7 @@ export default function LoginScreen() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="w-full h-11 px-3 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
+                className="w-full h-11 px-3 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
                 placeholder="Mínimo 6 caracteres"
               />
             </div>

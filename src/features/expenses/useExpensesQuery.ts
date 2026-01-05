@@ -32,13 +32,17 @@ export function useExpensesQuery(householdId?: string) {
       const expensesWithProfiles = await Promise.all(
         (data || []).map(async (expense: any) => {
           let split_with_profiles = undefined;
-          
-          if (expense.split_with && Array.isArray(expense.split_with) && expense.split_with.length > 0) {
+
+          if (
+            expense.split_with &&
+            Array.isArray(expense.split_with) &&
+            expense.split_with.length > 0
+          ) {
             const { data: profiles } = await supabase
               .from("profiles")
               .select("id, nome, avatar")
               .in("id", expense.split_with);
-            
+
             split_with_profiles = profiles || [];
           }
 
@@ -69,7 +73,7 @@ export function useMonthlyExpensesQuery(householdId?: string) {
     const grouped = expenses.reduce((acc, expense) => {
       const date = new Date(expense.paid_at || expense.created_at);
       const monthKey = format(date, "yyyy-MM");
-      
+
       if (!acc[monthKey]) {
         acc[monthKey] = {
           month: monthKey,
@@ -78,15 +82,17 @@ export function useMonthlyExpensesQuery(householdId?: string) {
           expenses: [],
         };
       }
-      
+
       acc[monthKey].total += Number(expense.amount);
       acc[monthKey].expenses.push(expense);
-      
+
       return acc;
     }, {} as Record<string, MonthlyExpenses>);
 
     // Converter para array e ordenar por mês (mais recente primeiro)
-    return Object.values(grouped).sort((a, b) => b.month.localeCompare(a.month));
+    return Object.values(grouped).sort((a, b) =>
+      b.month.localeCompare(a.month)
+    );
   }, [expenses]);
 
   return {
@@ -95,5 +101,3 @@ export function useMonthlyExpensesQuery(householdId?: string) {
     ...rest,
   };
 }
-
-

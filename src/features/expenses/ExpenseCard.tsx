@@ -17,7 +17,7 @@ export function ExpenseCard({ expense }: ExpenseCardProps) {
 
   const formatDate = (dateString: string | null | undefined) => {
     if (!dateString) return "Data inválida";
-    
+
     try {
       const date = new Date(dateString);
       // Check if date is valid
@@ -33,15 +33,20 @@ export function ExpenseCard({ expense }: ExpenseCardProps) {
     }
   };
 
-  const emoji = expense.category === "custom" && expense.custom_category
-    ? "✏️"
-    : EXPENSE_CATEGORY_EMOJIS[expense.category] || "📦";
+  const emoji =
+    expense.category === "custom" && expense.custom_category
+      ? "✏️"
+      : EXPENSE_CATEGORY_EMOJIS[expense.category] || "📦";
 
-  const categoryLabel = expense.category === "custom" && expense.custom_category
-    ? expense.custom_category
-    : expense.description;
+  const categoryLabel =
+    expense.category === "custom" && expense.custom_category
+      ? expense.custom_category
+      : expense.description;
 
-  const hasSplit = expense.is_split && expense.split_with_profiles && expense.split_with_profiles.length > 0;
+  const hasSplit =
+    expense.is_split &&
+    expense.split_with_profiles &&
+    expense.split_with_profiles.length > 0;
 
   return (
     <div className="bg-card border border-border rounded-xl p-4 space-y-3 hover-lift">
@@ -56,17 +61,18 @@ export function ExpenseCard({ expense }: ExpenseCardProps) {
               {expense.paid_by_profile?.nome || "Alguém"} pagou •{" "}
               {formatDate(expense.paid_at)}
             </p>
-            
+
             {/* Mostrar informação de divisão */}
             {hasSplit && (
               <div className="flex items-center gap-1.5 mt-2 text-xs text-muted-foreground">
                 <Users className="h-3.5 w-3.5" />
                 <span>
-                  Dividido com {expense.split_with_profiles?.map(p => p.nome).join(", ")}
+                  Dividido com{" "}
+                  {expense.split_with_profiles?.map((p) => p.nome).join(", ")}
                 </span>
               </div>
             )}
-            
+
             {expense.is_split && !hasSplit && (
               <div className="flex items-center gap-1.5 mt-2 text-xs text-muted-foreground">
                 <Users className="h-3.5 w-3.5" />
@@ -85,4 +91,3 @@ export function ExpenseCard({ expense }: ExpenseCardProps) {
     </div>
   );
 }
-

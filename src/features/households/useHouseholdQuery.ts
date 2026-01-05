@@ -20,7 +20,7 @@ export function useHouseholdQuery(householdId: string | null | undefined) {
         .from("households")
         .select("*")
         .eq("id", householdId)
-        .single();
+        .maybeSingle();
 
       if (householdError) throw householdError;
 
@@ -50,4 +50,3 @@ export function useHouseholdQuery(householdId: string | null | undefined) {
     enabled: !!householdId,
   });
 }
-

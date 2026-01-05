@@ -33,5 +33,3 @@ export function useUserBalanceQuery(userId?: string, householdId?: string) {
     staleTime: 1000 * 60, // 1 minute (atualiza mais frequente)
   });
 }
-
-

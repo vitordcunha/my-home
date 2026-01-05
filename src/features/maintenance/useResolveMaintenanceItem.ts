@@ -3,7 +3,8 @@ import { supabase } from "@/lib/supabase";
 import { toast } from "@/hooks/use-toast";
 import { Database } from "@/types/database";
 
-type MaintenanceUpdate = Database["public"]["Tables"]["maintenance_items"]["Update"];
+type MaintenanceUpdate =
+  Database["public"]["Tables"]["maintenance_items"]["Update"];
 type ExpenseInsert = Database["public"]["Tables"]["expenses"]["Insert"];
 
 interface ResolveMaintenanceItemData {
@@ -102,5 +103,3 @@ export function useResolveMaintenanceItem() {
     },
   });
 }
-
-

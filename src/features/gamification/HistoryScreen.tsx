@@ -22,7 +22,9 @@ export default function HistoryScreen() {
               <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/20 to-primary/5 animate-pulse"></div>
               <Loader2 className="h-12 w-12 animate-spin text-primary" />
             </div>
-            <p className="text-sm text-muted-foreground">Carregando histórico...</p>
+            <p className="text-sm text-muted-foreground">
+              Carregando histórico...
+            </p>
           </div>
         </div>
       )}
@@ -32,7 +34,9 @@ export default function HistoryScreen() {
           <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-destructive/10 mb-4">
             <span className="text-3xl">⚠️</span>
           </div>
-          <p className="text-destructive font-medium">Erro ao carregar histórico</p>
+          <p className="text-destructive font-medium">
+            Erro ao carregar histórico
+          </p>
         </div>
       )}
 
@@ -66,9 +70,16 @@ export default function HistoryScreen() {
 
               <div className="flex-1 min-w-0">
                 <p className="text-sm leading-relaxed line-clamp-2">
-                  <span className="font-semibold text-foreground">{item.profile.nome}</span>
+                  <span className="font-semibold text-foreground">
+                    {item.profile.nome}
+                  </span>
                   <span className="text-muted-foreground"> completou </span>
-                  <span className="font-medium text-foreground" title={item.task.nome}>{item.task.nome}</span>
+                  <span
+                    className="font-medium text-foreground"
+                    title={item.task.nome}
+                  >
+                    {item.task.nome}
+                  </span>
                 </p>
                 <p className="text-xs text-muted-foreground mt-1.5 font-medium">
                   {formatDistanceToNow(item.completed_at)}

@@ -22,7 +22,12 @@ export function useCompleteShoppingTrip() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ itemIds, userId, householdId, expenseData }: CompleteShoppingTripParams) => {
+    mutationFn: async ({
+      itemIds,
+      userId,
+      householdId,
+      expenseData,
+    }: CompleteShoppingTripParams) => {
       // Complete shopping trip
       // @ts-expect-error - Supabase type mismatch with new RPC function
       const { data, error } = await supabase.rpc("complete_shopping_trip", {
@@ -36,21 +41,20 @@ export function useCompleteShoppingTrip() {
 
       // If expense data provided, create expense
       if (expenseData && expenseData.amount > 0) {
-        const { error: expenseError } = await supabase
-          .from("expenses")
-          .insert({
-            household_id: householdId,
-            description: "Compras de mercado",
-            amount: expenseData.amount,
-            category: "mercado",
-            paid_by: userId,
-            is_split: expenseData.isSplit,
-            split_with: expenseData.isSplit && expenseData.splitWith.length > 0 
-              ? expenseData.splitWith 
+        const { error: expenseError } = await supabase.from("expenses").insert({
+          household_id: householdId,
+          description: "Compras de mercado",
+          amount: expenseData.amount,
+          category: "mercado",
+          paid_by: userId,
+          is_split: expenseData.isSplit,
+          split_with:
+            expenseData.isSplit && expenseData.splitWith.length > 0
+              ? expenseData.splitWith
               : null,
-            split_type: expenseData.isSplit ? "equal" : "individual",
-            created_by: userId,
-          } as any);
+          split_type: expenseData.isSplit ? "equal" : "individual",
+          created_by: userId,
+        } as any);
 
         if (expenseError) {
           console.error("Error creating expense:", expenseError);
@@ -98,7 +102,7 @@ export function useCompleteShoppingTrip() {
       queryClient.invalidateQueries({ queryKey: ["profile"] });
       queryClient.invalidateQueries({ queryKey: ["ranking"] });
       queryClient.invalidateQueries({ queryKey: ["history"] });
-      
+
       // Invalidate expense queries if expense was created
       if (variables.expenseData) {
         queryClient.invalidateQueries({ queryKey: ["expenses"] });

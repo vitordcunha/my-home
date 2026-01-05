@@ -28,9 +28,17 @@ function RewardCard({
     <div className="bg-card border rounded-2xl p-5 space-y-4 shadow-soft hover-lift animate-in">
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 space-y-2">
-          <h3 className="font-semibold text-lg leading-tight tracking-tight line-clamp-2" title={reward.nome}>{reward.nome}</h3>
+          <h3
+            className="font-semibold text-lg leading-tight tracking-tight line-clamp-2"
+            title={reward.nome}
+          >
+            {reward.nome}
+          </h3>
           {reward.descricao && (
-            <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3" title={reward.descricao}>
+            <p
+              className="text-sm text-muted-foreground leading-relaxed line-clamp-3"
+              title={reward.descricao}
+            >
               {reward.descricao}
             </p>
           )}
@@ -68,7 +76,9 @@ function RedeemedRewardCard({ reward }: { reward: Reward }) {
         <Check className="h-6 w-6 text-green-600 dark:text-green-400" />
       </div>
       <div className="flex-1 min-w-0">
-        <h3 className="font-semibold text-base truncate" title={reward.nome}>{reward.nome}</h3>
+        <h3 className="font-semibold text-base truncate" title={reward.nome}>
+          {reward.nome}
+        </h3>
         <p className="text-xs text-muted-foreground mt-1 font-medium">
           Resgatado em{" "}
           {new Date(reward.resgatado_em!).toLocaleDateString("pt-BR")}
@@ -96,9 +106,9 @@ export default function RewardsScreen() {
         .from("profiles")
         .select("*")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
       if (error) throw error;
-      return data as Profile;
+      return data as Profile | null;
     },
     enabled: !!user?.id,
   });
@@ -165,7 +175,9 @@ export default function RewardsScreen() {
                   <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/20 to-primary/5 animate-pulse"></div>
                   <Loader2 className="h-12 w-12 animate-spin text-primary" />
                 </div>
-                <p className="text-sm text-muted-foreground">Carregando prêmios...</p>
+                <p className="text-sm text-muted-foreground">
+                  Carregando prêmios...
+                </p>
               </div>
             </div>
           )}

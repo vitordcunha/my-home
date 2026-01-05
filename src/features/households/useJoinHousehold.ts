@@ -22,13 +22,27 @@ export function useJoinHousehold() {
       if (error) throw error;
       return data;
     },
-    onSuccess: (_data, variables) => {
-      // Invalidate profile query with the correct key
+    onSuccess: async (_data, variables) => {
+      // Invalidate and refetch profile query to get updated household_id
       queryClient.invalidateQueries({
         queryKey: ["profile", variables.userId],
+        refetchType: "active",
       });
-      queryClient.invalidateQueries({ queryKey: ["profiles"] });
-      queryClient.invalidateQueries({ queryKey: ["household"] });
+      queryClient.invalidateQueries({ 
+        queryKey: ["profiles"],
+        refetchType: "active",
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: ["household"],
+        refetchType: "active",
+      });
+      
+      // Force refetch to ensure immediate update
+      await queryClient.refetchQueries({
+        queryKey: ["profile", variables.userId],
+        type: "active",
+      });
+      
       toast({
         title: "Bem-vindo!",
         description: "Você entrou na casa com sucesso.",

@@ -164,7 +164,7 @@ export function AddItemSheet({
                   required
                   maxLength={50}
                   autoFocus
-                  className="flex-1 px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary bg-background text-base"
+                  className="flex-1 px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent bg-background text-base text-foreground placeholder:text-muted-foreground transition-all"
                   placeholder="Ex: Azeite, Macarrão..."
                 />
               </div>

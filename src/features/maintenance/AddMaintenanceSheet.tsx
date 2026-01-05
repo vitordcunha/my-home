@@ -33,7 +33,9 @@ export function AddMaintenanceSheet({
 
   const addItem = useAddMaintenanceItem();
 
-  const handleQuickAction = (action: typeof MAINTENANCE_QUICK_ACTIONS[number]) => {
+  const handleQuickAction = (
+    action: (typeof MAINTENANCE_QUICK_ACTIONS)[number]
+  ) => {
     setTitle(action.title);
     setActionType(action.action_type);
     setStep("location");
@@ -76,7 +78,9 @@ export function AddMaintenanceSheet({
 
           {step === "quick" && (
             <div>
-              <h3 className="text-sm font-semibold mb-3">🚀 Problemas Comuns</h3>
+              <h3 className="text-sm font-semibold mb-3">
+                🚀 Problemas Comuns
+              </h3>
               <div className="grid grid-cols-3 gap-3">
                 {MAINTENANCE_QUICK_ACTIONS.map((action) => (
                   <button
@@ -132,21 +136,21 @@ export function AddMaintenanceSheet({
               <div>
                 <label className="text-sm font-medium">🚨 Prioridade</label>
                 <div className="space-y-3 mt-3">
-                  {(["urgent", "important", "whenever"] as MaintenancePriority[]).map(
-                    (p) => (
-                      <button
-                        key={p}
-                        onClick={() => setPriority(p)}
-                        className={`w-full p-4 rounded-xl border-2 transition-colors text-left ${
-                          priority === p
-                            ? "border-orange-500 bg-orange-50 dark:bg-orange-950"
-                            : "border-border hover:border-orange-500"
-                        }`}
-                      >
-                        <div className="font-semibold">{PRIORITY_LABELS[p]}</div>
-                      </button>
-                    )
-                  )}
+                  {(
+                    ["urgent", "important", "whenever"] as MaintenancePriority[]
+                  ).map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => setPriority(p)}
+                      className={`w-full p-4 rounded-xl border-2 transition-colors text-left ${
+                        priority === p
+                          ? "border-orange-500 bg-orange-50 dark:bg-orange-950"
+                          : "border-border hover:border-orange-500"
+                      }`}
+                    >
+                      <div className="font-semibold">{PRIORITY_LABELS[p]}</div>
+                    </button>
+                  ))}
                 </div>
               </div>
 
@@ -155,7 +159,9 @@ export function AddMaintenanceSheet({
                 disabled={!priority || addItem.isPending}
                 className="w-full h-14 text-base font-semibold"
               >
-                {addItem.isPending ? "Salvando..." : "✅ Adicionar Item • +5 pts"}
+                {addItem.isPending
+                  ? "Salvando..."
+                  : "✅ Adicionar Item • +5 pts"}
               </Button>
 
               <Button
@@ -172,5 +178,3 @@ export function AddMaintenanceSheet({
     </Sheet>
   );
 }
-
-

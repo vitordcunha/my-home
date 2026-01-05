@@ -6,9 +6,9 @@ import { Loader2, Trophy, Medal, Award } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const positionIcons = [
-  { icon: Trophy, color: "text-yellow-500" },
-  { icon: Medal, color: "text-gray-400" },
-  { icon: Award, color: "text-amber-600" },
+  { icon: Trophy, color: "text-yellow-500 dark:text-yellow-400" },
+  { icon: Medal, color: "text-muted-foreground" },
+  { icon: Award, color: "text-amber-600 dark:text-amber-500" },
 ];
 
 export default function RankingScreen() {

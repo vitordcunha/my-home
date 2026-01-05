@@ -3,6 +3,7 @@ import { AuthProvider } from "./features/auth/AuthProvider";
 import { useAuth } from "./features/auth/useAuth";
 import { useProfileQuery } from "./features/auth/useProfileQuery";
 import { Toaster } from "./components/ui/toaster";
+// import { useTheme } from "./hooks/useTheme";
 import LoginScreen from "./features/auth/LoginScreen";
 import MainLayout from "./components/layout/MainLayout";
 import TodayScreen from "./features/tasks/TodayScreen";
@@ -122,6 +123,9 @@ function AppRoutes() {
 }
 
 function App() {
+  // Initialize theme - TEMPORARIAMENTE DESABILITADO
+  // useTheme();
+  
   return (
     <BrowserRouter>
       <AuthProvider>

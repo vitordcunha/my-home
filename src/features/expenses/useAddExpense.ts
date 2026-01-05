@@ -3,7 +3,8 @@ import { supabase } from "@/lib/supabase";
 import { ExpenseInsert } from "./types";
 import { toast } from "@/hooks/use-toast";
 
-interface AddExpenseData extends Omit<ExpenseInsert, "id" | "created_at" | "updated_at"> {}
+interface AddExpenseData
+  extends Omit<ExpenseInsert, "id" | "created_at" | "updated_at"> {}
 
 export function useAddExpense() {
   const queryClient = useQueryClient();
@@ -117,4 +118,3 @@ export function useAddExpense() {
     },
   });
 }
-

@@ -43,9 +43,10 @@ export function useMaintenanceItemsQuery({
         query = query.neq("status", "archived");
       }
 
-      const { data, error } = await query.order("priority", {
-        ascending: false,
-      }) // urgent first
+      const { data, error } = await query
+        .order("priority", {
+          ascending: false,
+        }) // urgent first
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -62,5 +63,3 @@ export function useMaintenanceItemsQuery({
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }
-
-

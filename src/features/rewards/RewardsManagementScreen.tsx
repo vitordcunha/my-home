@@ -291,7 +291,7 @@ export function RewardsManagementScreen() {
                 }
                 required
                 maxLength={100}
-                className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+                className="w-full px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent bg-background text-foreground placeholder:text-muted-foreground transition-all"
                 placeholder="Ex: Sorvete Extra"
               />
             </div>
@@ -315,7 +315,7 @@ export function RewardsManagementScreen() {
                   required
                   min="1"
                   max="10000"
-                  className="flex-1 px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+                  className="flex-1 px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent bg-background text-foreground transition-all"
                 />
                 <div className="flex items-center gap-1.5 px-4 py-3 rounded-full bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200/50 dark:border-amber-800/30 shrink-0">
                   <span className="text-base">⭐</span>

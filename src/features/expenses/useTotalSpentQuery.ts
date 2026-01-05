@@ -14,11 +14,13 @@ export function useTotalSpentQuery(householdId?: string) {
 
       if (error) throw error;
 
-      const total = (data || []).reduce((sum, expense: any) => sum + Number(expense.amount), 0);
+      const total = (data || []).reduce(
+        (sum, expense: any) => sum + Number(expense.amount),
+        0
+      );
       return total;
     },
     enabled: !!householdId,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }
-

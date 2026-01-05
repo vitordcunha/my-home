@@ -139,7 +139,7 @@ export function CompleteShoppingSheet({
                         inputMode="decimal"
                         value={amount}
                         onChange={(e) => setAmount(e.target.value)}
-                        className="w-full mt-1.5 px-4 h-12 rounded-xl border border-border bg-background text-base"
+                        className="w-full mt-1.5 px-4 h-12 rounded-xl border border-border bg-background text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
                         placeholder="0,00"
                         autoFocus
                       />

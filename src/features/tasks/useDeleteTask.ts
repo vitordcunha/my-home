@@ -38,8 +38,12 @@ export function useDeleteTask() {
     },
 
     onError: (error) => {
-      const errorMessage = error instanceof Error ? error.message : "Tente novamente";
-      const truncatedError = errorMessage.length > 60 ? errorMessage.substring(0, 60) + "..." : errorMessage;
+      const errorMessage =
+        error instanceof Error ? error.message : "Tente novamente";
+      const truncatedError =
+        errorMessage.length > 60
+          ? errorMessage.substring(0, 60) + "..."
+          : errorMessage;
       toast({
         variant: "destructive",
         title: "❌ Erro ao remover",
@@ -48,4 +52,3 @@ export function useDeleteTask() {
     },
   });
 }
-

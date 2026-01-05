@@ -20,7 +20,8 @@ export function AddExpenseSheet({
   householdId,
   userId,
 }: AddExpenseSheetProps) {
-  const [selectedCategory, setSelectedCategory] = useState<ExpenseCategory | null>(null);
+  const [selectedCategory, setSelectedCategory] =
+    useState<ExpenseCategory | null>(null);
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [customCategory, setCustomCategory] = useState("");
@@ -60,7 +61,8 @@ export function AddExpenseSheet({
     const numAmount = parseFloat(amount.replace(",", "."));
     if (isNaN(numAmount) || numAmount <= 0) return;
 
-    const finalDescription = selectedCategory === "custom" ? customCategory : description;
+    const finalDescription =
+      selectedCategory === "custom" ? customCategory : description;
 
     addExpense.mutate(
       {
@@ -68,10 +70,15 @@ export function AddExpenseSheet({
         description: finalDescription,
         amount: numAmount,
         category: selectedCategory,
-        custom_category: selectedCategory === "custom" ? customCategory : undefined,
+        custom_category:
+          selectedCategory === "custom" ? customCategory : undefined,
         paid_by: userId,
         is_split: isSplit,
-        split_with: isSplit ? (selectedMembers.length > 0 ? selectedMembers : undefined) : [],
+        split_with: isSplit
+          ? selectedMembers.length > 0
+            ? selectedMembers
+            : undefined
+          : [],
         split_type: isSplit ? "equal" : "individual",
         created_by: userId,
       },
@@ -111,16 +118,22 @@ export function AddExpenseSheet({
           {!selectedCategory ? (
             <div className="space-y-4">
               <div>
-                <h3 className="text-sm font-semibold mb-3">🚀 Atalhos Rápidos</h3>
+                <h3 className="text-sm font-semibold mb-3">
+                  🚀 Atalhos Rápidos
+                </h3>
                 <div className="grid grid-cols-3 gap-3">
                   {EXPENSE_QUICK_ACTIONS.map((action) => (
                     <button
                       key={action.label}
-                      onClick={() => handleQuickAction(action.category, action.label)}
+                      onClick={() =>
+                        handleQuickAction(action.category, action.label)
+                      }
                       className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 border-border hover:border-primary hover:bg-primary/5 transition-colors thumb-friendly"
                     >
                       <span className="text-3xl">{action.emoji}</span>
-                      <span className="text-xs font-medium">{action.label}</span>
+                      <span className="text-xs font-medium">
+                        {action.label}
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -165,18 +178,30 @@ export function AddExpenseSheet({
                           checked={selectedMembers.includes(member.id)}
                           onCheckedChange={() => toggleMember(member.id)}
                         />
-                        <span className="text-sm font-medium">{member.nome}</span>
+                        <span className="text-sm font-medium">
+                          {member.nome}
+                        </span>
                       </label>
                     ))}
                   </div>
                 )}
               </div>
 
-              <Button onClick={handleSubmit} disabled={addExpense.isPending} className="w-full h-14 text-base font-semibold">
-                {addExpense.isPending ? "Salvando..." : "✅ Salvar Despesa • +10 pts"}
+              <Button
+                onClick={handleSubmit}
+                disabled={addExpense.isPending}
+                className="w-full h-14 text-base font-semibold"
+              >
+                {addExpense.isPending
+                  ? "Salvando..."
+                  : "✅ Salvar Despesa • +10 pts"}
               </Button>
 
-              <Button variant="ghost" onClick={() => setShowSplitOptions(false)} className="w-full">
+              <Button
+                variant="ghost"
+                onClick={() => setShowSplitOptions(false)}
+                className="w-full"
+              >
                 ← Voltar
               </Button>
             </div>
@@ -184,18 +209,26 @@ export function AddExpenseSheet({
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium">
-                  {selectedCategory === "custom" ? "Nome da categoria" : "Descrição"}
+                  {selectedCategory === "custom"
+                    ? "Nome da categoria"
+                    : "Descrição"}
                 </label>
                 <input
                   type="text"
-                  value={selectedCategory === "custom" ? customCategory : description}
+                  value={
+                    selectedCategory === "custom" ? customCategory : description
+                  }
                   onChange={(e) =>
                     selectedCategory === "custom"
                       ? setCustomCategory(e.target.value)
                       : setDescription(e.target.value)
                   }
-                  className="w-full mt-1.5 px-4 h-12 rounded-xl border border-border bg-background text-base"
-                  placeholder={selectedCategory === "custom" ? "Ex: Streaming" : "Ex: Conta de luz"}
+                  className="w-full mt-1.5 px-4 h-12 rounded-xl border border-border bg-background text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
+                  placeholder={
+                    selectedCategory === "custom"
+                      ? "Ex: Streaming"
+                      : "Ex: Conta de luz"
+                  }
                   autoFocus
                 />
               </div>
@@ -207,7 +240,7 @@ export function AddExpenseSheet({
                   inputMode="decimal"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  className="w-full mt-1.5 px-4 h-12 rounded-xl border border-border bg-background text-base"
+                  className="w-full mt-1.5 px-4 h-12 rounded-xl border border-border bg-background text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
                   placeholder="0,00"
                 />
               </div>
@@ -215,7 +248,12 @@ export function AddExpenseSheet({
               {/* Opção de dividir */}
               <div className="bg-accent/50 rounded-xl p-4">
                 <label className="flex items-center gap-3 cursor-pointer">
-                  <Checkbox checked={isSplit} onCheckedChange={(checked) => setIsSplit(checked as boolean)} />
+                  <Checkbox
+                    checked={isSplit}
+                    onCheckedChange={(checked) =>
+                      setIsSplit(checked as boolean)
+                    }
+                  />
                   <div className="flex-1">
                     <p className="text-sm font-medium">Dividir despesa</p>
                     <p className="text-xs text-muted-foreground">
@@ -229,7 +267,12 @@ export function AddExpenseSheet({
                 <Button
                   onClick={() => setShowSplitOptions(true)}
                   className="w-full h-14 text-base font-semibold"
-                  disabled={!amount || (selectedCategory === "custom" ? !customCategory : !description)}
+                  disabled={
+                    !amount ||
+                    (selectedCategory === "custom"
+                      ? !customCategory
+                      : !description)
+                  }
                 >
                   Escolher com quem dividir
                   <ChevronRight className="ml-2 h-5 w-5" />
@@ -237,10 +280,18 @@ export function AddExpenseSheet({
               ) : (
                 <Button
                   onClick={handleSubmit}
-                  disabled={!amount || (selectedCategory === "custom" ? !customCategory : !description) || addExpense.isPending}
+                  disabled={
+                    !amount ||
+                    (selectedCategory === "custom"
+                      ? !customCategory
+                      : !description) ||
+                    addExpense.isPending
+                  }
                   className="w-full h-14 text-base font-semibold"
                 >
-                  {addExpense.isPending ? "Salvando..." : "✅ Salvar Despesa • +10 pts"}
+                  {addExpense.isPending
+                    ? "Salvando..."
+                    : "✅ Salvar Despesa • +10 pts"}
                 </Button>
               )}
 
@@ -254,5 +305,3 @@ export function AddExpenseSheet({
     </Sheet>
   );
 }
-
-

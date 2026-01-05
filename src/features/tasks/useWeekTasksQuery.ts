@@ -1,7 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { TaskWithStatus } from "./useTasksQuery";
-import { startOfWeek, endOfWeek, eachDayOfInterval, format, isSameDay } from "date-fns";
+import {
+  startOfWeek,
+  endOfWeek,
+  eachDayOfInterval,
+  format,
+  isSameDay,
+} from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 export interface DayTasks {
@@ -58,7 +64,9 @@ export function useWeekTasksQuery(weekStart?: Date) {
 
           // Únicas: verificar se já foram concluídas
           if (task.recurrence_type === "once") {
-            const wasCompleted = history?.some((h: any) => h.task_id === task.id);
+            const wasCompleted = history?.some(
+              (h: any) => h.task_id === task.id
+            );
             return !wasCompleted;
           }
 
@@ -69,8 +77,7 @@ export function useWeekTasksQuery(weekStart?: Date) {
         const filteredTasks = dayTasks.filter((task: any) => {
           const recentCompletion = history?.find(
             (h: any) =>
-              h.task_id === task.id &&
-              isSameDay(new Date(h.created_at), date)
+              h.task_id === task.id && isSameDay(new Date(h.created_at), date)
           );
           return !recentCompletion;
         }) as TaskWithStatus[];
@@ -107,4 +114,3 @@ export function useWeekTasksQuery(weekStart?: Date) {
     staleTime: 5 * 60 * 1000, // 5 minutos
   });
 }
-

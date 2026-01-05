@@ -152,7 +152,7 @@ export default function TaskFormDialog({
               onChange={(e) => setNome(e.target.value)}
               required
               maxLength={100}
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-4 py-2 border border-border rounded-md bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
               placeholder="Ex: Lavar Louça"
             />
           </div>
@@ -171,7 +171,7 @@ export default function TaskFormDialog({
               onChange={(e) => setDescricao(e.target.value)}
               maxLength={500}
               rows={3}
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+              className="w-full px-4 py-2 border border-border rounded-md bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent resize-none transition-all"
               placeholder="Detalhes sobre a tarefa..."
             />
           </div>
@@ -255,7 +255,7 @@ export default function TaskFormDialog({
                 required
                 min="1"
                 max="1000"
-                className="flex-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                className="flex-1 px-4 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
               />
               <Badge variant="secondary" className="text-base">
                 ⭐ {xpValue}

@@ -1,0 +1,192 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Cores suaves e elegantes - tema clean e minimalista */
+    --background: 0 0% 99%;
+    --foreground: 240 10% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 10%;
+    
+    /* Primary: Azul elegante e suave */
+    --primary: 221 65% 58%;
+    --primary-foreground: 0 0% 100%;
+    
+    /* Secondary: Cinza suave */
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 240 10% 20%;
+    
+    /* Muted: Tom neutro suave */
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 5% 50%;
+    
+    /* Accent: Destaque suave */
+    --accent: 240 5% 96%;
+    --accent-foreground: 240 10% 10%;
+    
+    /* Destructive: Vermelho suave */
+    --destructive: 0 65% 58%;
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Success: Verde suave */
+    --success: 142 65% 52%;
+    --success-foreground: 0 0% 100%;
+    
+    /* Borders sutis */
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
+    --ring: 221 65% 58%;
+    
+    /* Radius mais suave */
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 240 10% 8%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 10%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 10%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 221 65% 58%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 5% 15%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 5% 15%;
+    --muted-foreground: 240 5% 60%;
+    --accent: 240 5% 15%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 65% 58%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 142 65% 52%;
+    --success-foreground: 0 0% 100%;
+    --border: 240 5% 20%;
+    --input: 240 5% 20%;
+    --ring: 221 65% 58%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: none;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", "Roboto",
+      "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+      "Helvetica Neue", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: 'cv11', 'ss01';
+    letter-spacing: -0.011em;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+  
+  h1 {
+    @apply text-3xl;
+    letter-spacing: -0.025em;
+  }
+  
+  h2 {
+    @apply text-2xl;
+    letter-spacing: -0.02em;
+  }
+  
+  h3 {
+    @apply text-xl;
+    letter-spacing: -0.015em;
+  }
+}
+
+/* Mobile-first utilities */
+@layer utilities {
+  .thumb-friendly {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  .safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-area-inset-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  /* Otimizações mobile touch */
+  * {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
+
+  /* Permite seleção em inputs */
+  input,
+  textarea,
+  [contenteditable] {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  /* Touch feedback visual */
+  button:not(:disabled):active,
+  a:active,
+  [role="button"]:active {
+    transform: scale(0.97);
+    opacity: 0.7;
+  }
+  
+  /* Animações suaves */
+  .animate-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Hover suave */
+  .hover-lift {
+    @apply transition-all duration-200;
+  }
+  
+  .hover-lift:hover {
+    @apply -translate-y-0.5 shadow-md;
+  }
+  
+  /* Glass effect para elementos flutuantes */
+  .glass {
+    @apply bg-background/80 backdrop-blur-xl border border-border/50;
+  }
+  
+  /* Sombras suaves e elegantes */
+  .shadow-soft {
+    box-shadow: 0 2px 12px -2px rgba(0, 0, 0, 0.05),
+                0 4px 24px -4px rgba(0, 0, 0, 0.04);
+  }
+  
+  .shadow-soft-lg {
+    box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.06),
+                0 8px 48px -8px rgba(0, 0, 0, 0.05);
+  }
+}

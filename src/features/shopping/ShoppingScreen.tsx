@@ -232,7 +232,7 @@ export function ShoppingScreen() {
         onOpenChange={setShowCompleteSheet}
         selectedCount={selectedItems.size}
         xpToEarn={50 + selectedItems.size * 5}
-        householdId={profile?.household_id}
+        householdId={profile?.household_id || undefined}
         userId={user?.id || ""}
         onComplete={handleCompleteTrip}
         isPending={completeTrip.isPending}

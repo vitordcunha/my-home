@@ -47,7 +47,7 @@ export function useWeekTasksQuery(weekStart?: Date) {
         const dayName = format(date, "EEEE", { locale: ptBR });
 
         // Filtrar tarefas para este dia
-        const dayTasks = (tasks || []).filter((task) => {
+        const dayTasks = (tasks || []).filter((task: any) => {
           // Diárias aparecem todos os dias
           if (task.recurrence_type === "daily") return true;
 
@@ -58,7 +58,7 @@ export function useWeekTasksQuery(weekStart?: Date) {
 
           // Únicas: verificar se já foram concluídas
           if (task.recurrence_type === "once") {
-            const wasCompleted = history?.some((h) => h.task_id === task.id);
+            const wasCompleted = history?.some((h: any) => h.task_id === task.id);
             return !wasCompleted;
           }
 
@@ -66,9 +66,9 @@ export function useWeekTasksQuery(weekStart?: Date) {
         });
 
         // Remover tarefas concluídas nas últimas 24h
-        const filteredTasks = dayTasks.filter((task) => {
+        const filteredTasks = dayTasks.filter((task: any) => {
           const recentCompletion = history?.find(
-            (h) =>
+            (h: any) =>
               h.task_id === task.id &&
               isSameDay(new Date(h.created_at), date)
           );

@@ -50,7 +50,7 @@ export function useCompleteShoppingTrip() {
               : null,
             split_type: expenseData.isSplit ? "equal" : "individual",
             created_by: userId,
-          });
+          } as any);
 
         if (expenseError) {
           console.error("Error creating expense:", expenseError);

@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { useAddExpense } from "./useAddExpense";
 import { EXPENSE_QUICK_ACTIONS, ExpenseCategory } from "./types";
 import { useHouseholdQuery } from "@/features/households/useHouseholdQuery";
-import { useAuth } from "@/features/auth/useAuth";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Users, ChevronRight } from "lucide-react";
 
@@ -29,7 +28,6 @@ export function AddExpenseSheet({
   const [showSplitOptions, setShowSplitOptions] = useState(false);
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
 
-  const { user } = useAuth();
   const { data: household } = useHouseholdQuery(householdId);
   const addExpense = useAddExpense();
 
@@ -66,7 +64,7 @@ export function AddExpenseSheet({
 
     addExpense.mutate(
       {
-        householdId,
+        household_id: householdId,
         description: finalDescription,
         amount: numAmount,
         category: selectedCategory,

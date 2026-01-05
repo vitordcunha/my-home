@@ -30,7 +30,7 @@ export function useExpensesQuery(householdId?: string) {
 
       // Buscar perfis dos usuários com quem foi dividido
       const expensesWithProfiles = await Promise.all(
-        (data || []).map(async (expense) => {
+        (data || []).map(async (expense: any) => {
           let split_with_profiles = undefined;
           
           if (expense.split_with && Array.isArray(expense.split_with) && expense.split_with.length > 0) {

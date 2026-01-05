@@ -108,6 +108,7 @@ export interface Database {
           task_id: string;
           user_id: string;
           completed_at: string;
+          created_at: string;
           xp_earned: number;
         };
         Insert: {
@@ -115,6 +116,7 @@ export interface Database {
           task_id: string;
           user_id: string;
           completed_at?: string;
+          created_at?: string;
           xp_earned: number;
         };
         Update: {
@@ -122,6 +124,7 @@ export interface Database {
           task_id?: string;
           user_id?: string;
           completed_at?: string;
+          created_at?: string;
           xp_earned?: number;
         };
       };
@@ -129,6 +132,7 @@ export interface Database {
         Row: {
           id: string;
           nome: string;
+          descricao: string | null;
           custo_pontos: number;
           resgatado_por: string | null;
           resgatado_em: string | null;
@@ -138,6 +142,7 @@ export interface Database {
         Insert: {
           id?: string;
           nome: string;
+          descricao?: string | null;
           custo_pontos: number;
           resgatado_por?: string | null;
           resgatado_em?: string | null;
@@ -147,6 +152,7 @@ export interface Database {
         Update: {
           id?: string;
           nome?: string;
+          descricao?: string | null;
           custo_pontos?: number;
           resgatado_por?: string | null;
           resgatado_em?: string | null;
@@ -211,11 +217,15 @@ export interface Database {
             | "delivery"
             | "limpeza"
             | "manutencao"
+            | "custom"
             | "outros";
+          custom_category: string | null;
           paid_at: string;
           paid_by: string;
           split_type: "equal" | "custom" | "percentage" | "individual";
           split_data: Json;
+          is_split: boolean;
+          split_with: string[] | null;
           is_recurring: boolean;
           recurrence_frequency:
             | "daily"
@@ -244,11 +254,15 @@ export interface Database {
             | "delivery"
             | "limpeza"
             | "manutencao"
+            | "custom"
             | "outros";
+          custom_category?: string | null;
           paid_at?: string;
           paid_by: string;
           split_type?: "equal" | "custom" | "percentage" | "individual";
           split_data?: Json;
+          is_split?: boolean;
+          split_with?: string[] | null;
           is_recurring?: boolean;
           recurrence_frequency?:
             | "daily"
@@ -277,16 +291,21 @@ export interface Database {
             | "delivery"
             | "limpeza"
             | "manutencao"
+            | "custom"
             | "outros";
+          custom_category?: string | null;
           paid_at?: string;
           paid_by?: string;
           split_type?: "equal" | "custom" | "percentage" | "individual";
           split_data?: Json;
+          is_split?: boolean;
+          split_with?: string[] | null;
           is_recurring?: boolean;
           recurrence_frequency?:
             | "daily"
             | "weekly"
             | "monthly"
+            | "yearly"
             | "yearly"
             | null;
           recurrence_day?: number | null;

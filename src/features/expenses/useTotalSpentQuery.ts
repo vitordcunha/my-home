@@ -14,7 +14,7 @@ export function useTotalSpentQuery(householdId?: string) {
 
       if (error) throw error;
 
-      const total = (data || []).reduce((sum, expense) => sum + Number(expense.amount), 0);
+      const total = (data || []).reduce((sum, expense: any) => sum + Number(expense.amount), 0);
       return total;
     },
     enabled: !!householdId,

@@ -32,10 +32,20 @@ export function useHouseholdQuery(householdId: string | null | undefined) {
 
       if (membersError) throw membersError;
 
-      return {
-        ...household,
+      if (!household) return null;
+
+      // @ts-ignore - Supabase type inference issue
+      const householdData: any = household;
+      const result: HouseholdWithMembers = {
+        id: householdData.id,
+        name: householdData.name,
+        invite_code: householdData.invite_code,
+        created_at: householdData.created_at,
+        created_by: householdData.created_by,
         members: members || [],
-      } as HouseholdWithMembers;
+      };
+
+      return result;
     },
     enabled: !!householdId,
   });

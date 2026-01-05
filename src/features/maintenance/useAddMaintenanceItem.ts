@@ -7,9 +7,7 @@ interface AddMaintenanceItemData
   extends Omit<
     MaintenanceItemInsert,
     "id" | "created_at" | "updated_at" | "status"
-  > {
-  householdId: string;
-}
+  > {}
 
 export function useAddMaintenanceItem() {
   const queryClient = useQueryClient();
@@ -19,7 +17,7 @@ export function useAddMaintenanceItem() {
       const { data: item, error } = await supabase
         .from("maintenance_items")
         .insert({
-          household_id: data.householdId,
+          household_id: data.household_id,
           title: data.title,
           description: data.description,
           location: data.location,
@@ -29,7 +27,7 @@ export function useAddMaintenanceItem() {
           estimated_cost: data.estimated_cost,
           photos: data.photos,
           created_by: data.created_by,
-        })
+        } as any)
         .select()
         .single();
 
@@ -44,18 +42,18 @@ export function useAddMaintenanceItem() {
 
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({
-        queryKey: ["maintenanceItems", newItem.householdId],
+        queryKey: ["maintenanceItems", newItem.household_id],
       });
 
       // Snapshot do estado anterior
       const previousItems = queryClient.getQueryData([
         "maintenanceItems",
-        newItem.householdId,
+        newItem.household_id,
       ]);
 
       // Optimistic update
       queryClient.setQueryData(
-        ["maintenanceItems", newItem.householdId],
+        ["maintenanceItems", newItem.household_id],
         (old: any) => {
           const optimisticItem = {
             ...newItem,
@@ -86,7 +84,7 @@ export function useAddMaintenanceItem() {
       // Rollback
       if (context?.previousItems) {
         queryClient.setQueryData(
-          ["maintenanceItems", newItem.householdId],
+          ["maintenanceItems", newItem.household_id],
           context.previousItems
         );
       }
@@ -102,10 +100,10 @@ export function useAddMaintenanceItem() {
         description: err instanceof Error ? err.message : "Tente novamente",
       });
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (_data, variables) => {
       // Invalidar queries relacionadas
       queryClient.invalidateQueries({
-        queryKey: ["maintenanceItems", variables.householdId],
+        queryKey: ["maintenanceItems", variables.household_id],
       });
 
       // Toast de sucesso

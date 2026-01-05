@@ -2,6 +2,9 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { vibrate } from "@/lib/utils";
+import { Database } from "@/types/database";
+
+type RewardUpdate = Database["public"]["Tables"]["rewards"]["Update"];
 
 interface RedeemRewardParams {
   rewardId: string;
@@ -17,10 +20,11 @@ export function useRedeemReward() {
     mutationFn: async ({ rewardId, userId }: RedeemRewardParams) => {
       const { data, error } = await supabase
         .from("rewards")
+        // @ts-ignore - Supabase type inference issue
         .update({
           resgatado_por: userId,
           resgatado_em: new Date().toISOString(),
-        })
+        } as RewardUpdate)
         .eq("id", rewardId)
         .select()
         .single();

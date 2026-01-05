@@ -2,6 +2,9 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { vibrate } from "@/lib/utils";
+import { Database } from "@/types/database";
+
+type TaskUpdate = Database["public"]["Tables"]["tasks_master"]["Update"];
 
 interface UpdateTaskParams {
   id: string;
@@ -21,6 +24,7 @@ export function useUpdateTask() {
     mutationFn: async ({ id, ...updates }: UpdateTaskParams) => {
       const { data, error } = await supabase
         .from("tasks_master")
+        // @ts-ignore - Supabase type inference issue
         .update({
           nome: updates.nome,
           descricao: updates.descricao || null,
@@ -28,7 +32,7 @@ export function useUpdateTask() {
           recurrence_type: updates.recurrence_type,
           days_of_week: updates.days_of_week || null,
           assigned_to: updates.assigned_to || null,
-        })
+        } as TaskUpdate)
         .eq("id", id)
         .select()
         .single();

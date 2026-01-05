@@ -3,9 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { ExpenseInsert } from "./types";
 import { toast } from "@/hooks/use-toast";
 
-interface AddExpenseData extends Omit<ExpenseInsert, "id" | "created_at" | "updated_at"> {
-  householdId: string;
-}
+interface AddExpenseData extends Omit<ExpenseInsert, "id" | "created_at" | "updated_at"> {}
 
 export function useAddExpense() {
   const queryClient = useQueryClient();
@@ -15,7 +13,7 @@ export function useAddExpense() {
       const { data: expense, error } = await supabase
         .from("expenses")
         .insert({
-          household_id: data.householdId,
+          household_id: data.household_id,
           description: data.description,
           amount: data.amount,
           category: data.category,
@@ -33,7 +31,7 @@ export function useAddExpense() {
           maintenance_item_id: data.maintenance_item_id,
           receipt_url: data.receipt_url,
           created_by: data.created_by,
-        })
+        } as any)
         .select()
         .single();
 
@@ -48,18 +46,18 @@ export function useAddExpense() {
 
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({
-        queryKey: ["expenses", newExpense.householdId],
+        queryKey: ["expenses", newExpense.household_id],
       });
 
       // Snapshot do estado anterior
       const previousExpenses = queryClient.getQueryData([
         "expenses",
-        newExpense.householdId,
+        newExpense.household_id,
       ]);
 
       // Optimistic update
       queryClient.setQueryData(
-        ["expenses", newExpense.householdId],
+        ["expenses", newExpense.household_id],
         (old: any) => {
           const optimisticExpense = {
             ...newExpense,
@@ -83,7 +81,7 @@ export function useAddExpense() {
       // Rollback
       if (context?.previousExpenses) {
         queryClient.setQueryData(
-          ["expenses", newExpense.householdId],
+          ["expenses", newExpense.household_id],
           context.previousExpenses
         );
       }
@@ -99,16 +97,16 @@ export function useAddExpense() {
         description: err instanceof Error ? err.message : "Tente novamente",
       });
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (_data, variables) => {
       // Invalidar queries relacionadas
       queryClient.invalidateQueries({
-        queryKey: ["expenses", variables.householdId],
+        queryKey: ["expenses", variables.household_id],
       });
       queryClient.invalidateQueries({
-        queryKey: ["userBalance", variables.paid_by, variables.householdId],
+        queryKey: ["userBalance", variables.paid_by, variables.household_id],
       });
       queryClient.invalidateQueries({
-        queryKey: ["totalSpent", variables.householdId],
+        queryKey: ["totalSpent", variables.household_id],
       });
 
       // Toast de sucesso

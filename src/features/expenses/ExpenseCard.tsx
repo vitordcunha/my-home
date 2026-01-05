@@ -62,7 +62,7 @@ export function ExpenseCard({ expense }: ExpenseCardProps) {
               <div className="flex items-center gap-1.5 mt-2 text-xs text-muted-foreground">
                 <Users className="h-3.5 w-3.5" />
                 <span>
-                  Dividido com {expense.split_with_profiles.map(p => p.nome).join(", ")}
+                  Dividido com {expense.split_with_profiles?.map(p => p.nome).join(", ")}
                 </span>
               </div>
             )}

@@ -42,7 +42,7 @@ export function PullToRefreshWrapper({
       resistance={2.5}
       className="overscroll-none"
     >
-      {children}
+      <div>{children}</div>
     </PullToRefresh>
   );
 }

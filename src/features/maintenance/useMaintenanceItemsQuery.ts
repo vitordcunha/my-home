@@ -50,7 +50,7 @@ export function useMaintenanceItemsQuery({
 
       if (error) throw error;
 
-      return (data || []).map((item) => ({
+      return (data || []).map((item: any) => ({
         ...item,
         creator: Array.isArray(item.creator) ? item.creator[0] : item.creator,
         assigned: Array.isArray(item.assigned)

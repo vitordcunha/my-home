@@ -44,7 +44,7 @@ export function AddMaintenanceSheet({
 
     addItem.mutate(
       {
-        householdId,
+        household_id: householdId,
         title,
         location,
         priority,

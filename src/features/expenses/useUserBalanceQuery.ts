@@ -17,7 +17,7 @@ export function useUserBalanceQuery(userId?: string, householdId?: string) {
       const { data, error } = await supabase.rpc("get_user_balance", {
         p_user_id: userId,
         p_household_id: householdId,
-      });
+      } as any);
 
       if (error) throw error;
 

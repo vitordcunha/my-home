@@ -5,7 +5,6 @@ import { useAuth } from "@/features/auth/useAuth";
 import { useRewardsQuery, useRedeemedRewardsQuery } from "./useRewardsQuery";
 import { useRedeemReward } from "./useRedeemReward";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Loader2, Gift, Check } from "lucide-react";
 import { Database } from "@/types/database";
 

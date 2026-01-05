@@ -2,6 +2,9 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { vibrate } from "@/lib/utils";
+import { Database } from "@/types/database";
+
+type TaskUpdate = Database["public"]["Tables"]["tasks_master"]["Update"];
 
 export function useDeleteTask() {
   const queryClient = useQueryClient();
@@ -12,7 +15,8 @@ export function useDeleteTask() {
       // Soft delete: set is_active to false
       const { data, error } = await supabase
         .from("tasks_master")
-        .update({ is_active: false })
+        // @ts-ignore - Supabase type inference issue
+        .update({ is_active: false } as TaskUpdate)
         .eq("id", taskId)
         .select()
         .single();

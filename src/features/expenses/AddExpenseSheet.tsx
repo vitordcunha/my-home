@@ -12,6 +12,7 @@ import {
   Pencil,
   CheckCircle2,
 } from "lucide-react";
+import { useHaptic } from "@/hooks/useHaptic";
 
 interface AddExpenseSheetProps {
   open: boolean;
@@ -37,11 +38,13 @@ export function AddExpenseSheet({
 
   const { data: household } = useHouseholdQuery(householdId);
   const addExpense = useAddExpense();
+  const { trigger } = useHaptic();
 
   // Filtrar membros (exceto o usuário atual)
   const otherMembers = household?.members?.filter((m) => m.id !== userId) || [];
 
   const handleQuickAction = (category: ExpenseCategory, label: string) => {
+    trigger("light");
     setSelectedCategory(category);
     setDescription(label);
   };
@@ -70,6 +73,7 @@ export function AddExpenseSheet({
     const finalDescription =
       selectedCategory === "custom" ? customCategory : description;
 
+    trigger("success");
     addExpense.mutate(
       {
         household_id: householdId,

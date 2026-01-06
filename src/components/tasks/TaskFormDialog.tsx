@@ -15,6 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import { ProfileSelectSkeleton } from "@/components/skeletons/ProfileSelectSkeleton";
+import { useHaptic } from "@/hooks/useHaptic";
 
 interface TaskFormDialogProps {
   open: boolean;
@@ -50,6 +51,7 @@ export default function TaskFormDialog({
   const createTask = useCreateTask();
   const updateTask = useUpdateTask();
   const { data: profiles, isLoading: isLoadingProfiles } = useProfilesQuery();
+  const { trigger } = useHaptic();
 
   const [nome, setNome] = useState("");
   const [descricao, setDescricao] = useState("");
@@ -99,6 +101,7 @@ export default function TaskFormDialog({
       assigned_to: assignedTo || undefined,
     };
 
+    trigger("success");
     if (task) {
       // Update existing task
       await updateTask.mutateAsync({
@@ -121,6 +124,7 @@ export default function TaskFormDialog({
   };
 
   const toggleDay = (day: number) => {
+    trigger("light");
     setSelectedDays((prev) =>
       prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day].sort()
     );

@@ -135,7 +135,9 @@ export function ShoppingItemCard({
       >
         <Checkbox
           checked={isSelected}
-          onCheckedChange={() => onToggle(item.id)}
+          onCheckedChange={() => {
+            onToggle(item.id);
+          }}
           className="h-6 w-6 rounded-lg shrink-0"
         />
 

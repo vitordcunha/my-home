@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/sheet";
 import { X, Plus, CheckCircle2 } from "lucide-react";
 import { ShoppingCategory } from "./types";
+import { useHaptic } from "@/hooks/useHaptic";
 
 interface AddItemSheetProps {
   open: boolean;
@@ -62,8 +63,10 @@ export function AddItemSheet({
   const [name, setName] = useState("");
   const [category, setCategory] = useState<ShoppingCategory>("alimentos");
   const [emoji, setEmoji] = useState("🛒");
+  const { trigger } = useHaptic();
 
   const handleQuickItem = (item: (typeof quickItems)[0]) => {
+    trigger("success");
     onSubmit(item);
     // Reset and close
     setTimeout(() => {
@@ -78,6 +81,7 @@ export function AddItemSheet({
     e.preventDefault();
     if (!name.trim()) return;
 
+    trigger("success");
     onSubmit({
       name: name.trim(),
       category,

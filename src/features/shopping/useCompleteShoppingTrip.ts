@@ -211,10 +211,7 @@ export function useCompleteShoppingTrip() {
         );
       }
 
-      // Vibração de erro
-      if (navigator.vibrate) {
-        navigator.vibrate([100, 30, 100]);
-      }
+      // Vibração de erro será feita pelo hook useHaptic nos componentes
 
       toast({
         variant: "destructive",

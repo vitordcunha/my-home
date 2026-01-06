@@ -26,6 +26,7 @@ import {
 import { useTheme } from "@/hooks/useTheme";
 import { useDoubleTap } from "@/hooks/useDoubleTap";
 import { useScrollToTop } from "@/hooks/useScrollToTop";
+import { useHaptic } from "@/hooks/useHaptic";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
@@ -34,6 +35,7 @@ export default function Header() {
   const navigate = useNavigate();
   const { setTheme, resolvedTheme } = useTheme();
   const scrollToTop = useScrollToTop();
+  const { trigger } = useHaptic();
 
   // Double tap no logo para scroll to top
   const doubleTapHandlers = useDoubleTap(scrollToTop);
@@ -88,6 +90,7 @@ export default function Header() {
           {/* Toggle de Tema */}
           <button
             onClick={() => {
+              trigger("light");
               const newTheme = resolvedTheme === "dark" ? "light" : "dark";
               setTheme(newTheme);
             }}
@@ -173,7 +176,10 @@ export default function Header() {
                 {/* Tasks Actions */}
                 <div className="space-y-2 pt-2 border-t border-border/50">
                   <Button
-                    onClick={() => navigate("/tasks/week")}
+                    onClick={() => {
+                      trigger("light");
+                      navigate("/tasks/week");
+                    }}
                     variant="ghost"
                     className="w-full justify-start rounded-xl font-medium"
                   >
@@ -181,7 +187,10 @@ export default function Header() {
                     Vista Semanal
                   </Button>
                   <Button
-                    onClick={() => navigate("/tasks/trash")}
+                    onClick={() => {
+                      trigger("light");
+                      navigate("/tasks/trash");
+                    }}
                     variant="ghost"
                     className="w-full justify-start rounded-xl font-medium"
                   >
@@ -197,7 +206,10 @@ export default function Header() {
                       ADMINISTRAÇÃO
                     </p>
                     <Button
-                      onClick={() => navigate("/rewards/manage")}
+                      onClick={() => {
+                        trigger("light");
+                        navigate("/rewards/manage");
+                      }}
                       variant="ghost"
                       className="w-full justify-start rounded-xl font-medium"
                     >
@@ -205,7 +217,10 @@ export default function Header() {
                       Gerenciar Prêmios
                     </Button>
                     <Button
-                      onClick={() => navigate("/members")}
+                      onClick={() => {
+                        trigger("light");
+                        navigate("/members");
+                      }}
                       variant="ghost"
                       className="w-full justify-start rounded-xl font-medium"
                     >
@@ -217,7 +232,10 @@ export default function Header() {
 
                 {/* Botão de Sair */}
                 <Button
-                  onClick={signOut}
+                  onClick={() => {
+                    trigger("warning");
+                    signOut();
+                  }}
                   variant="outline"
                   className="w-full rounded-xl font-medium hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50 transition-all"
                 >

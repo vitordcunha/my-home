@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ShoppingCart, Users } from "lucide-react";
 import { useHouseholdQuery } from "@/features/households/useHouseholdQuery";
+import { useHaptic } from "@/hooks/useHaptic";
 
 interface CompleteShoppingSheetProps {
   open: boolean;
@@ -37,6 +38,7 @@ export function CompleteShoppingSheet({
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
 
   const { data: household } = useHouseholdQuery(householdId);
+  const { trigger } = useHaptic();
 
   // Filtrar membros (exceto o usuário atual)
   const otherMembers = household?.members?.filter((m) => m.id !== userId) || [];
@@ -66,6 +68,7 @@ export function CompleteShoppingSheet({
   const handleComplete = () => {
     const numAmount = amount ? parseFloat(amount.replace(",", ".")) : undefined;
 
+    trigger("success");
     onComplete({
       amount:
         registerExpense && numAmount && numAmount > 0 ? numAmount : undefined,

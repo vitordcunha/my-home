@@ -80,12 +80,14 @@ export default function TaskCard({ task }: TaskCardProps) {
     const truncatedTaskName =
       task.nome.length > 50 ? task.nome.substring(0, 50) + "..." : task.nome;
     if (confirm(`Tem certeza que deseja remover "${truncatedTaskName}"?`)) {
+      trigger("error");
       deleteTask.mutate(task.id);
       setShowActionsSheet(false);
     }
   };
 
   const handleEdit = () => {
+    trigger("light");
     setShowActionsSheet(false);
     setShowEditDialog(true);
   };
@@ -118,6 +120,7 @@ export default function TaskCard({ task }: TaskCardProps) {
 
       if (isHorizontal && isSignificant) {
         // Swipe esquerda = "Outra pessoa"
+        trigger("light");
         setShowPeopleSheet(true);
       }
       setSwipeProgress(0);

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Button, ButtonProps } from "./button";
 import { cn } from "@/lib/utils";
+import { useHaptic } from "@/hooks/useHaptic";
 
 interface ConfirmButtonProps extends Omit<ButtonProps, "onClick"> {
   onConfirm: () => void;
@@ -27,14 +28,17 @@ export function ConfirmButton({
   const [isConfirming, setIsConfirming] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const isIconButton = size === "icon";
+  const { trigger } = useHaptic();
 
   const handleClick = () => {
     if (isConfirming) {
       // Segundo clique - executar ação
+      trigger("error");
       onConfirm();
       setIsConfirming(false);
     } else {
       // Primeiro clique - mostrar confirmação
+      trigger("warning");
       setIsConfirming(true);
     }
   };

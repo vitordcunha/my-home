@@ -1,6 +1,7 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { Home, ShoppingCart, Trophy, Wallet /*, Wrench */ } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useHaptic } from "@/hooks/useHaptic";
 
 const navItems = [
   {
@@ -31,49 +32,65 @@ const navItems = [
 ];
 
 export default function BottomNav() {
+  const { trigger } = useHaptic();
+  const location = useLocation();
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 glass border-t safe-area-inset-bottom">
       <div className="container flex h-20 items-center justify-around px-4">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.to === "/"}
-            className={({ isActive }) =>
-              cn(
-                "relative flex flex-col items-center justify-center gap-1.5 px-4 py-2.5 rounded-2xl transition-all duration-200 thumb-friendly",
-                isActive
-                  ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground"
-              )
-            }
-          >
-            {({ isActive }) => (
-              <>
-                {isActive && (
-                  <div className="absolute inset-0 bg-primary/10 rounded-2xl animate-in" />
-                )}
-                <div className="relative">
-                  <item.icon
-                    className={cn(
-                      "h-6 w-6 transition-all duration-200",
-                      isActive && "scale-110"
-                    )}
-                    strokeWidth={isActive ? 2.5 : 2}
-                  />
-                </div>
-                <span
-                  className={cn(
-                    "text-xs font-medium transition-all duration-200 relative",
-                    isActive && "font-semibold"
+        {navItems.map((item) => {
+          const isCurrentlyActive =
+            item.to === "/"
+              ? location.pathname === "/"
+              : location.pathname.startsWith(item.to);
+
+          return (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.to === "/"}
+              onClick={() => {
+                // Só dispara haptic se não estiver na página atual
+                if (!isCurrentlyActive) {
+                  trigger("light");
+                }
+              }}
+              className={({ isActive }) =>
+                cn(
+                  "relative flex flex-col items-center justify-center gap-1.5 px-4 py-2.5 rounded-2xl transition-all duration-200 thumb-friendly",
+                  isActive
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-foreground"
+                )
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <div className="absolute inset-0 bg-primary/10 rounded-2xl animate-in" />
                   )}
-                >
-                  {item.label}
-                </span>
-              </>
-            )}
-          </NavLink>
-        ))}
+                  <div className="relative">
+                    <item.icon
+                      className={cn(
+                        "h-6 w-6 transition-all duration-200",
+                        isActive && "scale-110"
+                      )}
+                      strokeWidth={isActive ? 2.5 : 2}
+                    />
+                  </div>
+                  <span
+                    className={cn(
+                      "text-xs font-medium transition-all duration-200 relative",
+                      isActive && "font-semibold"
+                    )}
+                  >
+                    {item.label}
+                  </span>
+                </>
+              )}
+            </NavLink>
+          );
+        })}
       </div>
     </nav>
   );

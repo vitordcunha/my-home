@@ -1,4 +1,5 @@
 import { useState, useCallback, TouchEvent } from "react";
+import { useHaptic } from "./useHaptic";
 
 /**
  * Hook para detectar double tap (toque duplo)
@@ -11,6 +12,7 @@ export function useDoubleTap(
   onTouchEnd: (e: TouchEvent) => void;
 } {
   const [lastTap, setLastTap] = useState(0);
+  const { trigger } = useHaptic();
 
   const handleTouchEnd = useCallback(
     (e: TouchEvent) => {
@@ -19,12 +21,8 @@ export function useDoubleTap(
 
       if (timeSinceLastTap < delay && timeSinceLastTap > 0) {
         // Double tap detectado!
+        trigger("light");
         onDoubleTap();
-        
-        // Feedback háptico leve
-        if ("vibrate" in navigator) {
-          navigator.vibrate(10);
-        }
         
         // Previne zoom no iOS
         e.preventDefault();
@@ -35,7 +33,7 @@ export function useDoubleTap(
         setLastTap(now);
       }
     },
-    [lastTap, delay, onDoubleTap]
+    [lastTap, delay, onDoubleTap, trigger]
   );
 
   return {

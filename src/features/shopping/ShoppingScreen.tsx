@@ -104,7 +104,7 @@ export function ShoppingScreen() {
     deleteItem.mutate({
       itemId,
       itemName: item.name,
-      householdId: profile?.household_id,
+      householdId: profile?.household_id ?? undefined,
       addedBy: item.added_by,
       isPurchased: item.is_purchased,
     });
@@ -195,7 +195,6 @@ export function ShoppingScreen() {
                 onToggle={handleToggleItem}
                 onDelete={handleDeleteItem}
                 profiles={profiles}
-                isDeleting={deleteItem.isPending}
               />
             ))}
           </div>

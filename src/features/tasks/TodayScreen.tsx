@@ -24,9 +24,17 @@ export default function TodayScreen() {
   // Fetch all data for dashboard
   const { data: profile } = useProfileQuery(user?.id);
   const { data: allTasks } = useTasksQuery({ onlyMyTasks: false });
-  const { data: myTasks } = useTasksQuery({ onlyMyTasks: true, userId: user?.id });
-  const { data: balance } = useUserBalanceQuery(user?.id, profile?.household_id);
-  const { data: shoppingItems } = useShoppingItemsQuery(profile?.household_id);
+  const { data: myTasks } = useTasksQuery({
+    onlyMyTasks: true,
+    userId: user?.id,
+  });
+  const { data: balance } = useUserBalanceQuery(
+    user?.id,
+    profile?.household_id ?? undefined
+  );
+  const { data: shoppingItems } = useShoppingItemsQuery(
+    profile?.household_id ?? undefined
+  );
   const { data: ranking } = useRankingQuery();
 
   const handleRefresh = async () => {
@@ -56,17 +64,19 @@ export default function TodayScreen() {
     },
     shoppingData: {
       totalItems: shoppingItems?.length || 0,
-      urgentItems: shoppingItems?.filter((item: any) => item.is_urgent)?.length || 0,
+      urgentItems: 0, // Not implemented yet
     },
     rankingData: {
       topUserName: ranking?.[0]?.nome || "Ninguém",
       topUserPoints: ranking?.[0]?.total_points || 0,
-      currentUserPosition: ranking && user?.id 
-        ? ranking.findIndex((r) => r.id === user.id) + 1 || undefined
-        : undefined,
-      currentUserPoints: ranking && user?.id 
-        ? ranking.find((r) => r.id === user.id)?.total_points 
-        : undefined,
+      currentUserPosition:
+        ranking && user?.id
+          ? ranking.findIndex((r) => r.id === user.id) + 1 || undefined
+          : undefined,
+      currentUserPoints:
+        ranking && user?.id
+          ? ranking.find((r) => r.id === user.id)?.total_points
+          : undefined,
     },
   };
 
@@ -77,7 +87,9 @@ export default function TodayScreen() {
           {/* Header da página */}
           <div className="flex items-end justify-between gap-4">
             <div className="space-y-2">
-              <h2 className="text-3xl font-bold tracking-tight">Resumo de Hoje</h2>
+              <h2 className="text-3xl font-bold tracking-tight">
+                Resumo de Hoje
+              </h2>
               <p className="text-base text-muted-foreground capitalize">
                 {today}
               </p>

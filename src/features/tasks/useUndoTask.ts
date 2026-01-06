@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
-import { TaskWithStatus } from "./useTasksQuery";
 import { Database } from "@/types/database";
 import { vibrate } from "@/lib/utils";
 
@@ -15,27 +14,40 @@ interface UndoTaskParams {
   taskId: string;
 }
 
+interface UndoTaskResult {
+  task_id: string;
+  user_id: string;
+  xp_deducted: number;
+}
+
+interface UndoTaskContext {
+  previousTasks: unknown;
+  previousProfile: unknown;
+  previousHistory: unknown;
+}
+
 export function useUndoTask() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  return useMutation({
-    mutationFn: async ({ historyId }: { historyId: string }) => {
+  return useMutation<UndoTaskResult, Error, UndoTaskParams, UndoTaskContext>({
+    mutationFn: async ({ historyId }: UndoTaskParams) => {
       const { data, error } = await supabase.rpc("undo_task_completion", {
         p_history_id: historyId,
-      });
+      } as any);
 
       if (error) throw error;
       
       // The function returns a table with one row
-      if (!data || data.length === 0) {
+      const result = data as UndoTaskResult[] | null;
+      if (!result || result.length === 0) {
         throw new Error("Não foi possível desfazer a tarefa");
       }
       
-      return data[0];
+      return result[0];
     },
 
-    onMutate: async ({ historyId, userId, xpValue, taskName, taskId }: UndoTaskParams) => {
+    onMutate: async ({ historyId, userId, xpValue, taskName }: UndoTaskParams) => {
       // Vibrate for tactile feedback
       vibrate(50);
 
@@ -78,7 +90,7 @@ export function useUndoTask() {
       return { previousTasks, previousProfile, previousHistory };
     },
 
-    onError: (error, variables, context) => {
+    onError: (error, variables: UndoTaskParams, context) => {
       // Rollback optimistic updates
       if (context?.previousTasks) {
         queryClient.setQueryData(["tasks", "today"], context.previousTasks);

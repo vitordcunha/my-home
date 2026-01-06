@@ -13,7 +13,6 @@ interface ShoppingItemCardProps {
   onToggle: (itemId: string) => void;
   onDelete: (itemId: string) => void;
   profiles?: Array<{ id: string; nome: string; avatar?: string | null }>;
-  isDeleting?: boolean;
 }
 
 const categoryLabels: Record<string, string> = {
@@ -29,7 +28,6 @@ export function ShoppingItemCard({
   onToggle,
   onDelete,
   profiles,
-  isDeleting = false,
 }: ShoppingItemCardProps) {
   const [swipeProgress, setSwipeProgress] = useState(0);
   const [swipeDirection, setSwipeDirection] = useState<"left" | "right" | null>(null);

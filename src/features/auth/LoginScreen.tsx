@@ -42,8 +42,12 @@ export default function LoginScreen() {
         if (error) throw error;
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Erro ao autenticar";
-      const truncatedError = errorMessage.length > 60 ? errorMessage.substring(0, 60) + "..." : errorMessage;
+      const errorMessage =
+        error instanceof Error ? error.message : "Erro ao autenticar";
+      const truncatedError =
+        errorMessage.length > 60
+          ? errorMessage.substring(0, 60) + "..."
+          : errorMessage;
       toast({
         variant: "destructive",
         title: "Erro",
@@ -75,8 +79,12 @@ export default function LoginScreen() {
         description: "Verifique seu email para acessar.",
       });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Erro ao enviar link";
-      const truncatedError = errorMessage.length > 60 ? errorMessage.substring(0, 60) + "..." : errorMessage;
+      const errorMessage =
+        error instanceof Error ? error.message : "Erro ao enviar link";
+      const truncatedError =
+        errorMessage.length > 60
+          ? errorMessage.substring(0, 60) + "..."
+          : errorMessage;
       toast({
         variant: "destructive",
         title: "Erro",
@@ -99,8 +107,14 @@ export default function LoginScreen() {
 
       if (error) throw error;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Erro ao fazer login com Google";
-      const truncatedError = errorMessage.length > 60 ? errorMessage.substring(0, 60) + "..." : errorMessage;
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Erro ao fazer login com Google";
+      const truncatedError =
+        errorMessage.length > 60
+          ? errorMessage.substring(0, 60) + "..."
+          : errorMessage;
       toast({
         variant: "destructive",
         title: "Erro",
@@ -243,9 +257,7 @@ export default function LoginScreen() {
                   <div className="w-full border-t border-border"></div>
                 </div>
                 <div className="relative flex justify-center text-xs">
-                  <span className="bg-card px-2 text-muted-foreground">
-                    ou
-                  </span>
+                  <span className="bg-card px-2 text-muted-foreground">ou</span>
                 </div>
               </div>
 

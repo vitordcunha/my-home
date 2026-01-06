@@ -65,9 +65,10 @@ export function CompleteShoppingSheet({
 
   const handleComplete = () => {
     const numAmount = amount ? parseFloat(amount.replace(",", ".")) : undefined;
-    
+
     onComplete({
-      amount: registerExpense && numAmount && numAmount > 0 ? numAmount : undefined,
+      amount:
+        registerExpense && numAmount && numAmount > 0 ? numAmount : undefined,
       isSplit: registerExpense && isSplit,
       splitWith: registerExpense && isSplit ? selectedMembers : [],
     });
@@ -92,7 +93,10 @@ export function CompleteShoppingSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="h-auto max-h-[90vh] overflow-y-auto">
+      <SheetContent
+        side="bottom"
+        className="h-auto max-h-[90vh] overflow-y-auto"
+      >
         <div className="space-y-6 pb-6">
           {step === "amount" ? (
             <>
@@ -103,14 +107,21 @@ export function CompleteShoppingSheet({
                 </div>
                 <h2 className="text-2xl font-bold">Finalizar Compras</h2>
                 <p className="text-sm text-muted-foreground mt-2">
-                  {selectedCount} {selectedCount === 1 ? "item selecionado" : "itens selecionados"}
+                  {selectedCount}{" "}
+                  {selectedCount === 1
+                    ? "item selecionado"
+                    : "itens selecionados"}
                 </p>
               </div>
 
               {/* XP Info */}
               <div className="bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 rounded-xl p-4 text-center">
-                <p className="text-sm text-muted-foreground mb-1">Você ganhará</p>
-                <p className="text-3xl font-bold text-primary">+{xpToEarn} pts</p>
+                <p className="text-sm text-muted-foreground mb-1">
+                  Você ganhará
+                </p>
+                <p className="text-3xl font-bold text-primary">
+                  +{xpToEarn} pts
+                </p>
               </div>
 
               {/* Register expense option */}
@@ -119,7 +130,9 @@ export function CompleteShoppingSheet({
                   <label className="flex items-center gap-3 cursor-pointer">
                     <Checkbox
                       checked={registerExpense}
-                      onCheckedChange={(checked) => setRegisterExpense(checked as boolean)}
+                      onCheckedChange={(checked) =>
+                        setRegisterExpense(checked as boolean)
+                      }
                     />
                     <div className="flex-1">
                       <p className="text-sm font-medium">Registrar despesa</p>
@@ -133,7 +146,9 @@ export function CompleteShoppingSheet({
                 {registerExpense && (
                   <div className="space-y-4 animate-in">
                     <div>
-                      <label className="text-sm font-medium">Quanto gastou? (R$)</label>
+                      <label className="text-sm font-medium">
+                        Quanto gastou? (R$)
+                      </label>
                       <input
                         type="number"
                         inputMode="decimal"
@@ -150,10 +165,14 @@ export function CompleteShoppingSheet({
                         <label className="flex items-center gap-3 cursor-pointer">
                           <Checkbox
                             checked={isSplit}
-                            onCheckedChange={(checked) => setIsSplit(checked as boolean)}
+                            onCheckedChange={(checked) =>
+                              setIsSplit(checked as boolean)
+                            }
                           />
                           <div className="flex-1">
-                            <p className="text-sm font-medium">Dividir despesa</p>
+                            <p className="text-sm font-medium">
+                              Dividir despesa
+                            </p>
                             <p className="text-xs text-muted-foreground">
                               Marque se a despesa será dividida com outros
                             </p>
@@ -236,4 +255,3 @@ export function CompleteShoppingSheet({
     </Sheet>
   );
 }
-

@@ -14,7 +14,7 @@ export function TotalSpentCard({ totalSpent }: TotalSpentCardProps) {
     <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-2xl p-6 space-y-3 border border-primary/20">
       <div className="text-center">
         <p className="text-sm text-muted-foreground mb-2">💰 Total Gasto</p>
-        
+
         <p className="text-4xl font-bold text-primary">
           {formatCurrency(totalSpent)}
         </p>
@@ -26,5 +26,3 @@ export function TotalSpentCard({ totalSpent }: TotalSpentCardProps) {
     </div>
   );
 }
-
-

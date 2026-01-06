@@ -125,7 +125,7 @@ function AppRoutes() {
 function App() {
   // Initialize theme - TEMPORARIAMENTE DESABILITADO
   // useTheme();
-  
+
   return (
     <BrowserRouter>
       <AuthProvider>

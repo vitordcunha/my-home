@@ -29,7 +29,9 @@ export default function RankingScreen() {
               <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/20 to-primary/5 animate-pulse"></div>
               <Loader2 className="h-12 w-12 animate-spin text-primary" />
             </div>
-            <p className="text-sm text-muted-foreground">Carregando ranking...</p>
+            <p className="text-sm text-muted-foreground">
+              Carregando ranking...
+            </p>
           </div>
         </div>
       )}
@@ -39,7 +41,9 @@ export default function RankingScreen() {
           <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-destructive/10 mb-4">
             <span className="text-3xl">⚠️</span>
           </div>
-          <p className="text-destructive font-medium">Erro ao carregar ranking</p>
+          <p className="text-destructive font-medium">
+            Erro ao carregar ranking
+          </p>
         </div>
       )}
 
@@ -70,7 +74,8 @@ export default function RankingScreen() {
                 key={profile.id}
                 className={cn(
                   "bg-card border rounded-2xl p-5 flex items-center gap-4 transition-all shadow-soft hover-lift animate-in",
-                  isCurrentUser && "ring-2 ring-primary/50 bg-gradient-to-br from-primary/5 to-transparent"
+                  isCurrentUser &&
+                    "ring-2 ring-primary/50 bg-gradient-to-br from-primary/5 to-transparent"
                 )}
               >
                 <div className="flex items-center justify-center w-12 h-12 shrink-0 rounded-xl bg-gradient-to-br from-secondary to-secondary/50">
@@ -92,11 +97,17 @@ export default function RankingScreen() {
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="font-semibold text-lg leading-tight truncate" title={profile.nome}>
+                    <p
+                      className="font-semibold text-lg leading-tight truncate"
+                      title={profile.nome}
+                    >
                       {profile.nome}
                     </p>
                     {isCurrentUser && (
-                      <Badge variant="outline" className="text-xs font-medium border-primary/50 text-primary">
+                      <Badge
+                        variant="outline"
+                        className="text-xs font-medium border-primary/50 text-primary"
+                      >
                         Você
                       </Badge>
                     )}
@@ -113,7 +124,9 @@ export default function RankingScreen() {
                     </p>
                     <span className="text-lg">⭐</span>
                   </div>
-                  <p className="text-xs text-muted-foreground font-medium">pontos</p>
+                  <p className="text-xs text-muted-foreground font-medium">
+                    pontos
+                  </p>
                 </div>
               </div>
             );

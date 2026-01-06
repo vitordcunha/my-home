@@ -52,7 +52,9 @@ export function OnboardingScreen() {
             <h1 className="text-4xl font-bold text-foreground mb-2">
               🏠 Bem-vindo!
             </h1>
-            <p className="text-lg text-muted-foreground">Escolha como deseja começar</p>
+            <p className="text-lg text-muted-foreground">
+              Escolha como deseja começar
+            </p>
           </div>
 
           <div className="space-y-4">
@@ -195,4 +197,3 @@ export function OnboardingScreen() {
 
   return null;
 }
-

@@ -1,11 +1,7 @@
 import { useState } from "react";
 import { useDebounce } from "react-use";
 import { Search, X } from "lucide-react";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader } from "@/components/ui/sheet";
 
 interface SearchBarProps {
   open: boolean;
@@ -63,7 +59,7 @@ export function SearchBar({
               >
                 <X className="h-5 w-5" />
               </button>
-              
+
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <input
@@ -124,4 +120,3 @@ export function SearchBar({
     </Sheet>
   );
 }
-

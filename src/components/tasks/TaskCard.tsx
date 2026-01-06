@@ -40,7 +40,9 @@ export default function TaskCard({ task }: TaskCardProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showActionsSheet, setShowActionsSheet] = useState(false);
   const [swipeProgress, setSwipeProgress] = useState(0);
-  const [swipeDirection, setSwipeDirection] = useState<"left" | "right" | null>(null);
+  const [swipeDirection, setSwipeDirection] = useState<"left" | "right" | null>(
+    null
+  );
   const [hapticFired, setHapticFired] = useState(false);
   const { trigger } = useHaptic();
 
@@ -68,7 +70,8 @@ export default function TaskCard({ task }: TaskCardProps) {
   };
 
   const handleDelete = () => {
-    const truncatedTaskName = task.nome.length > 50 ? task.nome.substring(0, 50) + "..." : task.nome;
+    const truncatedTaskName =
+      task.nome.length > 50 ? task.nome.substring(0, 50) + "..." : task.nome;
     if (confirm(`Tem certeza que deseja remover "${truncatedTaskName}"?`)) {
       deleteTask.mutate(task.id);
       setShowActionsSheet(false);
@@ -82,28 +85,55 @@ export default function TaskCard({ task }: TaskCardProps) {
 
   // Swipe handlers
   const swipeHandlers = useSwipeable({
-    onSwipedRight: () => {
-      // Swipe direita = "Eu fiz"
-      handleComplete(user!.id);
+    onSwipedRight: (e) => {
+      // Só executa se o movimento horizontal for maior que o vertical
+      // E se o movimento foi significativo o suficiente (pelo menos 60% do necessário)
+      const minSwipeDistance = 100; // Distância mínima em pixels
+      const swipeDistance = Math.abs(e.deltaX);
+      const isHorizontal = Math.abs(e.deltaX) > Math.abs(e.deltaY);
+      const isSignificant = swipeDistance >= minSwipeDistance * 0.6; // 60% = 180px
+
+      if (isHorizontal && isSignificant) {
+        // Swipe direita = "Eu fiz"
+        handleComplete(user!.id);
+      }
       setSwipeProgress(0);
       setSwipeDirection(null);
       setHapticFired(false);
     },
-    onSwipedLeft: () => {
-      // Swipe esquerda = "Outra pessoa"
-      setShowPeopleSheet(true);
+    onSwipedLeft: (e) => {
+      // Só executa se o movimento horizontal for maior que o vertical
+      // E se o movimento foi significativo o suficiente (pelo menos 60% do necessário)
+      const minSwipeDistance = 100; // Distância mínima em pixels
+      const swipeDistance = Math.abs(e.deltaX);
+      const isHorizontal = Math.abs(e.deltaX) > Math.abs(e.deltaY);
+      const isSignificant = swipeDistance >= minSwipeDistance * 0.6; // 60% = 180px
+
+      if (isHorizontal && isSignificant) {
+        // Swipe esquerda = "Outra pessoa"
+        setShowPeopleSheet(true);
+      }
       setSwipeProgress(0);
       setSwipeDirection(null);
       setHapticFired(false);
     },
     onSwiping: (e) => {
-      const progress = Math.abs(e.deltaX) / 200;
+      // Ignora swipe se o movimento vertical for maior que o horizontal (scroll)
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        setSwipeProgress(0);
+        setSwipeDirection(null);
+        return;
+      }
+
+      // Aumenta a distância necessária para completar o swipe (de 200px para 300px)
+      const swipeDistance = 300;
+      const progress = Math.abs(e.deltaX) / swipeDistance;
       const clampedProgress = Math.min(progress, 1);
       setSwipeProgress(clampedProgress);
       setSwipeDirection(e.deltaX > 0 ? "right" : "left");
 
-      // Haptic feedback ao atingir threshold
-      if (clampedProgress > 0.6 && !hapticFired) {
+      // Haptic feedback ao atingir threshold (agora em 70% = 210px)
+      if (clampedProgress > 0.7 && !hapticFired) {
         trigger("medium");
         setHapticFired(true);
       }
@@ -115,22 +145,27 @@ export default function TaskCard({ task }: TaskCardProps) {
     },
     trackTouch: true,
     trackMouse: false, // Mobile-first: apenas touch
-    preventScrollOnSwipe: true,
-    delta: 10,
+    preventScrollOnSwipe: false, // Permite scroll vertical
+    delta: 40, // Aumenta o threshold mínimo para evitar ativação acidental
     touchEventOptions: { passive: false },
   });
 
   // Estilo dinâmico para swipe
   const swipeStyle = {
-    transform: `translateX(${swipeProgress * (swipeDirection === "right" ? 100 : -100)}px)`,
-    transition: swipeProgress === 0 ? "transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1)" : "none",
+    transform: `translateX(${
+      swipeProgress * (swipeDirection === "right" ? 100 : -100)
+    }px)`,
+    transition:
+      swipeProgress === 0
+        ? "transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1)"
+        : "none",
     willChange: swipeProgress > 0 ? "transform" : "auto",
   };
 
   // Background indicators para swipe
-  const showRightIndicator = swipeDirection === "right" && swipeProgress > 0.3;
-  const showLeftIndicator = swipeDirection === "left" && swipeProgress > 0.3;
-  const thresholdReached = swipeProgress > 0.6;
+  const showRightIndicator = swipeDirection === "right" && swipeProgress > 0.4;
+  const showLeftIndicator = swipeDirection === "left" && swipeProgress > 0.4;
+  const thresholdReached = swipeProgress > 0.7; // Aumentado para 70% (210px de 300px)
 
   return (
     <>
@@ -145,7 +180,11 @@ export default function TaskCard({ task }: TaskCardProps) {
             }`}
           >
             <div className="flex items-center gap-2">
-              <Check className={`h-6 w-6 text-success ${thresholdReached ? "animate-bounce" : ""}`} />
+              <Check
+                className={`h-6 w-6 text-success ${
+                  thresholdReached ? "animate-bounce" : ""
+                }`}
+              />
               <span className="font-semibold text-success">Eu fiz</span>
             </div>
           </div>
@@ -160,7 +199,11 @@ export default function TaskCard({ task }: TaskCardProps) {
           >
             <div className="flex items-center gap-2">
               <span className="font-semibold text-primary">Outra pessoa</span>
-              <Users className={`h-6 w-6 text-primary ${thresholdReached ? "animate-bounce" : ""}`} />
+              <Users
+                className={`h-6 w-6 text-primary ${
+                  thresholdReached ? "animate-bounce" : ""
+                }`}
+              />
             </div>
           </div>
         )}
@@ -171,65 +214,93 @@ export default function TaskCard({ task }: TaskCardProps) {
           style={swipeStyle}
           className="group bg-card border rounded-2xl p-5 space-y-4 shadow-soft hover-lift animate-in relative z-10"
         >
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1 space-y-2">
-            <h3 className="font-semibold text-lg leading-tight tracking-tight line-clamp-2" title={task.nome}>
-              {task.nome}
-            </h3>
-            {task.descricao && (
-              <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3" title={task.descricao}>
-                {task.descricao}
-              </p>
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 space-y-2">
+              <div className="flex items-center gap-2">
+                <h3
+                  className="font-semibold text-lg leading-tight tracking-tight line-clamp-2 flex-1"
+                  title={task.nome}
+                >
+                  {task.nome}
+                </h3>
+                {task.assigned_to &&
+                  (() => {
+                    const assignedProfile = profiles.find(
+                      (p) => p.id === task.assigned_to
+                    );
+                    return assignedProfile ? (
+                      assignedProfile.avatar ? (
+                        <Avatar className="h-8 w-8 shrink-0 border-2 border-border/50">
+                          <AvatarImage src={assignedProfile.avatar} />
+                          <AvatarFallback className="bg-gradient-to-br from-primary/10 to-primary/5 text-primary font-semibold text-xs">
+                            {assignedProfile.nome[0].toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                      ) : (
+                        <div className="h-8 w-8 shrink-0 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 border-2 border-border/50 flex items-center justify-center text-primary font-semibold text-xs">
+                          {assignedProfile.nome[0].toUpperCase()}
+                        </div>
+                      )
+                    ) : null;
+                  })()}
+              </div>
+              {task.descricao && (
+                <p
+                  className="text-sm text-muted-foreground leading-relaxed line-clamp-3"
+                  title={task.descricao}
+                >
+                  {task.descricao}
+                </p>
+              )}
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200/50 dark:border-amber-800/30">
+                <span className="text-sm">⭐</span>
+                <span className="text-sm font-semibold text-amber-900 dark:text-amber-100">
+                  {task.xp_value}
+                </span>
+              </div>
+              <button
+                onClick={() => setShowActionsSheet(true)}
+                className="p-2 hover:bg-accent rounded-xl transition-all opacity-60 group-hover:opacity-100"
+                aria-label="Mais opções"
+              >
+                <MoreVertical className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center px-3 py-1 bg-secondary/60 rounded-full text-xs font-medium text-secondary-foreground">
+              {recurrenceLabels[task.recurrence_type]}
+            </span>
+            {task.recurrence_type === "weekly" && task.days_of_week && (
+              <span className="inline-flex items-center px-3 py-1 bg-secondary/60 rounded-full text-xs font-medium text-secondary-foreground">
+                {task.days_of_week.length}{" "}
+                {task.days_of_week.length === 1 ? "dia" : "dias"}/semana
+              </span>
             )}
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200/50 dark:border-amber-800/30">
-              <span className="text-sm">⭐</span>
-              <span className="text-sm font-semibold text-amber-900 dark:text-amber-100">
-                {task.xp_value}
-              </span>
-            </div>
-            <button
-              onClick={() => setShowActionsSheet(true)}
-              className="p-2 hover:bg-accent rounded-xl transition-all opacity-60 group-hover:opacity-100"
-              aria-label="Mais opções"
+
+          <div className="flex gap-3 pt-2">
+            <Button
+              className="flex-1 thumb-friendly rounded-xl font-medium shadow-sm hover:shadow transition-all"
+              onClick={() => handleComplete(user!.id)}
+              disabled={completeTask.isPending}
             >
-              <MoreVertical className="h-4 w-4" />
-            </button>
+              <Check className="h-4 w-4 mr-2" />
+              Eu fiz
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1 thumb-friendly rounded-xl font-medium"
+              onClick={() => setShowPeopleSheet(true)}
+              disabled={completeTask.isPending}
+            >
+              <Users className="h-4 w-4 mr-2" />
+              Outra pessoa
+            </Button>
           </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <span className="inline-flex items-center px-3 py-1 bg-secondary/60 rounded-full text-xs font-medium text-secondary-foreground">
-            {recurrenceLabels[task.recurrence_type]}
-          </span>
-          {task.recurrence_type === "weekly" && task.days_of_week && (
-            <span className="inline-flex items-center px-3 py-1 bg-secondary/60 rounded-full text-xs font-medium text-secondary-foreground">
-              {task.days_of_week.length}{" "}
-              {task.days_of_week.length === 1 ? "dia" : "dias"}/semana
-            </span>
-          )}
-        </div>
-
-        <div className="flex gap-3 pt-2">
-          <Button
-            className="flex-1 thumb-friendly rounded-xl font-medium shadow-sm hover:shadow transition-all"
-            onClick={() => handleComplete(user!.id)}
-            disabled={completeTask.isPending}
-          >
-            <Check className="h-4 w-4 mr-2" />
-            Eu fiz
-          </Button>
-          <Button
-            variant="outline"
-            className="flex-1 thumb-friendly rounded-xl font-medium"
-            onClick={() => setShowPeopleSheet(true)}
-            disabled={completeTask.isPending}
-          >
-            <Users className="h-4 w-4 mr-2" />
-            Outra pessoa
-          </Button>
-        </div>
         </div>
       </div>
 
@@ -260,7 +331,12 @@ export default function TaskCard({ task }: TaskCardProps) {
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 text-left">
-                  <p className="font-semibold text-base truncate" title={profile.nome}>{profile.nome}</p>
+                  <p
+                    className="font-semibold text-base truncate"
+                    title={profile.nome}
+                  >
+                    {profile.nome}
+                  </p>
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <span className="text-xs">⭐</span>
                     <p className="text-sm text-muted-foreground font-medium">

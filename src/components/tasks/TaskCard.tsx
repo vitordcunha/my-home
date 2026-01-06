@@ -15,7 +15,16 @@ import {
 } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Database } from "@/types/database";
-import { Check, Users, Edit2, Trash2, MoreVertical, Star, Sparkles, RotateCw } from "lucide-react";
+import {
+  Check,
+  Users,
+  Edit2,
+  Trash2,
+  MoreVertical,
+  Star,
+  Sparkles,
+  RotateCw,
+} from "lucide-react";
 import TaskFormDialog from "./TaskFormDialog";
 import { useSwipeable } from "react-swipeable";
 import { useHaptic } from "@/hooks/useHaptic";
@@ -63,7 +72,7 @@ export default function TaskCard({ task }: TaskCardProps) {
   const handleComplete = (userId: string) => {
     setIsCompleting(true);
     trigger("success");
-    
+
     // Pequeno delay para mostrar a animação
     setTimeout(() => {
       completeTask.mutate({
@@ -223,7 +232,9 @@ export default function TaskCard({ task }: TaskCardProps) {
           {...swipeHandlers}
           style={swipeStyle}
           className={`group bg-card border rounded-2xl p-5 space-y-4 shadow-soft hover-lift animate-in relative z-10 transition-all ${
-            isCompleting ? "animate-confetti scale-105 bg-success/10 border-success/50" : ""
+            isCompleting
+              ? "animate-confetti scale-105 bg-success/10 border-success/50"
+              : ""
           }`}
         >
           <div className="flex items-start justify-between gap-4">
@@ -255,7 +266,10 @@ export default function TaskCard({ task }: TaskCardProps) {
                           </div>
                         )}
                         {task.rotation_enabled && (
-                          <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20" title="Rodízio automático ativo">
+                          <div
+                            className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20"
+                            title="Rodízio automático ativo"
+                          >
                             <RotateCw className="h-3 w-3 text-primary" />
                           </div>
                         )}

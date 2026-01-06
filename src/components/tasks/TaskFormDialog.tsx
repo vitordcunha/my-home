@@ -256,7 +256,8 @@ export default function TaskFormDialog({
                   <span>🔄 Rodízio Automático</span>
                 </label>
                 <p className="text-xs text-muted-foreground">
-                  Ao completar, a tarefa passa automaticamente para o próximo membro da casa
+                  Ao completar, a tarefa passa automaticamente para o próximo
+                  membro da casa
                 </p>
               </div>
               <Checkbox

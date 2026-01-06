@@ -3,7 +3,6 @@ import { useAuth } from "@/features/auth/useAuth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
-  Loader2,
   Trophy,
   Medal,
   Award,
@@ -12,6 +11,7 @@ import {
   Lightbulb,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { RankingListSkeleton } from "@/components/skeletons/RankingSkeleton";
 
 const positionIcons = [
   { icon: Trophy, color: "text-yellow-500 dark:text-yellow-400" },
@@ -30,19 +30,7 @@ export default function RankingScreen() {
         <p className="text-base text-muted-foreground">Leaderboard da casa</p>
       </div>
 
-      {isLoading && (
-        <div className="flex items-center justify-center py-16">
-          <div className="text-center space-y-4 animate-in">
-            <div className="relative h-12 w-12 mx-auto">
-              <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/20 to-primary/5 animate-pulse"></div>
-              <Loader2 className="h-12 w-12 animate-spin text-primary" />
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Carregando ranking...
-            </p>
-          </div>
-        </div>
-      )}
+      {isLoading && <RankingListSkeleton />}
 
       {error && (
         <div className="text-center py-16 animate-in">

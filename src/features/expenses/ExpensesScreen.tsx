@@ -8,12 +8,12 @@ import { ExpenseCard } from "./ExpenseCard";
 import { TotalSpentCard } from "./BalanceSummaryCard";
 import { FloatingActionButton } from "@/components/ui/floating-action-button";
 import {
-  Loader2,
   ChevronDown,
   ChevronUp,
   Wallet,
   Lightbulb,
 } from "lucide-react";
+import { ExpenseListSkeleton } from "@/components/skeletons/ExpenseSkeleton";
 
 export function ExpensesScreen() {
   const { user } = useAuth();
@@ -62,18 +62,12 @@ export function ExpensesScreen() {
 
   if (isLoading) {
     return (
-      <div className="space-y-8">
-        <div className="flex items-center justify-center py-16">
-          <div className="text-center space-y-4 animate-in">
-            <div className="relative h-12 w-12 mx-auto">
-              <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/20 to-primary/5 animate-pulse"></div>
-              <Loader2 className="h-12 w-12 animate-spin text-primary" />
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Carregando despesas...
-            </p>
-          </div>
+      <div className="space-y-6">
+        <div className="space-y-3">
+          <h2 className="text-3xl font-bold tracking-tight">Despesas</h2>
+          <p className="text-base text-muted-foreground">Carregando...</p>
         </div>
+        <ExpenseListSkeleton />
       </div>
     );
   }

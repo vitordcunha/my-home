@@ -8,8 +8,9 @@ import { useRegenerateInviteCode } from "./useRegenerateInviteCode";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Copy, RefreshCw, Loader2, Users, Lock } from "lucide-react";
+import { Copy, RefreshCw, Users, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { ProfileListSkeleton } from "@/components/skeletons/ProfileSkeleton";
 
 export function MembersManagementScreen() {
   const { user } = useAuth();
@@ -74,17 +75,11 @@ export function MembersManagementScreen() {
   if (isLoading) {
     return (
       <div className="space-y-8">
-        <div className="flex items-center justify-center py-16">
-          <div className="text-center space-y-4 animate-in">
-            <div className="relative h-12 w-12 mx-auto">
-              <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/20 to-primary/5 animate-pulse"></div>
-              <Loader2 className="h-12 w-12 animate-spin text-primary" />
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Carregando membros...
-            </p>
-          </div>
+        <div className="space-y-3">
+          <h2 className="text-3xl font-bold tracking-tight">Gerenciar Membros</h2>
+          <p className="text-base text-muted-foreground">Carregando...</p>
         </div>
+        <ProfileListSkeleton />
       </div>
     );
   }

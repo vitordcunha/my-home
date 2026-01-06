@@ -5,8 +5,9 @@ import { useAuth } from "@/features/auth/useAuth";
 import { useRewardsQuery, useRedeemedRewardsQuery } from "./useRewardsQuery";
 import { useRedeemReward } from "./useRedeemReward";
 import { Button } from "@/components/ui/button";
-import { Loader2, Gift, Check, Star } from "lucide-react";
+import { Gift, Check, Star } from "lucide-react";
 import { Database } from "@/types/database";
+import { RewardsGridSkeleton } from "@/components/skeletons/RewardsSkeleton";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 type Reward = Database["public"]["Tables"]["rewards"]["Row"];
@@ -168,19 +169,7 @@ export default function RewardsScreen() {
 
       {activeTab === "available" && (
         <>
-          {loadingRewards && (
-            <div className="flex items-center justify-center py-16">
-              <div className="text-center space-y-4 animate-in">
-                <div className="relative h-12 w-12 mx-auto">
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/20 to-primary/5 animate-pulse"></div>
-                  <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Carregando prêmios...
-                </p>
-              </div>
-            </div>
-          )}
+          {loadingRewards && <RewardsGridSkeleton />}
 
           {!loadingRewards && rewards && rewards.length === 0 && (
             <div className="text-center py-16 space-y-6 animate-in">
@@ -216,17 +205,7 @@ export default function RewardsScreen() {
 
       {activeTab === "redeemed" && (
         <>
-          {loadingRedeemed && (
-            <div className="flex items-center justify-center py-16">
-              <div className="text-center space-y-4 animate-in">
-                <div className="relative h-12 w-12 mx-auto">
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/20 to-primary/5 animate-pulse"></div>
-                  <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                </div>
-                <p className="text-sm text-muted-foreground">Carregando...</p>
-              </div>
-            </div>
-          )}
+          {loadingRedeemed && <RewardsGridSkeleton />}
 
           {!loadingRedeemed &&
             redeemedRewards &&

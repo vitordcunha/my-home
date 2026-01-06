@@ -7,12 +7,12 @@ import { Avatar } from "@/components/ui/avatar";
 import {
   RefreshCw,
   Trash2,
-  Loader2,
   Sparkles,
   Calendar,
   Target,
   CalendarDays,
 } from "lucide-react";
+import { TaskListSkeleton } from "@/components/skeletons/TaskSkeleton";
 
 export function TasksTrashScreen() {
   const { data: archivedTasks, isLoading } = useArchivedTasksQuery();
@@ -62,18 +62,12 @@ export function TasksTrashScreen() {
 
   if (isLoading) {
     return (
-      <div className="space-y-8">
-        <div className="flex items-center justify-center py-16">
-          <div className="text-center space-y-4 animate-in">
-            <div className="relative h-12 w-12 mx-auto">
-              <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/20 to-primary/5 animate-pulse"></div>
-              <Loader2 className="h-12 w-12 animate-spin text-primary" />
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Carregando lixeira...
-            </p>
-          </div>
+      <div className="space-y-6">
+        <div className="space-y-3">
+          <h2 className="text-3xl font-bold tracking-tight">Lixeira</h2>
+          <p className="text-base text-muted-foreground">Carregando...</p>
         </div>
+        <TaskListSkeleton />
       </div>
     );
   }

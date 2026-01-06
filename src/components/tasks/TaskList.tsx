@@ -1,6 +1,7 @@
 import { useTasksQuery } from "@/features/tasks/useTasksQuery";
 import TaskCard from "./TaskCard";
-import { Loader2, PartyPopper, AlertTriangle } from "lucide-react";
+import { PartyPopper, AlertTriangle } from "lucide-react";
+import { TaskListSkeleton } from "@/components/skeletons/TaskSkeleton";
 
 interface TaskListProps {
   onlyMyTasks?: boolean;
@@ -11,17 +12,7 @@ export default function TaskList({ onlyMyTasks = true, userId }: TaskListProps) 
   const { data: tasks, isLoading, error } = useTasksQuery({ onlyMyTasks, userId });
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <div className="text-center space-y-4 animate-in">
-          <div className="relative h-12 w-12 mx-auto">
-            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/20 to-primary/5 animate-pulse"></div>
-            <Loader2 className="h-12 w-12 animate-spin text-primary" />
-          </div>
-          <p className="text-sm text-muted-foreground">Carregando tarefas...</p>
-        </div>
-      </div>
-    );
+    return <TaskListSkeleton />;
   }
 
   if (error) {

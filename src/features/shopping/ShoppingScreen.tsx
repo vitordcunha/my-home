@@ -11,8 +11,9 @@ import { CompleteShoppingSheet } from "./CompleteShoppingSheet";
 import { ShoppingItemCard } from "./ShoppingItemCard";
 import { Button } from "@/components/ui/button";
 import { FloatingActionButton } from "@/components/ui/floating-action-button";
-import { Loader2, ShoppingCart, Sparkles } from "lucide-react";
+import { ShoppingCart, Sparkles } from "lucide-react";
 import { ShoppingCategory } from "./types";
+import { ShoppingListSkeleton } from "@/components/skeletons/ShoppingSkeleton";
 
 export function ShoppingScreen() {
   const { user } = useAuth();
@@ -121,15 +122,13 @@ export function ShoppingScreen() {
   if (isLoading) {
     return (
       <div className="space-y-8">
-        <div className="flex items-center justify-center py-16">
-          <div className="text-center space-y-4 animate-in">
-            <div className="relative h-12 w-12 mx-auto">
-              <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/20 to-primary/5 animate-pulse"></div>
-              <Loader2 className="h-12 w-12 animate-spin text-primary" />
-            </div>
-            <p className="text-sm text-muted-foreground">Carregando lista...</p>
-          </div>
+        <div className="space-y-3">
+          <h2 className="text-3xl font-bold tracking-tight">
+            Lista de Compras
+          </h2>
+          <p className="text-base text-muted-foreground">Carregando...</p>
         </div>
+        <ShoppingListSkeleton />
       </div>
     );
   }

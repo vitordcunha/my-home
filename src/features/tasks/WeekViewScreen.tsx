@@ -8,6 +8,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import TaskCard from "@/components/tasks/TaskCard";
 import { useHaptic } from "@/hooks/useHaptic";
+import { WeekViewSkeleton } from "@/components/skeletons/WeekViewSkeleton";
 
 export function WeekViewScreen() {
   const [weekStart, setWeekStart] = useState(new Date());
@@ -52,14 +53,7 @@ export function WeekViewScreen() {
   };
 
   if (isLoading || !weekData) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center space-y-3">
-          <div className="h-12 w-12 mx-auto rounded-full bg-primary/10 animate-pulse" />
-          <p className="text-sm text-muted-foreground">Carregando semana...</p>
-        </div>
-      </div>
-    );
+    return <WeekViewSkeleton />;
   }
 
   const densityTextColors = {

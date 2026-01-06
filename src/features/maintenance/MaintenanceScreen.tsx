@@ -5,7 +5,8 @@ import { useMaintenanceItemsQuery } from "./useMaintenanceItemsQuery";
 import { AddMaintenanceSheet } from "./AddMaintenanceSheet";
 import { MaintenanceItemCard } from "./MaintenanceItemCard";
 import { FloatingActionButton } from "@/components/ui/floating-action-button";
-import { Loader2, Wrench, Lightbulb, Circle } from "lucide-react";
+import { Wrench, Lightbulb, Circle } from "lucide-react";
+import { MaintenanceListSkeleton } from "@/components/skeletons/MaintenanceSkeleton";
 
 export function MaintenanceScreen() {
   const { user } = useAuth();
@@ -18,18 +19,12 @@ export function MaintenanceScreen() {
 
   if (isLoading) {
     return (
-      <div className="space-y-8">
-        <div className="flex items-center justify-center py-16">
-          <div className="text-center space-y-4 animate-in">
-            <div className="relative h-12 w-12 mx-auto">
-              <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-orange-500/20 to-orange-500/5 animate-pulse"></div>
-              <Loader2 className="h-12 w-12 animate-spin text-orange-500" />
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Carregando manutenções...
-            </p>
-          </div>
+      <div className="space-y-6">
+        <div className="space-y-3">
+          <h2 className="text-3xl font-bold tracking-tight">Manutenção</h2>
+          <p className="text-base text-muted-foreground">Carregando...</p>
         </div>
+        <MaintenanceListSkeleton />
       </div>
     );
   }
@@ -158,4 +153,3 @@ export function MaintenanceScreen() {
     </>
   );
 }
-

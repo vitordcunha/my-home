@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
+import { ProfileSelectSkeleton } from "@/components/skeletons/ProfileSelectSkeleton";
 
 interface TaskFormDialogProps {
   open: boolean;
@@ -182,9 +183,7 @@ export default function TaskFormDialog({
               Responsável (opcional)
             </label>
             {isLoadingProfiles ? (
-              <div className="text-sm text-muted-foreground">
-                Carregando usuários...
-              </div>
+              <ProfileSelectSkeleton />
             ) : (
               <div className="space-y-2">
                 <button

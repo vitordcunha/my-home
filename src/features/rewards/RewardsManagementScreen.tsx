@@ -13,16 +13,8 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import {
-  Plus,
-  Loader2,
-  Gift,
-  Lock,
-  Edit2,
-  Trash2,
-  Check,
-  Star,
-} from "lucide-react";
+import { Plus, Gift, Lock, Edit2, Trash2, Check, Star } from "lucide-react";
+import { RewardsGridSkeleton } from "@/components/skeletons/RewardsSkeleton";
 
 interface RewardFormData {
   id?: string;
@@ -118,17 +110,13 @@ export function RewardsManagementScreen() {
   if (isLoading) {
     return (
       <div className="space-y-8">
-        <div className="flex items-center justify-center py-16">
-          <div className="text-center space-y-4 animate-in">
-            <div className="relative h-12 w-12 mx-auto">
-              <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/20 to-primary/5 animate-pulse"></div>
-              <Loader2 className="h-12 w-12 animate-spin text-primary" />
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Carregando prêmios...
-            </p>
-          </div>
+        <div className="space-y-3">
+          <h2 className="text-3xl font-bold tracking-tight">
+            Gerenciar Prêmios
+          </h2>
+          <p className="text-base text-muted-foreground">Carregando...</p>
         </div>
+        <RewardsGridSkeleton />
       </div>
     );
   }
@@ -350,16 +338,11 @@ export function RewardsManagementScreen() {
                 className="flex-1 rounded-xl thumb-friendly"
                 disabled={createReward.isPending || updateReward.isPending}
               >
-                {createReward.isPending || updateReward.isPending ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Salvando...
-                  </>
-                ) : editingReward ? (
-                  "Atualizar"
-                ) : (
-                  "Criar Prêmio"
-                )}
+                {createReward.isPending || updateReward.isPending
+                  ? "Salvando..."
+                  : editingReward
+                  ? "Atualizar"
+                  : "Criar Prêmio"}
               </Button>
             </div>
           </form>

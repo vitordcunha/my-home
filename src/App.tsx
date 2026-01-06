@@ -5,8 +5,8 @@ import { useProfileQuery } from "./features/auth/useProfileQuery";
 import { Toaster } from "./components/ui/toaster";
 // import { useTheme } from "./hooks/useTheme";
 import LoginScreen from "./features/auth/LoginScreen";
-import { Home } from "lucide-react";
 import MainLayout from "./components/layout/MainLayout";
+import { AppLoadingSkeleton } from "./components/skeletons/AppLoadingSkeleton";
 import TodayScreen from "./features/tasks/TodayScreen";
 import HistoryScreen from "./features/gamification/HistoryScreen";
 import RankingScreen from "./features/gamification/RankingScreen";
@@ -27,29 +27,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   );
 
   if (loading || profileLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <div className="text-center space-y-6 animate-in">
-          <div className="relative">
-            <div className="h-16 w-16 mx-auto">
-              <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/20 to-primary/5 animate-pulse"></div>
-              <div className="absolute inset-2 rounded-full border-4 border-transparent border-t-primary animate-spin"></div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Home className="h-6 w-6 text-primary" />
-              </div>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <p className="text-base font-medium text-foreground">
-              Carregando...
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Preparando sua experiência
-            </p>
-          </div>
-        </div>
-      </div>
-    );
+    return <AppLoadingSkeleton />;
   }
 
   if (!user) {
@@ -68,29 +46,7 @@ function AppRoutes() {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <div className="text-center space-y-6 animate-in">
-          <div className="relative">
-            <div className="h-16 w-16 mx-auto">
-              <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/20 to-primary/5 animate-pulse"></div>
-              <div className="absolute inset-2 rounded-full border-4 border-transparent border-t-primary animate-spin"></div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Home className="h-6 w-6 text-primary" />
-              </div>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <p className="text-base font-medium text-foreground">
-              Carregando...
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Preparando sua experiência
-            </p>
-          </div>
-        </div>
-      </div>
-    );
+    return <AppLoadingSkeleton />;
   }
 
   return (

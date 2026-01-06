@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import TaskList from "@/components/tasks/TaskList";
 import TaskFormDialog from "@/components/tasks/TaskFormDialog";
 import { Button } from "@/components/ui/button";
+import { FloatingActionButton } from "@/components/ui/floating-action-button";
 import { Plus, User, Users, History } from "lucide-react";
 import { useAuth } from "@/features/auth/useAuth";
 import { PullToRefreshWrapper } from "@/components/ui/pull-to-refresh";
@@ -156,13 +157,13 @@ export default function TodayScreen() {
       </PullToRefreshWrapper>
 
       {/* Floating Action Button - Design mais elegante */}
-      <button
+      <FloatingActionButton
         onClick={() => setShowCreateDialog(true)}
-        className="group fixed bottom-24 right-6 z-30 h-16 w-16 rounded-2xl bg-gradient-to-br from-primary to-primary/90 text-primary-foreground shadow-soft-lg hover:shadow-xl transition-all hover:scale-105 active:scale-95 flex items-center justify-center md:hidden"
-        aria-label="Criar nova tarefa"
-      >
-        <Plus className="h-6 w-6 transition-transform group-hover:rotate-90 duration-200" />
-      </button>
+        ariaLabel="Criar nova tarefa"
+        variant="blue"
+        size="sm"
+        mobileOnly={true}
+      />
 
       <TaskFormDialog
         open={showCreateDialog}

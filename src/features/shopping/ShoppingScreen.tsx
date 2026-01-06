@@ -10,7 +10,8 @@ import { AddItemSheet } from "./AddItemSheet";
 import { CompleteShoppingSheet } from "./CompleteShoppingSheet";
 import { ShoppingItemCard } from "./ShoppingItemCard";
 import { Button } from "@/components/ui/button";
-import { Plus, Loader2, ShoppingCart, Sparkles } from "lucide-react";
+import { FloatingActionButton } from "@/components/ui/floating-action-button";
+import { Loader2, ShoppingCart, Sparkles } from "lucide-react";
 import { ShoppingCategory } from "./types";
 
 export function ShoppingScreen() {
@@ -223,13 +224,12 @@ export function ShoppingScreen() {
       </div>
 
       {/* Floating Action Button - Super fast access */}
-      <button
+      <FloatingActionButton
         onClick={() => setShowAddSheet(true)}
-        className="group fixed bottom-24 right-6 z-30 h-16 w-16 rounded-2xl bg-gradient-to-br from-primary to-primary/90 text-primary-foreground shadow-soft-lg hover:shadow-xl transition-all hover:scale-105 active:scale-95 flex items-center justify-center"
-        aria-label="Reportar item faltando"
-      >
-        <Plus className="h-6 w-6 transition-transform group-hover:rotate-90 duration-200" />
-      </button>
+        ariaLabel="Reportar item faltando"
+        variant="blue"
+        size="sm"
+      />
 
       {/* Add item sheet */}
       <AddItemSheet

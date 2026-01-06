@@ -6,22 +6,37 @@ import { useTotalSpentQuery } from "./useTotalSpentQuery";
 import { AddExpenseSheet } from "./AddExpenseSheet";
 import { ExpenseCard } from "./ExpenseCard";
 import { TotalSpentCard } from "./BalanceSummaryCard";
-import { Plus, Loader2, ChevronDown, ChevronUp, Wallet, Lightbulb } from "lucide-react";
+import { FloatingActionButton } from "@/components/ui/floating-action-button";
+import {
+  Loader2,
+  ChevronDown,
+  ChevronUp,
+  Wallet,
+  Lightbulb,
+} from "lucide-react";
 
 export function ExpensesScreen() {
   const { user } = useAuth();
   const { data: profile } = useProfileQuery(user?.id);
-  const { data: monthlyExpenses, expenses, isLoading } = useMonthlyExpensesQuery(
+  const {
+    data: monthlyExpenses,
+    expenses,
+    isLoading,
+  } = useMonthlyExpensesQuery(profile?.household_id || undefined);
+  const { data: totalSpent } = useTotalSpentQuery(
     profile?.household_id || undefined
   );
-  const { data: totalSpent } = useTotalSpentQuery(profile?.household_id || undefined);
 
   const [showAddSheet, setShowAddSheet] = useState(false);
   const [expandedMonths, setExpandedMonths] = useState<Set<string>>(new Set());
 
   // Expandir o primeiro mês automaticamente quando os dados carregarem
   useEffect(() => {
-    if (monthlyExpenses && monthlyExpenses.length > 0 && expandedMonths.size === 0) {
+    if (
+      monthlyExpenses &&
+      monthlyExpenses.length > 0 &&
+      expandedMonths.size === 0
+    ) {
       setExpandedMonths(new Set([monthlyExpenses[0].month]));
     }
   }, [monthlyExpenses]);
@@ -105,7 +120,7 @@ export function ExpensesScreen() {
           <div className="space-y-4">
             {monthlyExpenses.map((monthData) => {
               const isExpanded = expandedMonths.has(monthData.month);
-              
+
               return (
                 <div key={monthData.month} className="space-y-3">
                   {/* Month header */}
@@ -118,7 +133,10 @@ export function ExpensesScreen() {
                         {monthData.monthLabel}
                       </span>
                       <span className="text-sm text-muted-foreground">
-                        {monthData.expenses.length} {monthData.expenses.length === 1 ? "despesa" : "despesas"}
+                        {monthData.expenses.length}{" "}
+                        {monthData.expenses.length === 1
+                          ? "despesa"
+                          : "despesas"}
                       </span>
                     </div>
                     <div className="flex items-center gap-3">
@@ -168,13 +186,12 @@ export function ExpensesScreen() {
       </div>
 
       {/* Floating Action Button */}
-      <button
+      <FloatingActionButton
         onClick={() => setShowAddSheet(true)}
-        className="group fixed bottom-24 right-6 z-30 h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-soft-lg hover:shadow-xl transition-all hover:scale-105 active:scale-95 flex items-center justify-center"
-        aria-label="Adicionar despesa"
-      >
-        <Plus className="h-6 w-6 transition-transform group-hover:rotate-90 duration-200" />
-      </button>
+        ariaLabel="Adicionar despesa"
+        variant="blue"
+        size="sm"
+      />
 
       {/* Add expense sheet */}
       <AddExpenseSheet
@@ -186,5 +203,3 @@ export function ExpensesScreen() {
     </>
   );
 }
-
-

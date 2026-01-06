@@ -57,7 +57,7 @@ export default function BottomNav() {
               }}
               className={({ isActive }) =>
                 cn(
-                  "relative flex flex-col items-center justify-center gap-1.5 px-4 py-2.5 rounded-2xl transition-all duration-200 thumb-friendly",
+                  "relative flex flex-1 flex-col items-center justify-center gap-1.5 py-2.5 rounded-2xl transition-all duration-200 thumb-friendly",
                   isActive
                     ? "text-primary"
                     : "text-muted-foreground hover:text-foreground"

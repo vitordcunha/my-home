@@ -178,17 +178,6 @@ export default function Header() {
                   <Button
                     onClick={() => {
                       trigger("light");
-                      navigate("/tasks/week");
-                    }}
-                    variant="ghost"
-                    className="w-full justify-start rounded-xl font-medium"
-                  >
-                    <CalendarDays className="h-4 w-4 mr-2" />
-                    Vista Semanal
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      trigger("light");
                       navigate("/tasks/trash");
                     }}
                     variant="ghost"

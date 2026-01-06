@@ -4,7 +4,7 @@ import TaskList from "@/components/tasks/TaskList";
 import TaskFormDialog from "@/components/tasks/TaskFormDialog";
 import { Button } from "@/components/ui/button";
 import { FloatingActionButton } from "@/components/ui/floating-action-button";
-import { Plus, User, Users, History } from "lucide-react";
+import { Plus, User, Users, History, CalendarDays } from "lucide-react";
 import { useAuth } from "@/features/auth/useAuth";
 import { PullToRefreshWrapper } from "@/components/ui/pull-to-refresh";
 import { useQueryClient } from "@tanstack/react-query";
@@ -117,15 +117,28 @@ export default function TodayScreen() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-xl font-semibold">Suas Tarefas</h3>
-              <Button
-                onClick={() => navigate("/history")}
-                variant="outline"
-                size="sm"
-                className="rounded-xl transition-all gap-2 hover:bg-primary/10"
-              >
-                <History className="h-4 w-4" />
-                <span className="font-medium hidden sm:inline">Histórico</span>
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={() => navigate("/tasks/week")}
+                  variant="outline"
+                  size="sm"
+                  className="rounded-xl transition-all gap-2 hover:bg-primary/10"
+                >
+                  <CalendarDays className="h-4 w-4" />
+                  <span className="font-medium hidden sm:inline">Semanal</span>
+                </Button>
+                <Button
+                  onClick={() => navigate("/history")}
+                  variant="outline"
+                  size="sm"
+                  className="rounded-xl transition-all gap-2 hover:bg-primary/10"
+                >
+                  <History className="h-4 w-4" />
+                  <span className="font-medium hidden sm:inline">
+                    Histórico
+                  </span>
+                </Button>
+              </div>
             </div>
 
             {/* Filtro de visualização */}

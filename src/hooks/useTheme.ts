@@ -11,16 +11,16 @@ export function useTheme() {
   const updateResolvedTheme = () => {
     if (theme === "auto") {
       // Verifica horário (19h-7h = dark)
-      // const hour = new Date().getHours();
-      // const isDarkHours = hour >= 19 || hour < 7;
+      const hour = new Date().getHours();
+      const isDarkHours = hour >= 19 || hour < 7;
 
       // // Também considera preferência do sistema
-      // const systemPrefersDark = window.matchMedia(
-      //   "(prefers-color-scheme: dark)"
-      // ).matches;
+      const systemPrefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
 
       // Prioriza horário, mas respeita sistema se não estiver nos horários extremos
-      setResolvedTheme("light");
+      setResolvedTheme(isDarkHours ? "dark" : systemPrefersDark ? "dark" : "light");
     } else {
       setResolvedTheme(theme as ResolvedTheme);
     }

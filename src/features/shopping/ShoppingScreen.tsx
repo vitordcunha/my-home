@@ -15,8 +15,12 @@ import { ShoppingCart, Sparkles } from "lucide-react";
 import { ShoppingCategory } from "./types";
 import { ShoppingListSkeleton } from "@/components/skeletons/ShoppingSkeleton";
 
+import { PullToRefreshWrapper } from "@/components/ui/pull-to-refresh";
+import { useQueryClient } from "@tanstack/react-query";
+
 export function ShoppingScreen() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const { data: profile } = useProfileQuery(user?.id);
   const { data: profiles } = useProfilesQuery();
   const { data: items, isLoading } = useShoppingItemsQuery(
@@ -29,6 +33,11 @@ export function ShoppingScreen() {
   const [showAddSheet, setShowAddSheet] = useState(false);
   const [showCompleteSheet, setShowCompleteSheet] = useState(false);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+
+  const handleRefresh = async () => {
+    await queryClient.invalidateQueries({ queryKey: ["shopping-items"] });
+    await queryClient.invalidateQueries({ queryKey: ["profile"] });
+  };
 
   const handleAddItem = (data: {
     name: string;
@@ -84,10 +93,10 @@ export function ShoppingScreen() {
         householdId: profile.household_id,
         expenseData: data.amount
           ? {
-              amount: data.amount,
-              isSplit: data.isSplit,
-              splitWith: data.splitWith,
-            }
+            amount: data.amount,
+            isSplit: data.isSplit,
+            splitWith: data.splitWith,
+          }
           : undefined,
       },
       {
@@ -138,89 +147,92 @@ export function ShoppingScreen() {
 
   return (
     <>
-      <div className="space-y-8">
-        {/* Header */}
-        <div className="space-y-3">
-          <h2 className="text-3xl font-bold tracking-tight">
-            Lista de Compras
-          </h2>
-          <p className="text-base text-muted-foreground">
-            {hasItems
-              ? `${items.length} ${
-                  items.length === 1 ? "item" : "itens"
-                } para comprar`
-              : "Tudo abastecido por aqui!"}
-          </p>
-        </div>
+      <PullToRefreshWrapper onRefresh={handleRefresh}>
+        <div className="space-y-8">
 
-        {/* Complete trip button (shows when items are selected) */}
-        {hasSelection && (
-          <Button
-            onClick={handleOpenCompleteSheet}
-            size="lg"
-            className="w-full rounded-xl shadow-md hover:shadow-lg transition-all gap-2 thumb-friendly bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-            disabled={completeTrip.isPending}
-          >
-            <ShoppingCart className="h-5 w-5" />
-            <span className="font-semibold">
-              Finalizar Compras ({selectedItems.size}) • +
-              {50 + selectedItems.size * 5} pts
-            </span>
-          </Button>
-        )}
-
-        {/* Empty state */}
-        {!hasItems && (
-          <div className="text-center py-16 space-y-6 animate-in">
-            <div className="inline-flex items-center justify-center h-24 w-24 rounded-3xl bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30">
-              <Sparkles className="h-12 w-12 text-emerald-600 dark:text-emerald-400" />
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-xl font-semibold">Lista vazia!</h3>
-              <p className="text-muted-foreground">
-                Quando algo acabar, adicione aqui para ganhar pontos.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Shopping list */}
-        {hasItems && (
+          {/* Header */}
           <div className="space-y-3">
-            {items.map((item) => (
-              <ShoppingItemCard
-                key={item.id}
-                item={item}
-                isSelected={selectedItems.has(item.id)}
-                onToggle={handleToggleItem}
-                onDelete={handleDeleteItem}
-                profiles={profiles}
-              />
-            ))}
+            <h2 className="text-3xl font-bold tracking-tight">
+              Lista de Compras
+            </h2>
+            <p className="text-base text-muted-foreground">
+              {hasItems
+                ? `${items.length} ${items.length === 1 ? "item" : "itens"
+                } para comprar`
+                : "Tudo abastecido por aqui!"}
+            </p>
           </div>
-        )}
 
-        {/* Info box */}
-        <div className="bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 rounded-2xl p-5 space-y-2">
-          <h4 className="font-semibold text-sm flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-primary" />
-            Como funciona?
-          </h4>
-          <ul className="text-sm text-muted-foreground space-y-1">
-            <li>
-              • Reportar item que acabou:{" "}
-              <span className="font-semibold text-foreground">+5 pts</span>
-            </li>
-            <li>
-              • Fazer compras:{" "}
-              <span className="font-semibold text-foreground">
-                +50 pts + 5 pts por item
+          {/* Complete trip button (shows when items are selected) */}
+          {hasSelection && (
+            <Button
+              onClick={handleOpenCompleteSheet}
+              size="lg"
+              className="w-full rounded-xl shadow-md hover:shadow-lg transition-all gap-2 thumb-friendly bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+              disabled={completeTrip.isPending}
+            >
+              <ShoppingCart className="h-5 w-5" />
+              <span className="font-semibold">
+                Finalizar Compras ({selectedItems.size}) • +
+                {50 + selectedItems.size * 5} pts
               </span>
-            </li>
-            <li>• Quanto mais itens comprar, mais pontos ganha!</li>
-          </ul>
+            </Button>
+          )}
+
+          {/* Empty state */}
+          {!hasItems && (
+            <div className="text-center py-16 space-y-6 animate-in">
+              <div className="inline-flex items-center justify-center h-24 w-24 rounded-3xl bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30">
+                <Sparkles className="h-12 w-12 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl font-semibold">Lista vazia!</h3>
+                <p className="text-muted-foreground">
+                  Quando algo acabar, adicione aqui para ganhar pontos.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Shopping list */}
+          {hasItems && (
+            <div className="space-y-3">
+              {items.map((item) => (
+                <ShoppingItemCard
+                  key={item.id}
+                  item={item}
+                  isSelected={selectedItems.has(item.id)}
+                  onToggle={handleToggleItem}
+                  onDelete={handleDeleteItem}
+                  profiles={profiles}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Info box */}
+          <div className="bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 rounded-2xl p-5 space-y-2">
+            <h4 className="font-semibold text-sm flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-primary" />
+              Como funciona?
+            </h4>
+            <ul className="text-sm text-muted-foreground space-y-1">
+              <li>
+                • Reportar item que acabou:{" "}
+                <span className="font-semibold text-foreground">+5 pts</span>
+              </li>
+              <li>
+                • Fazer compras:{" "}
+                <span className="font-semibold text-foreground">
+                  +50 pts + 5 pts por item
+                </span>
+              </li>
+              <li>• Quanto mais itens comprar, mais pontos ganha!</li>
+            </ul>
+          </div>
         </div>
-      </div>
+      </PullToRefreshWrapper>
+
 
       {/* Floating Action Button - Super fast access */}
       <FloatingActionButton

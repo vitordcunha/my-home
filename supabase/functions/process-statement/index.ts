@@ -8,9 +8,9 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-// Initialize Supabase client
+// Initialize environment variables
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 interface Transaction {
   date: string;
@@ -42,6 +42,23 @@ interface ProcessStatementRequest {
   }>;
 }
 
+// Helper function to decode JWT payload
+function decodeJWT(token: string): { sub?: string; role?: string } | null {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+
+    // Decode base64url
+    const base64Url = parts[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = base64 + "=".repeat((4 - (base64.length % 4)) % 4);
+    const decoded = atob(padded);
+    return JSON.parse(decoded);
+  } catch {
+    return null;
+  }
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -49,43 +66,66 @@ serve(async (req) => {
   }
 
   try {
-    // Get authorization header
+    // Get the Authorization header
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: "Missing authorization header" }),
-        {
-          status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
+
+    // Extract JWT from Authorization header or apikey header
+    let jwt: string | null = null;
+
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      jwt = authHeader.replace("Bearer ", "");
     }
 
-    // Extract JWT token from Authorization header
-    const token = authHeader.replace("Bearer ", "");
+    // If no JWT from Authorization header, try to get it from the apikey header
+    // Supabase sends the user's JWT in the Authorization header
+    if (!jwt) {
+      // Check if there's a way to get user from the request
+      console.log("No Authorization header found");
+      console.log("Headers available:", [...req.headers.keys()]);
+    }
 
-    // Decode JWT to get user ID (simple base64url decode)
-    // Supabase already validated the token before reaching this function
+    // Decode the JWT to get user ID
     let userId: string | null = null;
-    try {
-      const parts = token.split(".");
-      if (parts.length === 3) {
-        // Decode base64url (JWT uses base64url encoding)
-        const base64Url = parts[1];
-        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-        // Add padding if needed
-        const padded = base64 + "=".repeat((4 - (base64.length % 4)) % 4);
-        const decoded = atob(padded);
-        const payload = JSON.parse(decoded);
-        userId = payload.sub || payload.user_id || null;
+
+    if (jwt) {
+      const payload = decodeJWT(jwt);
+      console.log("JWT payload:", payload);
+
+      if (payload && payload.sub && payload.role === "authenticated") {
+        userId = payload.sub;
       }
-    } catch (e) {
-      console.error("Failed to decode JWT:", e);
+    }
+
+    // If we couldn't get user from JWT, try using the service role to validate
+    if (!userId) {
+      // Create admin client with service role
+      const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey);
+
+      // Try to get user from the auth header
+      if (authHeader) {
+        const { data: { user }, error } = await supabaseAdmin.auth.getUser(
+          authHeader.replace("Bearer ", "")
+        );
+
+        if (!error && user) {
+          userId = user.id;
+          console.log("Got user from service role validation:", userId);
+        } else {
+          console.error("Service role validation failed:", error);
+        }
+      }
     }
 
     if (!userId) {
       return new Response(
-        JSON.stringify({ error: "Invalid token: could not extract user ID" }),
+        JSON.stringify({
+          error: "Unauthorized",
+          message: "Could not authenticate user",
+          debug: {
+            hasAuthHeader: !!authHeader,
+            headerKeys: [...req.headers.keys()],
+          }
+        }),
         {
           status: 401,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -93,9 +133,10 @@ serve(async (req) => {
       );
     }
 
-    // Create Supabase client with service role key for database access
-    // RLS policies will still enforce user permissions
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    console.log("✅ Authenticated user:", userId);
+
+    // Create Supabase client with service role for database operations
+    const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
     const {
       statement_text,
@@ -308,7 +349,7 @@ Analise o extrato acima e retorne um array JSON com todas as transações encont
     );
   } catch (error) {
     console.error("Error in process-statement function:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: (error as Error).message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

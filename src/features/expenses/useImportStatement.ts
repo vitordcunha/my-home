@@ -26,7 +26,8 @@ export function useImportStatement({
       }
 
       // Call the edge function
-      const { data, error } = await supabase.functions.invoke<ProcessStatementResponse>(
+      // Explicitly pass the auth token to ensure it reaches the Edge Function
+      const response = await supabase.functions.invoke<ProcessStatementResponse>(
         "process-statement",
         {
           body: request,
@@ -36,18 +37,32 @@ export function useImportStatement({
         }
       );
 
-      if (error) {
-        console.error("Error calling process-statement function:", error);
-        throw new Error(
-          error.message || "Erro ao processar o extrato. Tente novamente."
-        );
+      // Log full response for debugging
+      console.log("Edge Function Response:", response);
+
+      if (response.error) {
+        console.error("Error calling process-statement function:", response.error);
+
+        // Try to extract more details from the error
+        let errorMessage = "Erro ao processar o extrato. Tente novamente.";
+
+        if (response.error.message) {
+          errorMessage = response.error.message;
+        }
+
+        // If there's a context with more details, include it
+        if (response.error.context) {
+          errorMessage += ` (${JSON.stringify(response.error.context)})`;
+        }
+
+        throw new Error(errorMessage);
       }
 
-      if (!data) {
+      if (!response.data) {
         throw new Error("Nenhum dado retornado ao processar o extrato");
       }
 
-      return data;
+      return response.data;
     },
     onSuccess,
     onError,

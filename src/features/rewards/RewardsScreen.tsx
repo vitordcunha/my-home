@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/features/auth/useAuth";
 import { useRewardsQuery, useRedeemedRewardsQuery } from "./useRewardsQuery";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Gift, Check, Star } from "lucide-react";
 import { Database } from "@/types/database";
 import { RewardsGridSkeleton } from "@/components/skeletons/RewardsSkeleton";
+import { PullToRefreshWrapper } from "@/components/ui/pull-to-refresh";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 type Reward = Database["public"]["Tables"]["rewards"]["Row"];
@@ -95,9 +96,18 @@ function RedeemedRewardCard({ reward }: { reward: Reward }) {
 
 export default function RewardsScreen() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<"available" | "redeemed">(
     "available"
   );
+
+  const handleRefresh = async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["rewards"] }),
+      queryClient.invalidateQueries({ queryKey: ["redeemed-rewards"] }),
+      queryClient.invalidateQueries({ queryKey: ["profile"] })
+    ]);
+  };
 
   const { data: profile } = useQuery({
     queryKey: ["profile", user?.id],
@@ -129,113 +139,115 @@ export default function RewardsScreen() {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="space-y-3">
-        <h2 className="text-3xl font-bold tracking-tight">Prêmios</h2>
-        <div className="flex items-center gap-2">
-          <p className="text-base text-muted-foreground">Você tem</p>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200/50 dark:border-amber-800/30">
-            <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
-            <span className="text-sm font-bold text-amber-900 dark:text-amber-100">
-              {profile?.total_points || 0}
-            </span>
+    <PullToRefreshWrapper onRefresh={handleRefresh}>
+      <div className="space-y-8">
+
+        <div className="space-y-3">
+          <h2 className="text-3xl font-bold tracking-tight">Prêmios</h2>
+          <div className="flex items-center gap-2">
+            <p className="text-base text-muted-foreground">Você tem</p>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200/50 dark:border-amber-800/30">
+              <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
+              <span className="text-sm font-bold text-amber-900 dark:text-amber-100">
+                {profile?.total_points || 0}
+              </span>
+            </div>
+            <p className="text-base text-muted-foreground">disponíveis</p>
           </div>
-          <p className="text-base text-muted-foreground">disponíveis</p>
         </div>
-      </div>
 
-      <div className="flex gap-2 border-b border-border/50">
-        <button
-          onClick={() => setActiveTab("available")}
-          className={`px-6 py-3 font-semibold transition-all rounded-t-lg ${
-            activeTab === "available"
+        <div className="flex gap-2 border-b border-border/50">
+          <button
+            onClick={() => setActiveTab("available")}
+            className={`px-6 py-3 font-semibold transition-all rounded-t-lg ${activeTab === "available"
               ? "text-primary border-b-2 border-primary bg-primary/5"
               : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
-          }`}
-        >
-          Disponíveis
-        </button>
-        <button
-          onClick={() => setActiveTab("redeemed")}
-          className={`px-6 py-3 font-semibold transition-all rounded-t-lg ${
-            activeTab === "redeemed"
+              }`}
+          >
+            Disponíveis
+          </button>
+          <button
+            onClick={() => setActiveTab("redeemed")}
+            className={`px-6 py-3 font-semibold transition-all rounded-t-lg ${activeTab === "redeemed"
               ? "text-primary border-b-2 border-primary bg-primary/5"
               : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
-          }`}
-        >
-          Resgatados
-        </button>
-      </div>
+              }`}
+          >
+            Resgatados
+          </button>
+        </div>
 
-      {activeTab === "available" && (
-        <>
-          {loadingRewards && <RewardsGridSkeleton />}
+        {activeTab === "available" && (
+          <>
+            {loadingRewards && <RewardsGridSkeleton />}
 
-          {!loadingRewards && rewards && rewards.length === 0 && (
-            <div className="text-center py-16 space-y-6 animate-in">
-              <div className="inline-flex items-center justify-center h-24 w-24 rounded-3xl bg-gradient-to-br from-primary/10 to-primary/5">
-                <Gift className="h-12 w-12 text-primary" />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-xl font-semibold">
-                  Nenhum prêmio disponível
-                </h3>
-                <p className="text-muted-foreground">
-                  Novos prêmios serão adicionados em breve!
-                </p>
-              </div>
-            </div>
-          )}
-
-          {!loadingRewards && rewards && rewards.length > 0 && (
-            <div className="space-y-3">
-              {rewards.map((reward) => (
-                <RewardCard
-                  key={reward.id}
-                  reward={reward}
-                  userPoints={profile?.total_points || 0}
-                  onRedeem={() => handleRedeem(reward)}
-                  isRedeeming={redeemMutation.isPending}
-                />
-              ))}
-            </div>
-          )}
-        </>
-      )}
-
-      {activeTab === "redeemed" && (
-        <>
-          {loadingRedeemed && <RewardsGridSkeleton />}
-
-          {!loadingRedeemed &&
-            redeemedRewards &&
-            redeemedRewards.length === 0 && (
+            {!loadingRewards && rewards && rewards.length === 0 && (
               <div className="text-center py-16 space-y-6 animate-in">
                 <div className="inline-flex items-center justify-center h-24 w-24 rounded-3xl bg-gradient-to-br from-primary/10 to-primary/5">
                   <Gift className="h-12 w-12 text-primary" />
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-xl font-semibold">
-                    Nenhum prêmio resgatado
+                    Nenhum prêmio disponível
                   </h3>
                   <p className="text-muted-foreground">
-                    Comece resgatando prêmios com seus pontos!
+                    Novos prêmios serão adicionados em breve!
                   </p>
                 </div>
               </div>
             )}
 
-          {!loadingRedeemed &&
-            redeemedRewards &&
-            redeemedRewards.length > 0 && (
+            {!loadingRewards && rewards && rewards.length > 0 && (
               <div className="space-y-3">
-                {redeemedRewards.map((reward) => (
-                  <RedeemedRewardCard key={reward.id} reward={reward} />
+                {rewards.map((reward) => (
+                  <RewardCard
+                    key={reward.id}
+                    reward={reward}
+                    userPoints={profile?.total_points || 0}
+                    onRedeem={() => handleRedeem(reward)}
+                    isRedeeming={redeemMutation.isPending}
+                  />
                 ))}
               </div>
             )}
-        </>
-      )}
-    </div>
+          </>
+        )}
+
+        {activeTab === "redeemed" && (
+          <>
+            {loadingRedeemed && <RewardsGridSkeleton />}
+
+            {!loadingRedeemed &&
+              redeemedRewards &&
+              redeemedRewards.length === 0 && (
+                <div className="text-center py-16 space-y-6 animate-in">
+                  <div className="inline-flex items-center justify-center h-24 w-24 rounded-3xl bg-gradient-to-br from-primary/10 to-primary/5">
+                    <Gift className="h-12 w-12 text-primary" />
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-xl font-semibold">
+                      Nenhum prêmio resgatado
+                    </h3>
+                    <p className="text-muted-foreground">
+                      Comece resgatando prêmios com seus pontos!
+                    </p>
+                  </div>
+                </div>
+              )}
+
+            {!loadingRedeemed &&
+              redeemedRewards &&
+              redeemedRewards.length > 0 && (
+                <div className="space-y-3">
+                  {redeemedRewards.map((reward) => (
+                    <RedeemedRewardCard key={reward.id} reward={reward} />
+                  ))}
+                </div>
+              )}
+          </>
+        )}
+      </div>
+    </PullToRefreshWrapper>
   );
+
 }

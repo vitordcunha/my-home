@@ -3,7 +3,7 @@ import { AuthProvider } from "./features/auth/AuthProvider";
 import { useAuth } from "./features/auth/useAuth";
 import { useProfileQuery } from "./features/auth/useProfileQuery";
 import { Toaster } from "./components/ui/toaster";
-// import { useTheme } from "./hooks/useTheme";
+import { useTheme } from "./hooks/useTheme";
 import LoginScreen from "./features/auth/LoginScreen";
 import MainLayout from "./components/layout/MainLayout";
 import { AppLoadingSkeleton } from "./components/skeletons/AppLoadingSkeleton";
@@ -17,8 +17,7 @@ import { TasksTrashScreen } from "./features/tasks/TasksTrashScreen";
 import { OnboardingScreen } from "./features/households/OnboardingScreen";
 import { ShoppingScreen } from "./features/shopping/ShoppingScreen";
 import { WeekViewScreen } from "./features/tasks/WeekViewScreen";
-import { ExpensesScreen } from "./features/expenses/ExpensesScreen";
-import { FinancialPlanningScreen } from "./features/expenses/FinancialPlanningScreen";
+import { FinancialDashboard } from "./features/expenses/FinancialDashboard";
 // import { MaintenanceScreen } from "./features/maintenance/MaintenanceScreen";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -46,6 +45,8 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function AppRoutes() {
   const { user, loading } = useAuth();
 
+  useTheme();
+
   if (loading) {
     return <AppLoadingSkeleton />;
   }
@@ -65,8 +66,9 @@ function AppRoutes() {
         }
       >
         <Route index element={<TodayScreen />} />
-        <Route path="expenses" element={<ExpensesScreen />} />
-        <Route path="expenses/planning" element={<FinancialPlanningScreen />} />
+        <Route path="expenses" element={<FinancialDashboard />} />
+        {/* Rota legada redirecionando para o novo dashboard */}
+        <Route path="expenses/planning" element={<Navigate to="/expenses" replace />} />
         <Route path="shopping" element={<ShoppingScreen />} />
         {/* <Route path="maintenance" element={<MaintenanceScreen />} /> */}
         <Route path="tasks/week" element={<WeekViewScreen />} />

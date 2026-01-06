@@ -5,7 +5,7 @@ import { useHaptic } from "@/hooks/useHaptic";
 interface FloatingActionButtonProps {
   onClick: () => void;
   ariaLabel: string;
-  variant?: "primary" | "blue" | "orange";
+  variant?: "primary" | "blue" | "orange" | "green";
   size?: "sm" | "md";
   mobileOnly?: boolean;
 }
@@ -28,6 +28,7 @@ export function FloatingActionButton({
       "bg-gradient-to-br from-primary to-primary/90 text-primary-foreground",
     blue: "bg-gradient-to-br from-blue-600 to-indigo-600 text-white",
     orange: "bg-gradient-to-br from-orange-600 to-amber-600 text-white",
+    green: "bg-gradient-to-br from-green-600 to-emerald-600 text-white",
   };
 
   const sizeClasses = {

@@ -28,3 +28,5 @@ CREATE POLICY "Users can complete household tasks"
 COMMENT ON POLICY "Users can complete household tasks" ON tasks_history IS 
   'Allows any household member to mark tasks as completed for any member of the same household';
 
+
+

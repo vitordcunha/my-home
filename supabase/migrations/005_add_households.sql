@@ -51,19 +51,33 @@ CREATE TRIGGER trigger_set_invite_code
   FOR EACH ROW
   EXECUTE FUNCTION set_invite_code();
 
--- Add household_id to profiles table
-ALTER TABLE profiles 
-ADD COLUMN household_id UUID REFERENCES households(id) ON DELETE CASCADE,
-ADD COLUMN role TEXT DEFAULT 'member' CHECK (role IN ('admin', 'member'));
+-- Add household_id to profiles table (only if not exists)
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='profiles' AND column_name='household_id') THEN
+    ALTER TABLE profiles ADD COLUMN household_id UUID REFERENCES households(id) ON DELETE CASCADE;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='profiles' AND column_name='role') THEN
+    ALTER TABLE profiles ADD COLUMN role TEXT DEFAULT 'member' CHECK (role IN ('admin', 'member'));
+  END IF;
+END $$;
 
--- Add household_id to tasks_master table
-ALTER TABLE tasks_master 
-ADD COLUMN household_id UUID REFERENCES households(id) ON DELETE CASCADE;
+-- Add household_id to tasks_master table (only if not exists)
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='tasks_master' AND column_name='household_id') THEN
+    ALTER TABLE tasks_master ADD COLUMN household_id UUID REFERENCES households(id) ON DELETE CASCADE;
+  END IF;
+END $$;
 
--- Add household_id to rewards table
-ALTER TABLE rewards 
-ADD COLUMN household_id UUID REFERENCES households(id) ON DELETE CASCADE,
-ADD COLUMN is_active BOOLEAN DEFAULT true;
+-- Add household_id to rewards table (only if not exists)
+-- Note: is_active already exists in 001_initial_schema.sql, so we only add household_id
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='rewards' AND column_name='household_id') THEN
+    ALTER TABLE rewards ADD COLUMN household_id UUID REFERENCES households(id) ON DELETE CASCADE;
+  END IF;
+END $$;
 
 -- Create indexes for performance
 CREATE INDEX idx_households_invite_code ON households(invite_code);

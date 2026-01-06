@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useAddExpense } from "./useAddExpense";
-import { EXPENSE_QUICK_ACTIONS, ExpenseCategory } from "./types";
+import { useUpdateExpense } from "./useExpenseMutations";
+import { EXPENSE_QUICK_ACTIONS, ExpenseCategory, Expense } from "./types";
 import { useHouseholdQuery } from "@/features/households/useHouseholdQuery";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -19,6 +20,7 @@ interface AddExpenseSheetProps {
   onOpenChange: (open: boolean) => void;
   householdId: string;
   userId: string;
+  expenseToEdit?: Expense | null;
 }
 
 export function AddExpenseSheet({
@@ -26,6 +28,7 @@ export function AddExpenseSheet({
   onOpenChange,
   householdId,
   userId,
+  expenseToEdit,
 }: AddExpenseSheetProps) {
   const [selectedCategory, setSelectedCategory] =
     useState<ExpenseCategory | null>(null);
@@ -35,10 +38,34 @@ export function AddExpenseSheet({
   const [isSplit, setIsSplit] = useState(false);
   const [showSplitOptions, setShowSplitOptions] = useState(false);
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
+  const [competenceDate, setCompetenceDate] = useState<string>("");
 
   const { data: household } = useHouseholdQuery(householdId);
   const addExpense = useAddExpense();
+  const updateExpense = useUpdateExpense();
   const { trigger } = useHaptic();
+
+  const isEditMode = !!expenseToEdit;
+
+  // Preencher formulário quando estiver editando
+  useEffect(() => {
+    if (expenseToEdit && open) {
+      setSelectedCategory(expenseToEdit.category as ExpenseCategory);
+      setAmount(expenseToEdit.amount.toString());
+      setDescription(expenseToEdit.description);
+      setCustomCategory(expenseToEdit.custom_category || "");
+      setIsSplit(expenseToEdit.is_split);
+      setSelectedMembers(expenseToEdit.split_with || []);
+      setCompetenceDate(
+        (expenseToEdit as any).competence_date
+          ? new Date((expenseToEdit as any).competence_date).toISOString().slice(0, 10)
+          : ""
+      );
+    } else if (!open) {
+      // Limpar formulário ao fechar
+      resetForm();
+    }
+  }, [expenseToEdit, open]);
 
   // Filtrar membros (exceto o usuário atual)
   const otherMembers = household?.members?.filter((m) => m.id !== userId) || [];
@@ -74,37 +101,65 @@ export function AddExpenseSheet({
       selectedCategory === "custom" ? customCategory : description;
 
     trigger("success");
-    addExpense.mutate(
-      {
-        household_id: householdId,
-        description: finalDescription,
-        amount: numAmount,
-        category: selectedCategory,
-        custom_category:
-          selectedCategory === "custom" ? customCategory : undefined,
-        paid_by: userId,
-        is_split: isSplit,
-        split_with: isSplit
-          ? selectedMembers.length > 0
-            ? selectedMembers
-            : undefined
-          : [],
-        split_type: isSplit ? "equal" : "individual",
-        created_by: userId,
-      },
-      {
-        onSuccess: () => {
-          onOpenChange(false);
-          setAmount("");
-          setDescription("");
-          setCustomCategory("");
-          setSelectedCategory(null);
-          setIsSplit(false);
-          setShowSplitOptions(false);
-          setSelectedMembers([]);
-        },
-      }
-    );
+
+    // Calcular competence_date (se não especificada, usar paid_at)
+    const finalCompetenceDate = competenceDate || new Date().toISOString().slice(0, 10);
+
+    if (isEditMode && expenseToEdit) {
+      // Modo de edição
+      updateExpense.mutate(
+        {
+          id: expenseToEdit.id,
+          description: finalDescription,
+          amount: numAmount,
+          category: selectedCategory,
+          custom_category:
+            selectedCategory === "custom" ? customCategory : undefined,
+          is_split: isSplit,
+          split_with: isSplit
+            ? selectedMembers.length > 0
+              ? selectedMembers
+              : undefined
+            : [],
+          split_type: isSplit ? "equal" : "individual",
+          competence_date: finalCompetenceDate,
+        } as any,
+        {
+          onSuccess: () => {
+            onOpenChange(false);
+            resetForm();
+          },
+        }
+      );
+    } else {
+      // Modo de criação
+      addExpense.mutate(
+        {
+          household_id: householdId,
+          description: finalDescription,
+          amount: numAmount,
+          category: selectedCategory,
+          custom_category:
+            selectedCategory === "custom" ? customCategory : undefined,
+          paid_by: userId,
+          is_split: isSplit,
+          split_with: isSplit
+            ? selectedMembers.length > 0
+              ? selectedMembers
+              : undefined
+            : [],
+          split_type: isSplit ? "equal" : "individual",
+          created_by: userId,
+          competence_date: finalCompetenceDate,
+        } as any,
+        {
+          onSuccess: () => {
+            onOpenChange(false);
+            resetForm();
+          },
+        }
+      );
+    }
   };
 
   const resetForm = () => {
@@ -112,6 +167,7 @@ export function AddExpenseSheet({
     setShowSplitOptions(false);
     setDescription("");
     setCustomCategory("");
+    setCompetenceDate("");
   };
 
   return (
@@ -119,9 +175,13 @@ export function AddExpenseSheet({
       <SheetContent side="bottom" className="h-[90vh] overflow-y-auto">
         <div className="space-y-6 pb-6">
           <div>
-            <h2 className="text-2xl font-bold">Adicionar Despesa</h2>
+            <h2 className="text-2xl font-bold">
+              {isEditMode ? "Editar Despesa" : "Adicionar Despesa"}
+            </h2>
             <p className="text-sm text-muted-foreground">
-              Registre uma despesa e ganhe +10 pts
+              {isEditMode
+                ? "Atualize os dados da despesa"
+                : "Registre uma despesa e ganhe +10 pts"}
             </p>
           </div>
 
@@ -200,10 +260,21 @@ export function AddExpenseSheet({
 
               <Button
                 onClick={handleSubmit}
-                disabled={addExpense.isPending}
+                disabled={
+                  isEditMode ? updateExpense.isPending : addExpense.isPending
+                }
                 className="w-full h-14 text-base font-semibold"
               >
-                {addExpense.isPending ? (
+                {isEditMode ? (
+                  updateExpense.isPending ? (
+                    "Salvando..."
+                  ) : (
+                    <>
+                      <CheckCircle2 className="h-4 w-4 mr-2" />
+                      Atualizar Despesa
+                    </>
+                  )
+                ) : addExpense.isPending ? (
                   "Salvando..."
                 ) : (
                   <>
@@ -259,6 +330,20 @@ export function AddExpenseSheet({
                   className="w-full mt-1.5 px-4 h-12 rounded-xl border border-border bg-background text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
                   placeholder="0,00"
                 />
+              </div>
+
+              {/* Campo de Competência */}
+              <div>
+                <label className="text-sm font-medium">Mês de Competência (Opcional)</label>
+                <input
+                  type="date"
+                  value={competenceDate}
+                  onChange={(e) => setCompetenceDate(e.target.value)}
+                  className="w-full mt-1.5 px-4 h-12 rounded-xl border border-border bg-background text-base text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  💡 Use para contabilizar em outro mês do orçamento
+                </p>
               </div>
 
               {/* Opção de dividir */}

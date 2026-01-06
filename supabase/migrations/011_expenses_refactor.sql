@@ -1,5 +1,5 @@
 -- =====================================================
--- MIGRATION 011: EXPENSES REFACTOR
+-- MIGRATION 011: EXPENSES REFACTOR (FIXED)
 -- =====================================================
 -- Refatoração para simplificar despesas:
 -- - Adicionar campo para categoria customizada
@@ -35,9 +35,8 @@ ADD CONSTRAINT expenses_category_check CHECK (category IN (
   'outros'       -- outros
 ));
 
--- Índice para busca por mês/ano removido
--- (DATE_TRUNC não é IMMUTABLE com TIMESTAMPTZ)
--- O índice idx_expenses_paid_at existente é suficiente para queries de data
+-- Índice para busca por data já existe (idx_expenses_paid_at)
+-- Não é necessário criar índice adicional para DATE_TRUNC
 
 -- =====================================================
 -- FUNCTION: Criar splits com novo sistema

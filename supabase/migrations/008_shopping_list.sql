@@ -199,3 +199,5 @@ COMMENT ON FUNCTION reward_shopping_report IS 'Award 5 XP when user reports miss
 COMMENT ON FUNCTION get_frequent_shopping_items IS 'Get most frequently purchased items for autocomplete';
 
 
+
+

@@ -81,3 +81,5 @@ export function getCategoryGradient(category?: CategoryType): string {
   return `${cat.lightBg} ${cat.darkBg}`;
 }
 
+
+

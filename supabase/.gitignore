@@ -1,0 +1,11 @@
+# Supabase local development
+.branches
+.temp
+.env.local
+
+# Edge Functions environment files
+functions/**/.env
+functions/**/.env.local
+
+
+

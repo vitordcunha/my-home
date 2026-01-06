@@ -18,6 +18,7 @@ import { OnboardingScreen } from "./features/households/OnboardingScreen";
 import { ShoppingScreen } from "./features/shopping/ShoppingScreen";
 import { WeekViewScreen } from "./features/tasks/WeekViewScreen";
 import { ExpensesScreen } from "./features/expenses/ExpensesScreen";
+import { FinancialPlanningScreen } from "./features/expenses/FinancialPlanningScreen";
 // import { MaintenanceScreen } from "./features/maintenance/MaintenanceScreen";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -65,6 +66,7 @@ function AppRoutes() {
       >
         <Route index element={<TodayScreen />} />
         <Route path="expenses" element={<ExpensesScreen />} />
+        <Route path="expenses/planning" element={<FinancialPlanningScreen />} />
         <Route path="shopping" element={<ShoppingScreen />} />
         {/* <Route path="maintenance" element={<MaintenanceScreen />} /> */}
         <Route path="tasks/week" element={<WeekViewScreen />} />

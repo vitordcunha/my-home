@@ -78,3 +78,5 @@ BEGIN
   RAISE NOTICE '💡 Para remover completamente os usuários, descomente a linha de DELETE em auth.users';
 END $$;
 
+
+

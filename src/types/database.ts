@@ -238,6 +238,7 @@ export interface Database {
             | null;
           recurrence_day: number | null;
           next_occurrence_date: string | null;
+          due_date: string | null;
           shopping_trip_id: string | null;
           maintenance_item_id: string | null;
           receipt_url: string | null;
@@ -275,6 +276,7 @@ export interface Database {
             | null;
           recurrence_day?: number | null;
           next_occurrence_date?: string | null;
+          due_date?: string | null;
           shopping_trip_id?: string | null;
           maintenance_item_id?: string | null;
           receipt_url?: string | null;
@@ -313,9 +315,60 @@ export interface Database {
             | null;
           recurrence_day?: number | null;
           next_occurrence_date?: string | null;
+          due_date?: string | null;
           shopping_trip_id?: string | null;
           maintenance_item_id?: string | null;
           receipt_url?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          created_by?: string | null;
+        };
+      };
+      incomes: {
+        Row: {
+          id: string;
+          household_id: string;
+          description: string;
+          amount: number;
+          category: "salario" | "freelance" | "investimento" | "presente" | "outros";
+          received_at: string | null;
+          received_by: string;
+          is_recurring: boolean;
+          recurrence_frequency: "daily" | "weekly" | "monthly" | "yearly" | null;
+          recurrence_day: number | null;
+          next_occurrence_date: string | null;
+          created_at: string;
+          updated_at: string;
+          created_by: string | null;
+        };
+        Insert: {
+          id?: string;
+          household_id: string;
+          description: string;
+          amount: number;
+          category: "salario" | "freelance" | "investimento" | "presente" | "outros";
+          received_at?: string | null;
+          received_by: string;
+          is_recurring?: boolean;
+          recurrence_frequency?: "daily" | "weekly" | "monthly" | "yearly" | null;
+          recurrence_day?: number | null;
+          next_occurrence_date?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          created_by?: string | null;
+        };
+        Update: {
+          id?: string;
+          household_id?: string;
+          description?: string;
+          amount?: number;
+          category?: "salario" | "freelance" | "investimento" | "presente" | "outros";
+          received_at?: string | null;
+          received_by?: string;
+          is_recurring?: boolean;
+          recurrence_frequency?: "daily" | "weekly" | "monthly" | "yearly" | null;
+          recurrence_day?: number | null;
+          next_occurrence_date?: string | null;
           created_at?: string;
           updated_at?: string;
           created_by?: string | null;
@@ -357,6 +410,65 @@ export interface Database {
           confirmed_by?: string | null;
           created_at?: string;
           updated_at?: string;
+        };
+      };
+      budgets: {
+        Row: {
+          id: string;
+          household_id: string;
+          category:
+            | "casa"
+            | "contas"
+            | "mercado"
+            | "delivery"
+            | "limpeza"
+            | "manutencao"
+            | "custom"
+            | "outros";
+          limit_amount: number;
+          budget_month: number | null;
+          budget_year: number | null;
+          created_at: string;
+          updated_at: string;
+          created_by: string | null;
+        };
+        Insert: {
+          id?: string;
+          household_id: string;
+          category:
+            | "casa"
+            | "contas"
+            | "mercado"
+            | "delivery"
+            | "limpeza"
+            | "manutencao"
+            | "custom"
+            | "outros";
+          limit_amount: number;
+          budget_month?: number | null;
+          budget_year?: number | null;
+          created_at?: string;
+          updated_at?: string;
+          created_by?: string | null;
+        };
+        Update: {
+          id?: string;
+          household_id?: string;
+          category?:
+            | "casa"
+            | "contas"
+            | "mercado"
+            | "delivery"
+            | "limpeza"
+            | "manutencao"
+            | "custom"
+            | "outros";
+          limit_amount?: number;
+          budget_month?: number | null;
+          budget_year?: number | null;
+          created_at?: string;
+          updated_at?: string;
+          created_by?: string | null;
         };
       };
       maintenance_items: {

@@ -4,12 +4,16 @@
 
 -- Drop existing policies that need to be updated
 DROP POLICY IF EXISTS "Anyone can view all profiles" ON profiles;
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can insert own profile" ON profiles;
 DROP POLICY IF EXISTS "Anyone can view active tasks" ON tasks_master;
 DROP POLICY IF EXISTS "Anyone can create tasks" ON tasks_master;
 DROP POLICY IF EXISTS "Users can update own tasks" ON tasks_master;
 DROP POLICY IF EXISTS "Users can delete own tasks" ON tasks_master;
 DROP POLICY IF EXISTS "Anyone can view task history" ON tasks_history;
 DROP POLICY IF EXISTS "Anyone can complete tasks" ON tasks_history;
+DROP POLICY IF EXISTS "No one can update history" ON tasks_history;
+DROP POLICY IF EXISTS "No one can delete history" ON tasks_history;
 DROP POLICY IF EXISTS "Anyone can view active rewards" ON rewards;
 DROP POLICY IF EXISTS "Anyone can create rewards" ON rewards;
 DROP POLICY IF EXISTS "Anyone can update rewards" ON rewards;

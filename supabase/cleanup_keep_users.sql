@@ -74,3 +74,5 @@ BEGIN
   RAISE NOTICE '🔄 Pontos dos usuários foram zerados';
 END $$;
 
+
+

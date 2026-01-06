@@ -41,7 +41,6 @@ export function useResolveMaintenanceItem() {
       // 1. Atualizar status do item para resolved
       const { error: updateError } = await supabase
         .from("maintenance_items")
-        // @ts-expect-error - Supabase type inference issue
         .update({
           status: "resolved",
           resolved_by: data.resolvedBy,
@@ -58,7 +57,6 @@ export function useResolveMaintenanceItem() {
       if (data.createExpense && data.actualCost && data.actualCost > 0) {
         const { error: expenseError } = await supabase
           .from("expenses")
-          // @ts-expect-error - Supabase type inference issue
           .insert({
             household_id: data.householdId,
             description: data.expenseDescription || "Manutenção",
@@ -104,9 +102,9 @@ export function useResolveMaintenanceItem() {
       ]);
       const previousExpenses = data.createExpense
         ? queryClient.getQueryData<ExpenseWithPaidBy[]>([
-            "expenses",
-            data.householdId,
-          ])
+          "expenses",
+          data.householdId,
+        ])
         : undefined;
 
       // Optimistic update - update item status to resolved

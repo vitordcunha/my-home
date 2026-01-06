@@ -31,6 +31,7 @@ export interface Database {
           created_at?: string;
           created_by?: string | null;
         };
+        Relationships: [];
       };
       profiles: {
         Row: {
@@ -60,6 +61,14 @@ export interface Database {
           household_id?: string | null;
           role?: "admin" | "member";
         };
+        Relationships: [
+          {
+            foreignKeyName: "profiles_household_id_fkey";
+            columns: ["household_id"];
+            referencedRelation: "households";
+            referencedColumns: ["id"];
+          }
+        ];
       };
       tasks_master: {
         Row: {
@@ -104,6 +113,14 @@ export interface Database {
           household_id?: string | null;
           rotation_enabled?: boolean;
         };
+        Relationships: [
+          {
+            foreignKeyName: "tasks_master_household_id_fkey";
+            columns: ["household_id"];
+            referencedRelation: "households";
+            referencedColumns: ["id"];
+          }
+        ];
       };
       tasks_history: {
         Row: {
@@ -130,6 +147,20 @@ export interface Database {
           created_at?: string;
           xp_earned?: number;
         };
+        Relationships: [
+          {
+            foreignKeyName: "tasks_history_task_id_fkey";
+            columns: ["task_id"];
+            referencedRelation: "tasks_master";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tasks_history_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
       };
       rewards: {
         Row: {
@@ -162,6 +193,14 @@ export interface Database {
           household_id?: string | null;
           is_active?: boolean;
         };
+        Relationships: [
+          {
+            foreignKeyName: "rewards_household_id_fkey";
+            columns: ["household_id"];
+            referencedRelation: "households";
+            referencedColumns: ["id"];
+          }
+        ];
       };
       shopping_items: {
         Row: {
@@ -206,6 +245,14 @@ export interface Database {
           notes?: string | null;
           created_at?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: "shopping_items_household_id_fkey";
+            columns: ["household_id"];
+            referencedRelation: "households";
+            referencedColumns: ["id"];
+          }
+        ];
       };
       expenses: {
         Row: {
@@ -214,14 +261,14 @@ export interface Database {
           description: string;
           amount: number;
           category:
-            | "casa"
-            | "contas"
-            | "mercado"
-            | "delivery"
-            | "limpeza"
-            | "manutencao"
-            | "custom"
-            | "outros";
+          | "casa"
+          | "contas"
+          | "mercado"
+          | "delivery"
+          | "limpeza"
+          | "manutencao"
+          | "custom"
+          | "outros";
           custom_category: string | null;
           paid_at: string;
           paid_by: string;
@@ -231,11 +278,11 @@ export interface Database {
           split_with: string[] | null;
           is_recurring: boolean;
           recurrence_frequency:
-            | "daily"
-            | "weekly"
-            | "monthly"
-            | "yearly"
-            | null;
+          | "daily"
+          | "weekly"
+          | "monthly"
+          | "yearly"
+          | null;
           recurrence_day: number | null;
           next_occurrence_date: string | null;
           due_date: string | null;
@@ -245,6 +292,7 @@ export interface Database {
           created_at: string;
           updated_at: string;
           created_by: string | null;
+          competence_date: string | null;
         };
         Insert: {
           id?: string;
@@ -252,14 +300,14 @@ export interface Database {
           description: string;
           amount: number;
           category:
-            | "casa"
-            | "contas"
-            | "mercado"
-            | "delivery"
-            | "limpeza"
-            | "manutencao"
-            | "custom"
-            | "outros";
+          | "casa"
+          | "contas"
+          | "mercado"
+          | "delivery"
+          | "limpeza"
+          | "manutencao"
+          | "custom"
+          | "outros";
           custom_category?: string | null;
           paid_at?: string;
           paid_by: string;
@@ -269,11 +317,11 @@ export interface Database {
           split_with?: string[] | null;
           is_recurring?: boolean;
           recurrence_frequency?:
-            | "daily"
-            | "weekly"
-            | "monthly"
-            | "yearly"
-            | null;
+          | "daily"
+          | "weekly"
+          | "monthly"
+          | "yearly"
+          | null;
           recurrence_day?: number | null;
           next_occurrence_date?: string | null;
           due_date?: string | null;
@@ -283,6 +331,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
           created_by?: string | null;
+          competence_date?: string | null;
         };
         Update: {
           id?: string;
@@ -290,14 +339,14 @@ export interface Database {
           description?: string;
           amount?: number;
           category?:
-            | "casa"
-            | "contas"
-            | "mercado"
-            | "delivery"
-            | "limpeza"
-            | "manutencao"
-            | "custom"
-            | "outros";
+          | "casa"
+          | "contas"
+          | "mercado"
+          | "delivery"
+          | "limpeza"
+          | "manutencao"
+          | "custom"
+          | "outros";
           custom_category?: string | null;
           paid_at?: string;
           paid_by?: string;
@@ -307,12 +356,11 @@ export interface Database {
           split_with?: string[] | null;
           is_recurring?: boolean;
           recurrence_frequency?:
-            | "daily"
-            | "weekly"
-            | "monthly"
-            | "yearly"
-            | "yearly"
-            | null;
+          | "daily"
+          | "weekly"
+          | "monthly"
+          | "yearly"
+          | null;
           recurrence_day?: number | null;
           next_occurrence_date?: string | null;
           due_date?: string | null;
@@ -322,7 +370,22 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
           created_by?: string | null;
+          competence_date?: string | null;
         };
+        Relationships: [
+          {
+            foreignKeyName: "expenses_household_id_fkey";
+            columns: ["household_id"];
+            referencedRelation: "households";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "expenses_paid_by_fkey";
+            columns: ["paid_by"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
       };
       incomes: {
         Row: {
@@ -340,6 +403,7 @@ export interface Database {
           created_at: string;
           updated_at: string;
           created_by: string | null;
+          competence_date: string | null;
         };
         Insert: {
           id?: string;
@@ -356,6 +420,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
           created_by?: string | null;
+          competence_date?: string | null;
         };
         Update: {
           id?: string;
@@ -372,7 +437,22 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
           created_by?: string | null;
+          competence_date?: string | null;
         };
+        Relationships: [
+          {
+            foreignKeyName: "incomes_household_id_fkey";
+            columns: ["household_id"];
+            referencedRelation: "households";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "incomes_received_by_fkey";
+            columns: ["received_by"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
       };
       expense_splits: {
         Row: {
@@ -411,20 +491,34 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: "expense_splits_expense_id_fkey";
+            columns: ["expense_id"];
+            referencedRelation: "expenses";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "expense_splits_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
       };
       budgets: {
         Row: {
           id: string;
           household_id: string;
           category:
-            | "casa"
-            | "contas"
-            | "mercado"
-            | "delivery"
-            | "limpeza"
-            | "manutencao"
-            | "custom"
-            | "outros";
+          | "casa"
+          | "contas"
+          | "mercado"
+          | "delivery"
+          | "limpeza"
+          | "manutencao"
+          | "custom"
+          | "outros";
           limit_amount: number;
           budget_month: number | null;
           budget_year: number | null;
@@ -436,14 +530,14 @@ export interface Database {
           id?: string;
           household_id: string;
           category:
-            | "casa"
-            | "contas"
-            | "mercado"
-            | "delivery"
-            | "limpeza"
-            | "manutencao"
-            | "custom"
-            | "outros";
+          | "casa"
+          | "contas"
+          | "mercado"
+          | "delivery"
+          | "limpeza"
+          | "manutencao"
+          | "custom"
+          | "outros";
           limit_amount: number;
           budget_month?: number | null;
           budget_year?: number | null;
@@ -455,14 +549,14 @@ export interface Database {
           id?: string;
           household_id?: string;
           category?:
-            | "casa"
-            | "contas"
-            | "mercado"
-            | "delivery"
-            | "limpeza"
-            | "manutencao"
-            | "custom"
-            | "outros";
+          | "casa"
+          | "contas"
+          | "mercado"
+          | "delivery"
+          | "limpeza"
+          | "manutencao"
+          | "custom"
+          | "outros";
           limit_amount?: number;
           budget_month?: number | null;
           budget_year?: number | null;
@@ -470,6 +564,14 @@ export interface Database {
           updated_at?: string;
           created_by?: string | null;
         };
+        Relationships: [
+          {
+            foreignKeyName: "budgets_household_id_fkey";
+            columns: ["household_id"];
+            referencedRelation: "households";
+            referencedColumns: ["id"];
+          }
+        ];
       };
       maintenance_items: {
         Row: {
@@ -478,18 +580,18 @@ export interface Database {
           title: string;
           description: string | null;
           location:
-            | "cozinha"
-            | "sala"
-            | "quarto1"
-            | "quarto2"
-            | "quarto3"
-            | "banheiro"
-            | "lavanderia"
-            | "area_externa"
-            | "garagem"
-            | "entrada"
-            | "deposito"
-            | "outro";
+          | "cozinha"
+          | "sala"
+          | "quarto1"
+          | "quarto2"
+          | "quarto3"
+          | "banheiro"
+          | "lavanderia"
+          | "area_externa"
+          | "garagem"
+          | "entrada"
+          | "deposito"
+          | "outro";
           priority: "urgent" | "important" | "whenever";
           action_type: "call_technician" | "diy" | "waiting_parts" | "contact";
           technician_specialty: string | null;
@@ -512,18 +614,18 @@ export interface Database {
           title: string;
           description?: string | null;
           location:
-            | "cozinha"
-            | "sala"
-            | "quarto1"
-            | "quarto2"
-            | "quarto3"
-            | "banheiro"
-            | "lavanderia"
-            | "area_externa"
-            | "garagem"
-            | "entrada"
-            | "deposito"
-            | "outro";
+          | "cozinha"
+          | "sala"
+          | "quarto1"
+          | "quarto2"
+          | "quarto3"
+          | "banheiro"
+          | "lavanderia"
+          | "area_externa"
+          | "garagem"
+          | "entrada"
+          | "deposito"
+          | "outro";
           priority: "urgent" | "important" | "whenever";
           action_type: "call_technician" | "diy" | "waiting_parts" | "contact";
           technician_specialty?: string | null;
@@ -546,18 +648,18 @@ export interface Database {
           title?: string;
           description?: string | null;
           location?:
-            | "cozinha"
-            | "sala"
-            | "quarto1"
-            | "quarto2"
-            | "quarto3"
-            | "banheiro"
-            | "lavanderia"
-            | "area_externa"
-            | "garagem"
-            | "entrada"
-            | "deposito"
-            | "outro";
+          | "cozinha"
+          | "sala"
+          | "quarto1"
+          | "quarto2"
+          | "quarto3"
+          | "banheiro"
+          | "lavanderia"
+          | "area_externa"
+          | "garagem"
+          | "entrada"
+          | "deposito"
+          | "outro";
           priority?: "urgent" | "important" | "whenever";
           action_type?: "call_technician" | "diy" | "waiting_parts" | "contact";
           technician_specialty?: string | null;
@@ -574,6 +676,14 @@ export interface Database {
           created_by?: string;
           updated_at?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_items_household_id_fkey";
+            columns: ["household_id"];
+            referencedRelation: "households";
+            referencedColumns: ["id"];
+          }
+        ];
       };
       maintenance_history: {
         Row: {
@@ -624,6 +734,14 @@ export interface Database {
           notes?: string | null;
           created_at?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_history_household_id_fkey";
+            columns: ["household_id"];
+            referencedRelation: "households";
+            referencedColumns: ["id"];
+          }
+        ];
       };
       recurring_maintenances: {
         Row: {
@@ -683,6 +801,92 @@ export interface Database {
           created_by?: string;
           updated_at?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: "recurring_maintenances_household_id_fkey";
+            columns: ["household_id"];
+            referencedRelation: "households";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+    };
+    Views: {};
+    Functions: {
+      get_financial_balance: {
+        Args: {
+          p_household_id: string;
+          p_month?: number | null;
+          p_year?: number | null;
+        };
+        Returns: Array<{
+          opening_balance: number;
+          total_income: number;
+          total_expenses: number;
+          net_balance: number;
+          projected_income: number;
+          projected_expenses: number;
+          projected_balance: number;
+        }>;
+      };
+      get_financial_timeline: {
+        Args: {
+          p_household_id: string;
+          p_month?: number | null;
+          p_year?: number | null;
+        };
+        Returns: Array<{
+          date: string;
+          type: string;
+          description: string;
+          amount: number;
+          category: string;
+          is_projected: boolean;
+          item_id: string;
+          competence_date: string | null;
+          real_date: string | null;
+        }>;
+      };
+      get_current_month_budgets: {
+        Args: {
+          p_household_id: string;
+        };
+        Returns: Array<{
+          category: string;
+          limit_amount: number;
+        }>;
+      };
+      get_user_balance: {
+        Args: {
+          p_user_id: string;
+          p_household_id: string;
+        };
+        Returns: {
+          owed_by_user: number;
+          owed_to_user: number;
+          net_balance: number;
+        };
+      };
+      undo_task_completion: {
+        Args: {
+          p_history_id: string;
+        };
+        Returns: Array<{
+          task_id: string;
+          user_id: string;
+          xp_deducted: number;
+        }>;
+      };
+      complete_shopping_trip: {
+        Args: {
+          p_item_ids: string[];
+          p_user_id: string;
+        };
+        Returns: Array<{
+          items_completed: number;
+          xp_earned: number;
+          user_id: string;
+        }>;
       };
     };
   };

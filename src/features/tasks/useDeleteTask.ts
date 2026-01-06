@@ -20,7 +20,6 @@ export function useDeleteTask() {
       // Soft delete: set is_active to false
       const { data, error } = await supabase
         .from("tasks_master")
-        // @ts-expect-error - Supabase type inference issue
         .update({ is_active: false } as TaskUpdate)
         .eq("id", taskId)
         .select()

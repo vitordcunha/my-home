@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useFinancialBalance } from "./useFinancialBalance";
-import { TrendingUp, TrendingDown, DollarSign, Calendar } from "lucide-react";
+import { TrendingUp, TrendingDown, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -75,19 +75,18 @@ export function FinancialOverviewCard({
               {monthLabel}
             </CardTitle>
             <div
-              className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                isCritical
+              className={`px-3 py-1 rounded-full text-xs font-semibold ${isCritical
                   ? "bg-red-500/10 text-red-600 dark:text-red-400"
                   : isWarning
-                  ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                  : "bg-green-500/10 text-green-600 dark:text-green-400"
-              }`}
+                    ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                    : "bg-green-500/10 text-green-600 dark:text-green-400"
+                }`}
             >
               {isCritical
                 ? "Crítico"
                 : isWarning
-                ? "Atenção"
-                : "Saudável"}
+                  ? "Atenção"
+                  : "Saudável"}
             </div>
           </div>
         </CardHeader>
@@ -96,11 +95,10 @@ export function FinancialOverviewCard({
           <div className="space-y-1">
             <p className="text-sm text-muted-foreground">Saldo Projetado</p>
             <p
-              className={`text-3xl font-bold ${
-                isPositive
+              className={`text-3xl font-bold ${isPositive
                   ? "text-green-600 dark:text-green-400"
                   : "text-red-600 dark:text-red-400"
-              }`}
+                }`}
             >
               {formatCurrency(projected_balance)}
             </p>
@@ -153,11 +151,10 @@ export function FinancialOverviewCard({
                 Saldo Inicial (do mês anterior)
               </p>
               <p
-                className={`text-lg font-semibold ${
-                  opening_balance >= 0
+                className={`text-lg font-semibold ${opening_balance >= 0
                     ? "text-green-600 dark:text-green-400"
                     : "text-red-600 dark:text-red-400"
-                }`}
+                  }`}
               >
                 {formatCurrency(opening_balance)}
               </p>
@@ -171,11 +168,10 @@ export function FinancialOverviewCard({
                 Saldo Realizado (até agora)
               </p>
               <p
-                className={`text-xl font-semibold ${
-                  net_balance >= 0
+                className={`text-xl font-semibold ${net_balance >= 0
                     ? "text-green-600 dark:text-green-400"
                     : "text-red-600 dark:text-red-400"
-                }`}
+                  }`}
               >
                 {formatCurrency(net_balance)}
               </p>
@@ -199,8 +195,8 @@ export function FinancialOverviewCard({
                 <p className="text-xs text-amber-800 dark:text-amber-200">
                   {isCritical
                     ? `Você está projetado para fechar o mês com ${formatCurrency(
-                        Math.abs(projected_balance)
-                      )} de déficit. Considere revisar seus gastos.`
+                      Math.abs(projected_balance)
+                    )} de déficit. Considere revisar seus gastos.`
                     : `Saldo projetado está abaixo do ideal. Fique atento aos gastos futuros.`}
                 </p>
               </div>

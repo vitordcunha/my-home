@@ -20,7 +20,6 @@ export function useCompleteTask() {
 
   return useMutation({
     mutationFn: async ({ taskId, userId, xpValue }: CompleteTaskParams) => {
-      // @ts-expect-error - Supabase type mismatch
       const { data, error } = await supabase.from("tasks_history").insert({
         task_id: taskId,
         user_id: userId,

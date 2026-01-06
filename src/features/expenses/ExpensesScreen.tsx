@@ -100,9 +100,8 @@ export function ExpensesScreen() {
           <h2 className="text-3xl font-bold tracking-tight">Despesas</h2>
           <p className="text-base text-muted-foreground">
             {hasExpenses
-              ? `${expenses.length} ${
-                  expenses.length === 1 ? "despesa" : "despesas"
-                } registradas`
+              ? `${expenses.length} ${expenses.length === 1 ? "despesa" : "despesas"
+              } registradas`
               : "Comece a registrar suas despesas"}
           </p>
         </div>
@@ -113,7 +112,7 @@ export function ExpensesScreen() {
         )}
 
         {/* Financial Overview Card */}
-        <FinancialOverviewCard householdId={profile?.household_id} />
+        <FinancialOverviewCard householdId={profile?.household_id ?? undefined} />
 
         {/* Botão para Planejamento Completo */}
         <Button
@@ -131,22 +130,20 @@ export function ExpensesScreen() {
             <div className="flex p-1 bg-muted/50 rounded-xl">
               <button
                 onClick={() => setViewMode("list")}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${
-                  viewMode === "list"
+                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === "list"
                     ? "bg-background shadow-sm text-primary"
                     : "text-muted-foreground hover:text-foreground"
-                }`}
+                  }`}
               >
                 <List className="w-4 h-4" />
                 Extrato
               </button>
               <button
                 onClick={() => setViewMode("analytics")}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${
-                  viewMode === "analytics"
+                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === "analytics"
                     ? "bg-background shadow-sm text-primary"
                     : "text-muted-foreground hover:text-foreground"
-                }`}
+                  }`}
               >
                 <BarChart3 className="w-4 h-4" />
                 Análise
@@ -190,11 +187,10 @@ export function ExpensesScreen() {
                     <button
                       key={monthData.month}
                       onClick={() => setSelectedMonth(monthData.month)}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
-                        selectedMonth === monthData.month
+                      className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${selectedMonth === monthData.month
                           ? "bg-primary text-primary-foreground"
                           : "bg-muted text-muted-foreground hover:bg-muted/80"
-                      }`}
+                        }`}
                     >
                       {monthData.monthLabel}
                     </button>

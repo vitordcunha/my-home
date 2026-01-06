@@ -17,7 +17,6 @@ import {
   Trash2,
   Sun,
   Moon,
-  CalendarDays,
   Home,
   Star,
   Crown,

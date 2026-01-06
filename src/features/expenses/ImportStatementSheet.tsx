@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  Upload,
   Sparkles,
   TrendingUp,
   TrendingDown,
@@ -170,26 +169,26 @@ export function ImportStatementSheet({
     const transactionDate = new Date(transaction.date);
     const year = transactionDate.getFullYear();
     const month = transactionDate.getMonth();
-    
+
     // Find the last business day (Monday-Friday) of the month
     const lastDayOfMonth = new Date(year, month + 1, 0);
     let lastBusinessDay = new Date(lastDayOfMonth);
-    
+
     // Go backwards from the last day until we find a weekday (Mon-Fri)
     while (lastBusinessDay.getDay() === 0 || lastBusinessDay.getDay() === 6) {
       lastBusinessDay.setDate(lastBusinessDay.getDate() - 1);
     }
-    
+
     // Check if the transaction is on the last business day of the month
     const isLastBusinessDay = transactionDate.getDate() === lastBusinessDay.getDate() &&
-                              transactionDate.getMonth() === lastBusinessDay.getMonth();
-    
+      transactionDate.getMonth() === lastBusinessDay.getMonth();
+
     // Also check if it's within the last 3 business days (to catch edge cases)
     let isInLastBusinessDays = false;
     let checkDate = new Date(lastBusinessDay);
     for (let i = 0; i < 3; i++) {
       if (transactionDate.getDate() === checkDate.getDate() &&
-          transactionDate.getMonth() === checkDate.getMonth()) {
+        transactionDate.getMonth() === checkDate.getMonth()) {
         isInLastBusinessDays = true;
         break;
       }
@@ -199,7 +198,7 @@ export function ImportStatementSheet({
         checkDate.setDate(checkDate.getDate() - 1);
       }
     }
-    
+
     return isLastBusinessDay || isInLastBusinessDays;
   };
 
@@ -373,15 +372,13 @@ Exemplo:
                 {transactions.map((transaction, index) => (
                   <Card
                     key={index}
-                    className={`transition-all ${
-                      transaction.selected
+                    className={`transition-all ${transaction.selected
                         ? "border-primary"
                         : "opacity-50 border-dashed"
-                    } ${
-                      transaction.match_type !== "none"
+                      } ${transaction.match_type !== "none"
                         ? "border-amber-500/50 bg-amber-500/5"
                         : ""
-                    }`}
+                      }`}
                   >
                     <CardContent className="p-4">
                       <div className="flex items-start gap-3">
@@ -404,11 +401,10 @@ Exemplo:
                               </span>
                             </div>
                             <p
-                              className={`font-bold text-lg flex-shrink-0 ${
-                                transaction.type === "income"
+                              className={`font-bold text-lg flex-shrink-0 ${transaction.type === "income"
                                   ? "text-green-600 dark:text-green-400"
                                   : "text-red-600 dark:text-red-400"
-                              }`}
+                                }`}
                             >
                               {transaction.type === "income" ? "+" : "-"}
                               {formatCurrency(transaction.amount)}

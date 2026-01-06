@@ -18,7 +18,7 @@ export function useCreateBudget() {
       if (error) throw error;
       return budget;
     },
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["budgets"] });
       toast({
         title: "Orçamento criado",

@@ -21,7 +21,6 @@ export function useUpdateReward() {
     mutationFn: async ({ id, ...updates }: UpdateRewardParams) => {
       const { data, error } = await supabase
         .from("rewards")
-        // @ts-expect-error - Supabase type mismatch
         .update(updates)
         .eq("id", id)
         .select()

@@ -17,17 +17,15 @@ export function useUserBalanceQuery(userId?: string, householdId?: string) {
       const { data, error } = await supabase.rpc("get_user_balance", {
         p_user_id: userId,
         p_household_id: householdId,
-      } as any);
+      });
 
       if (error) throw error;
 
-      return (
-        data || {
-          owed_by_user: 0,
-          owed_to_user: 0,
-          net_balance: 0,
-        }
-      );
+      return data || {
+        owed_by_user: 0,
+        owed_to_user: 0,
+        net_balance: 0,
+      };
     },
     enabled: !!userId && !!householdId,
     staleTime: 1000 * 60, // 1 minute (atualiza mais frequente)

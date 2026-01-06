@@ -24,7 +24,6 @@ export function useCreateReward() {
     mutationFn: async (reward: CreateRewardParams) => {
       const { data, error } = await supabase
         .from("rewards")
-        // @ts-expect-error - Supabase type mismatch
         .insert({
           nome: reward.nome,
           custo_pontos: reward.custo_pontos,

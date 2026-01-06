@@ -27,7 +27,6 @@ export function useRedeemReward() {
     mutationFn: async ({ rewardId, userId }: RedeemRewardParams) => {
       const { data, error } = await supabase
         .from("rewards")
-        // @ts-expect-error - Supabase type inference issue
         .update({
           resgatado_por: userId,
           resgatado_em: new Date().toISOString(),

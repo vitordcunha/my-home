@@ -20,7 +20,6 @@ export function useRestoreTask() {
     mutationFn: async (taskId: string) => {
       const { data, error } = await supabase
         .from("tasks_master")
-        // @ts-expect-error - Supabase type mismatch
         .update({ is_active: true })
         .eq("id", taskId)
         .select()

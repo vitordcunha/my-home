@@ -31,7 +31,6 @@ export function useCreateTask() {
     mutationFn: async (task: CreateTaskParams) => {
       const { data, error } = await supabase
         .from("tasks_master")
-        // @ts-expect-error - Supabase type mismatch
         .insert({
           nome: task.nome,
           descricao: task.descricao || null,

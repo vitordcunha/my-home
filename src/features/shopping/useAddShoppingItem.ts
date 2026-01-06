@@ -41,7 +41,6 @@ export function useAddShoppingItem() {
     }: AddShoppingItemParams) => {
       const { data, error } = await supabase
         .from("shopping_items")
-        // @ts-expect-error - Supabase type mismatch with new table
         .insert({
           household_id: householdId,
           added_by: userId,

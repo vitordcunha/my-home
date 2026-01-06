@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { useBudgetsQuery, useCurrentMonthBudgetsQuery } from "./useBudgetsQuery";
+import { useBudgetsQuery } from "./useBudgetsQuery";
 import { useCreateBudget, useUpdateBudget, useDeleteBudget } from "./useBudgetMutations";
 import { ExpenseCategory, EXPENSE_CATEGORY_LABELS } from "./types";
 import { Trash2, Plus, Edit2 } from "lucide-react";

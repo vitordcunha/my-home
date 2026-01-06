@@ -44,7 +44,6 @@ export function useCompleteShoppingTrip() {
       expenseData,
     }: CompleteShoppingTripParams) => {
       // Complete shopping trip
-      // @ts-expect-error - Supabase type mismatch with new RPC function
       const { data, error } = await supabase.rpc("complete_shopping_trip", {
         p_item_ids: itemIds,
         p_user_id: userId,
@@ -56,7 +55,6 @@ export function useCompleteShoppingTrip() {
 
       // If expense data provided, create expense
       if (expenseData && expenseData.amount > 0) {
-        // @ts-expect-error - Supabase type inference issue
         const { error: expenseError } = await supabase.from("expenses").insert({
           household_id: householdId,
           description: "Compras de mercado",
@@ -112,9 +110,9 @@ export function useCompleteShoppingTrip() {
       ]);
       const previousExpenses = expenseData
         ? queryClient.getQueryData<ExpenseWithPaidBy[]>([
-            "expenses",
-            householdId,
-          ])
+          "expenses",
+          householdId,
+        ])
         : undefined;
 
       // Calculate expected XP (5 points per item + 10 for expense if applicable)
@@ -179,11 +177,9 @@ export function useCompleteShoppingTrip() {
       // Show success toast
       toast({
         title: "Compras finalizadas!",
-        description: `Você comprou ${itemIds.length} ${
-          itemIds.length === 1 ? "item" : "itens"
-        } e ganhou ${totalXp} pts!${
-          expenseXp > 0 ? " (+10 pts pela despesa)" : ""
-        }`,
+        description: `Você comprou ${itemIds.length} ${itemIds.length === 1 ? "item" : "itens"
+          } e ganhou ${totalXp} pts!${expenseXp > 0 ? " (+10 pts pela despesa)" : ""
+          }`,
         duration: 5000,
       });
 

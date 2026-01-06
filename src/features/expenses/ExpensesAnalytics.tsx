@@ -10,8 +10,6 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  Legend,
-  ReferenceLine,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EXPENSE_CATEGORY_LABELS } from "./types";
@@ -171,7 +169,7 @@ export function ExpensesAnalytics({
                   paddingAngle={5}
                   dataKey="value"
                   label={({ name, percent }) =>
-                    `${name}: ${(percent * 100).toFixed(0)}%`
+                    `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`
                   }
                 >
                   {categoryData.map((entry, index) => (
@@ -183,7 +181,7 @@ export function ExpensesAnalytics({
                   ))}
                 </Pie>
                 <Tooltip
-                  formatter={(value: number) => formatCurrency(value)}
+                  formatter={(value) => formatCurrency(Number(value ?? 0))}
                   contentStyle={{
                     borderRadius: "8px",
                     border: "none",
@@ -217,7 +215,7 @@ export function ExpensesAnalytics({
                 />
                 <Tooltip
                   cursor={{ fill: "transparent" }}
-                  formatter={(value: number) => formatCurrency(value)}
+                  formatter={(value) => formatCurrency(Number(value ?? 0))}
                   contentStyle={{
                     borderRadius: "8px",
                     border: "none",
@@ -253,13 +251,12 @@ export function ExpensesAnalytics({
                   </div>
                   <div className="relative h-3 bg-muted rounded-full overflow-hidden">
                     <div
-                      className={`h-full rounded-full transition-all ${
-                        item.percentage > 100
-                          ? "bg-red-500"
-                          : item.percentage > 80
+                      className={`h-full rounded-full transition-all ${item.percentage > 100
+                        ? "bg-red-500"
+                        : item.percentage > 80
                           ? "bg-amber-500"
                           : "bg-green-500"
-                      }`}
+                        }`}
                       style={{ width: `${Math.min(item.percentage, 100)}%` }}
                     />
                     {item.percentage > 100 && (

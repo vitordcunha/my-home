@@ -34,16 +34,16 @@ export function useUndoTask() {
     mutationFn: async ({ historyId }: UndoTaskParams) => {
       const { data, error } = await supabase.rpc("undo_task_completion", {
         p_history_id: historyId,
-      } as any);
+      });
 
       if (error) throw error;
-      
+
       // The function returns a table with one row
-      const result = data as UndoTaskResult[] | null;
+      const result = data;
       if (!result || result.length === 0) {
         throw new Error("Não foi possível desfazer a tarefa");
       }
-      
+
       return result[0];
     },
 

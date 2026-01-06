@@ -30,7 +30,6 @@ export function useUpdateTask() {
     mutationFn: async ({ id, ...updates }: UpdateTaskParams) => {
       const { data, error } = await supabase
         .from("tasks_master")
-        // @ts-expect-error - Supabase type inference issue
         .update({
           nome: updates.nome,
           descricao: updates.descricao || null,

@@ -3,19 +3,24 @@ import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { vibrate } from "@/lib/utils";
 import { Database } from "@/types/database";
+import { TaskWithStatus } from "./useTasksQuery";
 
 type TaskUpdate = Database["public"]["Tables"]["tasks_master"]["Update"];
+
+interface DeleteTaskContext {
+  previousTasks: TaskWithStatus[] | undefined;
+}
 
 export function useDeleteTask() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  return useMutation({
+  return useMutation<unknown, Error, string, DeleteTaskContext>({
     mutationFn: async (taskId: string) => {
       // Soft delete: set is_active to false
       const { data, error } = await supabase
         .from("tasks_master")
-        // @ts-ignore - Supabase type inference issue
+        // @ts-expect-error - Supabase type inference issue
         .update({ is_active: false } as TaskUpdate)
         .eq("id", taskId)
         .select()
@@ -25,19 +30,45 @@ export function useDeleteTask() {
       return data;
     },
 
-    onSuccess: () => {
+    onMutate: async (taskId: string) => {
+      // Vibrate for tactile feedback
       vibrate(50);
 
+      // Cancel outgoing queries
+      await queryClient.cancelQueries({ queryKey: ["tasks"] });
+
+      // Snapshot previous values
+      const previousTasks = queryClient.getQueryData<TaskWithStatus[]>([
+        "tasks",
+        "today",
+      ]);
+
+      // Optimistic update - remove task from list
+      queryClient.setQueryData<TaskWithStatus[]>(["tasks", "today"], (old) => {
+        if (!old) return [];
+        return old.filter((task) => task.id !== taskId);
+      });
+
+      // Show success toast
       toast({
         title: "Tarefa removida",
         description: "A tarefa foi desativada.",
       });
 
-      // Invalidate queries to refetch tasks
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      return { previousTasks };
     },
 
-    onError: (error) => {
+    onError: (error, _variables, context) => {
+      // Rollback optimistic updates
+      if (context?.previousTasks !== undefined) {
+        queryClient.setQueryData(["tasks", "today"], context.previousTasks);
+      }
+
+      // Vibração de erro
+      if (navigator.vibrate) {
+        navigator.vibrate([100, 30, 100]);
+      }
+
       const errorMessage =
         error instanceof Error ? error.message : "Tente novamente";
       const truncatedError =
@@ -49,6 +80,11 @@ export function useDeleteTask() {
         title: "Erro ao remover",
         description: truncatedError,
       });
+    },
+
+    onSuccess: () => {
+      // Invalidate queries to refetch tasks
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },
   });
 }

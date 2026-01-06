@@ -4,6 +4,7 @@ import { useAuth } from "../auth/useAuth";
 import { useProfileQuery } from "../auth/useProfileQuery";
 import { useCreateHousehold } from "./useCreateHousehold";
 import { useJoinHousehold } from "./useJoinHousehold";
+import { Home, DoorOpen } from "lucide-react";
 
 export function OnboardingScreen() {
   const { user } = useAuth();
@@ -49,8 +50,9 @@ export function OnboardingScreen() {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="max-w-md w-full space-y-8 text-center">
           <div>
-            <h1 className="text-4xl font-bold text-foreground mb-2">
-              🏠 Bem-vindo!
+            <h1 className="text-4xl font-bold text-foreground mb-2 flex items-center justify-center gap-2">
+              <Home className="h-10 w-10 text-primary" />
+              Bem-vindo!
             </h1>
             <p className="text-lg text-muted-foreground">
               Escolha como deseja começar
@@ -63,7 +65,7 @@ export function OnboardingScreen() {
               className="w-full h-auto py-6 px-6 flex flex-col items-center gap-2 text-left"
               variant="outline"
             >
-              <span className="text-3xl">🏡</span>
+              <Home className="h-8 w-8 text-primary" />
               <div>
                 <div className="font-semibold text-base">Criar nova casa</div>
                 <div className="text-sm text-muted-foreground font-normal">
@@ -77,7 +79,7 @@ export function OnboardingScreen() {
               className="w-full h-auto py-6 px-6 flex flex-col items-center gap-2 text-left"
               variant="outline"
             >
-              <span className="text-3xl">🚪</span>
+              <DoorOpen className="h-8 w-8 text-primary" />
               <div>
                 <div className="font-semibold text-base">
                   Entrar em uma casa
@@ -104,8 +106,9 @@ export function OnboardingScreen() {
             >
               ← Voltar
             </button>
-            <h1 className="text-3xl font-bold text-foreground mb-2">
-              🏡 Criar nova casa
+            <h1 className="text-3xl font-bold text-foreground mb-2 flex items-center justify-center gap-2">
+              <Home className="h-8 w-8 text-primary" />
+              Criar nova casa
             </h1>
             <p className="text-muted-foreground">Dê um nome para sua casa</p>
           </div>
@@ -153,8 +156,9 @@ export function OnboardingScreen() {
             >
               ← Voltar
             </button>
-            <h1 className="text-3xl font-bold text-foreground mb-2">
-              🚪 Entrar em uma casa
+            <h1 className="text-3xl font-bold text-foreground mb-2 flex items-center justify-center gap-2">
+              <DoorOpen className="h-8 w-8 text-primary" />
+              Entrar em uma casa
             </h1>
             <p className="text-muted-foreground">Digite o código de convite</p>
           </div>

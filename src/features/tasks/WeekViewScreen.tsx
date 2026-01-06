@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useWeekTasksQuery } from "./useWeekTasksQuery";
 import { addWeeks, subWeeks, format, isToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar, RefreshCw, PartyPopper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
@@ -198,14 +198,15 @@ export function WeekViewScreen() {
         onClick={handleRefresh}
         className="w-full rounded-xl font-medium text-sm"
       >
-        🔄 Atualizar tarefas
+        <RefreshCw className="h-4 w-4 mr-2" />
+        Atualizar tarefas
       </Button>
 
       {/* Lista de tarefas do dia ativo */}
       <div className="space-y-3 pb-6">
         {currentDay.tasks.length === 0 ? (
           <div className="text-center py-12 space-y-3">
-            <div className="text-6xl">🎉</div>
+            <PartyPopper className="h-16 w-16 mx-auto text-primary" />
             <p className="text-lg font-medium">Nenhuma tarefa para este dia</p>
             <p className="text-sm text-muted-foreground">
               Aproveite seu tempo livre!

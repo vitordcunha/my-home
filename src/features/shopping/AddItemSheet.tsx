@@ -7,7 +7,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { X } from "lucide-react";
+import { X, Plus, CheckCircle2 } from "lucide-react";
 import { ShoppingCategory } from "./types";
 
 interface AddItemSheetProps {
@@ -141,7 +141,8 @@ export function AddItemSheet({
               size="lg"
               className="w-full rounded-xl thumb-friendly"
             >
-              ➕ Outro item
+              <Plus className="h-4 w-4 mr-2" />
+              Outro item
             </Button>
           </div>
         ) : (
@@ -214,7 +215,8 @@ export function AddItemSheet({
                 className="flex-1 rounded-xl thumb-friendly"
                 disabled={isPending || !name.trim()}
               >
-                ✅ Adicionar (+5 pts)
+                <CheckCircle2 className="h-4 w-4 mr-2" />
+                Adicionar (+5 pts)
               </Button>
             </div>
           </form>

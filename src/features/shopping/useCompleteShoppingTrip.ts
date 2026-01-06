@@ -73,7 +73,7 @@ export function useCompleteShoppingTrip() {
     onError: (error) => {
       toast({
         variant: "destructive",
-        title: "❌ Erro ao finalizar compras",
+        title: "Erro ao finalizar compras",
         description: "Não foi possível salvar as compras. Tente novamente.",
       });
       console.error("Error completing shopping trip:", error);
@@ -87,7 +87,7 @@ export function useCompleteShoppingTrip() {
         const totalXp = baseXp + expenseXp;
 
         toast({
-          title: "🛒 Compras finalizadas!",
+          title: "Compras finalizadas!",
           description: `Você comprou ${data.items_count} ${
             data.items_count === 1 ? "item" : "itens"
           } e ganhou ${totalXp} pts!${

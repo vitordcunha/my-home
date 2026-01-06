@@ -93,8 +93,8 @@ export function useResolveMaintenanceItem() {
 
       // Toast de sucesso
       const toastMessage = variables.createExpense
-        ? "✅ Item resolvido e despesa registrada!"
-        : "✅ Item resolvido!";
+        ? "Item resolvido e despesa registrada!"
+        : "Item resolvido!";
 
       toast({
         title: toastMessage,

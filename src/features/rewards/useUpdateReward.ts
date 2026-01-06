@@ -29,7 +29,7 @@ export function useUpdateReward() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["rewards"] });
       toast({
-        title: "✅ Prêmio atualizado!",
+        title: "Prêmio atualizado!",
         description: "As alterações foram salvas.",
       });
     },

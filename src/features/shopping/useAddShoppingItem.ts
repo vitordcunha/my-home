@@ -52,7 +52,7 @@ export function useAddShoppingItem() {
       const truncatedName =
         name.length > 30 ? name.substring(0, 30) + "..." : name;
       toast({
-        title: "✅ Item adicionado!",
+        title: "Item adicionado!",
         description: `${truncatedName} · +5 pts`,
         duration: 3000,
       });
@@ -61,7 +61,7 @@ export function useAddShoppingItem() {
     onError: (error) => {
       toast({
         variant: "destructive",
-        title: "❌ Erro ao adicionar",
+        title: "Erro ao adicionar",
         description: "Não foi possível adicionar o item. Tente novamente.",
       });
       console.error("Error adding shopping item:", error);

@@ -18,6 +18,10 @@ import {
   Sun,
   Moon,
   CalendarDays,
+  Home,
+  Star,
+  Crown,
+  User,
 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { useDoubleTap } from "@/hooks/useDoubleTap";
@@ -60,7 +64,7 @@ export default function Header() {
             {...doubleTapHandlers}
             className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 cursor-pointer active:scale-95 transition-transform"
           >
-            <span className="text-2xl">🏠</span>
+            <Home className="h-6 w-6 text-primary" />
           </div>
           <div>
             <h1 className="text-xl font-bold leading-none tracking-tight">
@@ -75,7 +79,7 @@ export default function Header() {
         {/* Pontos, Tema e Avatar */}
         <div className="flex items-center gap-3">
           <div className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200/50 dark:border-amber-800/30">
-            <span className="text-lg">⭐</span>
+            <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
             <span className="font-semibold text-amber-900 dark:text-amber-100">
               {profile?.total_points || 0}
             </span>
@@ -140,7 +144,7 @@ export default function Header() {
                 {/* Estatísticas */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="flex flex-col items-center p-3 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200/50 dark:border-amber-800/30">
-                    <span className="text-2xl mb-1">⭐</span>
+                    <Star className="h-6 w-6 mb-1 fill-amber-500 text-amber-500" />
                     <span className="text-2xl font-bold text-amber-900 dark:text-amber-100">
                       {profile?.total_points || 0}
                     </span>
@@ -149,9 +153,11 @@ export default function Header() {
                     </span>
                   </div>
                   <div className="flex flex-col items-center p-3 rounded-xl bg-secondary/60">
-                    <span className="text-2xl mb-1">
-                      {profile?.role === "admin" ? "👑" : "👤"}
-                    </span>
+                    {profile?.role === "admin" ? (
+                      <Crown className="h-6 w-6 mb-1 text-amber-500" />
+                    ) : (
+                      <User className="h-6 w-6 mb-1" />
+                    )}
                     <span
                       className="text-2xl font-bold truncate max-w-[120px]"
                       title={profile?.nome?.split(" ")[0] || "Você"}

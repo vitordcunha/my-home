@@ -19,7 +19,7 @@ export function usePermanentDeleteTask() {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["tasks", "archived"] });
       toast({
-        title: "✅ Tarefa excluída permanentemente!",
+        title: "Tarefa excluída permanentemente!",
         description: "A tarefa foi removida definitivamente.",
       });
     },

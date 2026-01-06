@@ -5,7 +5,7 @@ import { useAuth } from "@/features/auth/useAuth";
 import { useRewardsQuery, useRedeemedRewardsQuery } from "./useRewardsQuery";
 import { useRedeemReward } from "./useRedeemReward";
 import { Button } from "@/components/ui/button";
-import { Loader2, Gift, Check } from "lucide-react";
+import { Loader2, Gift, Check, Star } from "lucide-react";
 import { Database } from "@/types/database";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
@@ -44,13 +44,13 @@ function RewardCard({
           )}
         </div>
         <div className="flex items-center justify-center h-14 w-14 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 shrink-0">
-          <span className="text-3xl">🎁</span>
+          <Gift className="h-8 w-8 text-primary" />
         </div>
       </div>
 
       <div className="flex items-center justify-between pt-2 gap-3">
         <div className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200/50 dark:border-amber-800/30">
-          <span className="text-base">⭐</span>
+          <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
           <span className="text-sm font-semibold text-amber-900 dark:text-amber-100">
             {reward.custo_pontos}
           </span>
@@ -85,7 +85,7 @@ function RedeemedRewardCard({ reward }: { reward: Reward }) {
         </p>
       </div>
       <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-secondary shrink-0">
-        <span className="text-xs">⭐</span>
+        <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
         <span className="text-xs font-semibold">{reward.custo_pontos}</span>
       </div>
     </div>
@@ -134,7 +134,7 @@ export default function RewardsScreen() {
         <div className="flex items-center gap-2">
           <p className="text-base text-muted-foreground">Você tem</p>
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200/50 dark:border-amber-800/30">
-            <span className="text-base">⭐</span>
+            <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
             <span className="text-sm font-bold text-amber-900 dark:text-amber-100">
               {profile?.total_points || 0}
             </span>

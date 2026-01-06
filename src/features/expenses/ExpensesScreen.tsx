@@ -6,7 +6,7 @@ import { useTotalSpentQuery } from "./useTotalSpentQuery";
 import { AddExpenseSheet } from "./AddExpenseSheet";
 import { ExpenseCard } from "./ExpenseCard";
 import { TotalSpentCard } from "./BalanceSummaryCard";
-import { Plus, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Loader2, ChevronDown, ChevronUp, Wallet, Lightbulb } from "lucide-react";
 
 export function ExpensesScreen() {
   const { user } = useAuth();
@@ -89,7 +89,7 @@ export function ExpensesScreen() {
         {!hasExpenses && (
           <div className="text-center py-16 space-y-6 animate-in">
             <div className="inline-flex items-center justify-center h-24 w-24 rounded-3xl bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30">
-              <span className="text-6xl">💰</span>
+              <Wallet className="h-12 w-12 text-blue-600 dark:text-blue-400" />
             </div>
             <div className="space-y-2">
               <h3 className="text-xl font-semibold">Nenhuma despesa ainda</h3>
@@ -149,7 +149,10 @@ export function ExpensesScreen() {
 
         {/* Info box */}
         <div className="bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 rounded-2xl p-5 space-y-2">
-          <h4 className="font-semibold text-sm">💡 Como funciona?</h4>
+          <h4 className="font-semibold text-sm flex items-center gap-2">
+            <Lightbulb className="h-4 w-4" />
+            Como funciona?
+          </h4>
           <ul className="text-sm text-muted-foreground space-y-1">
             <li>
               • Registrar despesa:{" "}

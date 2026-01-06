@@ -5,6 +5,7 @@ import { useProfileQuery } from "./features/auth/useProfileQuery";
 import { Toaster } from "./components/ui/toaster";
 // import { useTheme } from "./hooks/useTheme";
 import LoginScreen from "./features/auth/LoginScreen";
+import { Home } from "lucide-react";
 import MainLayout from "./components/layout/MainLayout";
 import TodayScreen from "./features/tasks/TodayScreen";
 import HistoryScreen from "./features/gamification/HistoryScreen";
@@ -34,7 +35,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
               <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/20 to-primary/5 animate-pulse"></div>
               <div className="absolute inset-2 rounded-full border-4 border-transparent border-t-primary animate-spin"></div>
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-2xl">🏠</span>
+                <Home className="h-6 w-6 text-primary" />
               </div>
             </div>
           </div>
@@ -75,7 +76,7 @@ function AppRoutes() {
               <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/20 to-primary/5 animate-pulse"></div>
               <div className="absolute inset-2 rounded-full border-4 border-transparent border-t-primary animate-spin"></div>
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-2xl">🏠</span>
+                <Home className="h-6 w-6 text-primary" />
               </div>
             </div>
           </div>

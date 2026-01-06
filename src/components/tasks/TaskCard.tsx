@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Database } from "@/types/database";
-import { Check, Users, Edit2, Trash2, MoreVertical } from "lucide-react";
+import { Check, Users, Edit2, Trash2, MoreVertical, Star, Sparkles } from "lucide-react";
 import TaskFormDialog from "./TaskFormDialog";
 import { useSwipeable } from "react-swipeable";
 import { useHaptic } from "@/hooks/useHaptic";
@@ -44,6 +44,7 @@ export default function TaskCard({ task }: TaskCardProps) {
     null
   );
   const [hapticFired, setHapticFired] = useState(false);
+  const [isCompleting, setIsCompleting] = useState(false);
   const { trigger } = useHaptic();
 
   const { data: profiles = [] } = useQuery({
@@ -60,13 +61,19 @@ export default function TaskCard({ task }: TaskCardProps) {
   });
 
   const handleComplete = (userId: string) => {
-    completeTask.mutate({
-      taskId: task.id,
-      userId,
-      xpValue: task.xp_value,
-      taskName: task.nome,
-    });
-    setShowPeopleSheet(false);
+    setIsCompleting(true);
+    trigger("success");
+    
+    // Pequeno delay para mostrar a animação
+    setTimeout(() => {
+      completeTask.mutate({
+        taskId: task.id,
+        userId,
+        xpValue: task.xp_value,
+        taskName: task.nome,
+      });
+      setShowPeopleSheet(false);
+    }, 300);
   };
 
   const handleDelete = () => {
@@ -212,7 +219,9 @@ export default function TaskCard({ task }: TaskCardProps) {
         <div
           {...swipeHandlers}
           style={swipeStyle}
-          className="group bg-card border rounded-2xl p-5 space-y-4 shadow-soft hover-lift animate-in relative z-10"
+          className={`group bg-card border rounded-2xl p-5 space-y-4 shadow-soft hover-lift animate-in relative z-10 transition-all ${
+            isCompleting ? "animate-confetti scale-105 bg-success/10 border-success/50" : ""
+          }`}
         >
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 space-y-2">
@@ -255,7 +264,7 @@ export default function TaskCard({ task }: TaskCardProps) {
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200/50 dark:border-amber-800/30">
-                <span className="text-sm">⭐</span>
+                <Star className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 fill-amber-500 dark:fill-amber-400" />
                 <span className="text-sm font-semibold text-amber-900 dark:text-amber-100">
                   {task.xp_value}
                 </span>
@@ -338,7 +347,7 @@ export default function TaskCard({ task }: TaskCardProps) {
                     {profile.nome}
                   </p>
                   <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className="text-xs">⭐</span>
+                    <Sparkles className="h-3 w-3 text-amber-600 dark:text-amber-400" />
                     <p className="text-sm text-muted-foreground font-medium">
                       {profile.total_points} pontos
                     </p>

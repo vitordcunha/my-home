@@ -28,7 +28,7 @@ export function MembersManagementScreen() {
       navigator.clipboard.writeText(household.invite_code);
       setCopiedCode(true);
       toast({
-        title: "✅ Código copiado!",
+        title: "Código copiado!",
         description:
           "O código de convite foi copiado para a área de transferência.",
       });

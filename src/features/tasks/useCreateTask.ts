@@ -45,7 +45,7 @@ export function useCreateTask() {
       vibrate(50);
 
       toast({
-        title: "✅ Tarefa criada!",
+        title: "Tarefa criada!",
         description: "A nova tarefa está disponível.",
       });
 
@@ -62,7 +62,7 @@ export function useCreateTask() {
           : errorMessage;
       toast({
         variant: "destructive",
-        title: "❌ Erro ao criar tarefa",
+        title: "Erro ao criar tarefa",
         description: truncatedError,
       });
     },

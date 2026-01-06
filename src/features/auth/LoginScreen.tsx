@@ -2,6 +2,7 @@ import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { Home } from "lucide-react";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -130,7 +131,7 @@ export default function LoginScreen() {
         {/* Header */}
         <div className="text-center space-y-3">
           <div className="inline-flex items-center justify-center h-14 w-14 rounded-2xl bg-foreground/5">
-            <span className="text-3xl">🏠</span>
+            <Home className="h-8 w-8 text-primary" />
           </div>
           <div>
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">

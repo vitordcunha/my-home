@@ -18,7 +18,7 @@ export function useDeleteReward() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["rewards"] });
       toast({
-        title: "✅ Prêmio removido!",
+        title: "Prêmio removido!",
         description: "O prêmio foi removido da loja.",
       });
     },

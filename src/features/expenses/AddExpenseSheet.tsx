@@ -5,7 +5,13 @@ import { useAddExpense } from "./useAddExpense";
 import { EXPENSE_QUICK_ACTIONS, ExpenseCategory } from "./types";
 import { useHouseholdQuery } from "@/features/households/useHouseholdQuery";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Users, ChevronRight } from "lucide-react";
+import {
+  Users,
+  ChevronRight,
+  Rocket,
+  Pencil,
+  CheckCircle2,
+} from "lucide-react";
 
 interface AddExpenseSheetProps {
   open: boolean;
@@ -118,8 +124,9 @@ export function AddExpenseSheet({
           {!selectedCategory ? (
             <div className="space-y-4">
               <div>
-                <h3 className="text-sm font-semibold mb-3">
-                  🚀 Atalhos Rápidos
+                <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                  <Rocket className="h-4 w-4" />
+                  Atalhos Rápidos
                 </h3>
                 <div className="grid grid-cols-3 gap-3">
                   {EXPENSE_QUICK_ACTIONS.map((action) => (
@@ -145,7 +152,7 @@ export function AddExpenseSheet({
                   className="w-full flex items-center justify-between p-4 rounded-xl border-2 border-dashed border-border hover:border-primary hover:bg-primary/5 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-2xl">✏️</span>
+                    <Pencil className="h-5 w-5 text-primary" />
                     <span className="text-sm font-medium">Outra categoria</span>
                   </div>
                   <ChevronRight className="h-5 w-5 text-muted-foreground" />
@@ -192,9 +199,14 @@ export function AddExpenseSheet({
                 disabled={addExpense.isPending}
                 className="w-full h-14 text-base font-semibold"
               >
-                {addExpense.isPending
-                  ? "Salvando..."
-                  : "✅ Salvar Despesa • +10 pts"}
+                {addExpense.isPending ? (
+                  "Salvando..."
+                ) : (
+                  <>
+                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                    Salvar Despesa • +10 pts
+                  </>
+                )}
               </Button>
 
               <Button
@@ -289,9 +301,14 @@ export function AddExpenseSheet({
                   }
                   className="w-full h-14 text-base font-semibold"
                 >
-                  {addExpense.isPending
-                    ? "Salvando..."
-                    : "✅ Salvar Despesa • +10 pts"}
+                  {addExpense.isPending ? (
+                    "Salvando..."
+                  ) : (
+                    <>
+                      <CheckCircle2 className="h-4 w-4 mr-2" />
+                      Salvar Despesa • +10 pts
+                    </>
+                  )}
                 </Button>
               )}
 

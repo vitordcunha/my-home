@@ -1,10 +1,19 @@
 import { useHistoryQuery } from "./useHistoryQuery";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Loader2 } from "lucide-react";
+import {
+  Loader2,
+  AlertTriangle,
+  Clipboard,
+  Sparkles,
+  Undo2,
+} from "lucide-react";
 import { formatDistanceToNow } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { useUndoTask } from "@/features/tasks/useUndoTask";
 
 export default function HistoryScreen() {
   const { data: history, isLoading, error } = useHistoryQuery();
+  const undoTask = useUndoTask();
 
   return (
     <div className="space-y-8">
@@ -32,7 +41,7 @@ export default function HistoryScreen() {
       {error && (
         <div className="text-center py-16 animate-in">
           <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-destructive/10 mb-4">
-            <span className="text-3xl">⚠️</span>
+            <AlertTriangle className="h-8 w-8 text-destructive" />
           </div>
           <p className="text-destructive font-medium">
             Erro ao carregar histórico
@@ -43,7 +52,7 @@ export default function HistoryScreen() {
       {history && history.length === 0 && (
         <div className="text-center py-16 space-y-6 animate-in">
           <div className="inline-flex items-center justify-center h-24 w-24 rounded-3xl bg-gradient-to-br from-primary/10 to-primary/5">
-            <span className="text-6xl">📋</span>
+            <Clipboard className="h-12 w-12 text-primary" />
           </div>
           <div className="space-y-2">
             <h3 className="text-xl font-semibold">Nenhuma atividade ainda</h3>
@@ -86,11 +95,42 @@ export default function HistoryScreen() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border border-green-200/50 dark:border-green-800/30 shrink-0">
-                <span className="text-sm">✨</span>
-                <span className="text-sm font-semibold text-green-900 dark:text-green-100">
-                  +{item.xp_earned}
-                </span>
+              <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border border-green-200/50 dark:border-green-800/30">
+                  <Sparkles className="h-4 w-4 text-green-600 dark:text-green-400" />
+                  <span className="text-sm font-semibold text-green-900 dark:text-green-100">
+                    +{item.xp_earned}
+                  </span>
+                </div>
+
+                <Button
+                  onClick={() => {
+                    const truncatedTaskName =
+                      item.task.nome.length > 50
+                        ? item.task.nome.substring(0, 50) + "..."
+                        : item.task.nome;
+                    if (
+                      confirm(
+                        `Desfazer conclusão de "${truncatedTaskName}"?\n\nIsso removerá ${item.xp_earned} pontos de ${item.profile.nome} e a tarefa voltará para o board.`
+                      )
+                    ) {
+                      undoTask.mutate({
+                        historyId: item.id,
+                        userId: item.user_id,
+                        xpValue: item.xp_earned,
+                        taskName: item.task.nome,
+                        taskId: item.task_id,
+                      });
+                    }
+                  }}
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                  disabled={undoTask.isPending}
+                  title="Desfazer tarefa"
+                >
+                  <Undo2 className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           ))}

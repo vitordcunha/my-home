@@ -43,30 +43,45 @@
 
     /* Radius mais suave */
     --radius: 0.75rem;
+
+    /* Cores específicas para categorias */
+    --category-market: 142 65% 52%;
+    --category-cleaning: 199 89% 48%;
+    --category-bills: 271 91% 65%;
+    --category-maintenance: 43 96% 56%;
+    --category-other: 240 5% 50%;
   }
 
   .dark {
-    --background: 240 10% 8%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 10%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 10%;
-    --popover-foreground: 0 0% 98%;
+    /* Dark mode com tons de cinza azulado para melhor contraste e elegância */
+    --background: 222 20% 10%;
+    --foreground: 210 20% 98%;
+    --card: 222 18% 12%;
+    --card-foreground: 210 20% 98%;
+    --popover: 222 18% 12%;
+    --popover-foreground: 210 20% 98%;
     --primary: 221 65% 58%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 240 5% 15%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 5% 15%;
-    --muted-foreground: 240 5% 60%;
-    --accent: 240 5% 15%;
-    --accent-foreground: 0 0% 98%;
+    --secondary: 220 15% 18%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 220 15% 18%;
+    --muted-foreground: 215 15% 65%;
+    --accent: 220 15% 18%;
+    --accent-foreground: 210 20% 98%;
     --destructive: 0 65% 58%;
     --destructive-foreground: 0 0% 100%;
     --success: 142 65% 52%;
     --success-foreground: 0 0% 100%;
-    --border: 240 5% 20%;
-    --input: 240 5% 20%;
+    --border: 220 15% 22%;
+    --input: 220 15% 22%;
     --ring: 221 65% 58%;
+
+    /* Cores específicas para categorias */
+    --category-market: 142 65% 52%;
+    --category-cleaning: 199 89% 48%;
+    --category-bills: 271 91% 65%;
+    --category-maintenance: 43 96% 56%;
+    --category-other: 240 5% 50%;
   }
 }
 
@@ -258,6 +273,105 @@
       opacity: 1;
       transform: translateY(0);
     }
+  }
+
+  /* Animação escalonada para grids */
+  .animate-stagger > * {
+    animation: fadeIn 0.4s ease-out backwards;
+  }
+
+  .animate-stagger > *:nth-child(1) {
+    animation-delay: 0.05s;
+  }
+  .animate-stagger > *:nth-child(2) {
+    animation-delay: 0.1s;
+  }
+  .animate-stagger > *:nth-child(3) {
+    animation-delay: 0.15s;
+  }
+  .animate-stagger > *:nth-child(4) {
+    animation-delay: 0.2s;
+  }
+  .animate-stagger > *:nth-child(5) {
+    animation-delay: 0.25s;
+  }
+
+  /* Animação de confete sutil para conclusão de tarefas */
+  @keyframes confetti {
+    0% {
+      transform: scale(1) rotate(0deg);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.05) rotate(5deg);
+    }
+    100% {
+      transform: scale(1) rotate(0deg);
+      opacity: 1;
+    }
+  }
+
+  .animate-confetti {
+    animation: confetti 0.6s ease-in-out;
+  }
+
+  /* Animação de preenchimento fluido */
+  @keyframes fillProgress {
+    from {
+      transform: scaleX(0);
+      opacity: 0;
+    }
+    to {
+      transform: scaleX(1);
+      opacity: 1;
+    }
+  }
+
+  .animate-fill {
+    animation: fillProgress 0.4s ease-out;
+    transform-origin: left;
+  }
+
+  /* Animação de shake para feedback de erro */
+  @keyframes shake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
+      transform: translateX(-4px);
+    }
+    20%,
+    40%,
+    60%,
+    80% {
+      transform: translateX(4px);
+    }
+  }
+
+  .animate-shake {
+    animation: shake 0.5s ease-in-out;
+  }
+
+  /* Pulse suave para notificações */
+  @keyframes softPulse {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.8;
+      transform: scale(1.02);
+    }
+  }
+
+  .animate-soft-pulse {
+    animation: softPulse 2s ease-in-out infinite;
   }
 
   /* Hover suave */

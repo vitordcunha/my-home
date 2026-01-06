@@ -39,6 +39,10 @@ export default {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
         },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
         muted: {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
@@ -54,6 +58,13 @@ export default {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
+        },
+        category: {
+          market: "hsl(var(--category-market))",
+          cleaning: "hsl(var(--category-cleaning))",
+          bills: "hsl(var(--category-bills))",
+          maintenance: "hsl(var(--category-maintenance))",
+          other: "hsl(var(--category-other))",
         },
       },
       borderRadius: {

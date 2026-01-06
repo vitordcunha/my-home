@@ -1,6 +1,6 @@
 import { useTasksQuery } from "@/features/tasks/useTasksQuery";
 import TaskCard from "./TaskCard";
-import { Loader2 } from "lucide-react";
+import { Loader2, PartyPopper, AlertTriangle } from "lucide-react";
 
 interface TaskListProps {
   onlyMyTasks?: boolean;
@@ -28,7 +28,7 @@ export default function TaskList({ onlyMyTasks = true, userId }: TaskListProps) 
     return (
       <div className="text-center py-16 animate-in">
         <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-destructive/10 mb-4">
-          <span className="text-3xl">⚠️</span>
+          <AlertTriangle className="h-8 w-8 text-destructive" />
         </div>
         <p className="text-destructive font-medium">
           Erro ao carregar tarefas
@@ -44,7 +44,7 @@ export default function TaskList({ onlyMyTasks = true, userId }: TaskListProps) 
     return (
       <div className="text-center py-16 space-y-6 animate-in">
         <div className="inline-flex items-center justify-center h-24 w-24 rounded-3xl bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30">
-          <span className="text-6xl">🎉</span>
+          <PartyPopper className="h-12 w-12 text-emerald-600 dark:text-emerald-400" />
         </div>
         <div className="space-y-2">
           <h3 className="text-2xl font-semibold">Tudo feito!</h3>

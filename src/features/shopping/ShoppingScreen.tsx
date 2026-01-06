@@ -10,7 +10,7 @@ import { AddItemSheet } from "./AddItemSheet";
 import { CompleteShoppingSheet } from "./CompleteShoppingSheet";
 import { ShoppingItemCard } from "./ShoppingItemCard";
 import { Button } from "@/components/ui/button";
-import { Plus, Loader2, ShoppingCart } from "lucide-react";
+import { Plus, Loader2, ShoppingCart, Sparkles } from "lucide-react";
 import { ShoppingCategory } from "./types";
 
 export function ShoppingScreen() {
@@ -98,7 +98,17 @@ export function ShoppingScreen() {
   };
 
   const handleDeleteItem = (itemId: string) => {
-    deleteItem.mutate(itemId);
+    const item = items?.find((i) => i.id === itemId);
+    if (!item) return;
+
+    deleteItem.mutate({
+      itemId,
+      itemName: item.name,
+      householdId: profile?.household_id,
+      addedBy: item.added_by,
+      isPurchased: item.is_purchased,
+    });
+
     // Remove from selection if was selected
     setSelectedItems((prev) => {
       const newSet = new Set(prev);
@@ -163,7 +173,7 @@ export function ShoppingScreen() {
         {!hasItems && (
           <div className="text-center py-16 space-y-6 animate-in">
             <div className="inline-flex items-center justify-center h-24 w-24 rounded-3xl bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30">
-              <span className="text-6xl">✨</span>
+              <Sparkles className="h-12 w-12 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div className="space-y-2">
               <h3 className="text-xl font-semibold">Lista vazia!</h3>
@@ -185,6 +195,7 @@ export function ShoppingScreen() {
                 onToggle={handleToggleItem}
                 onDelete={handleDeleteItem}
                 profiles={profiles}
+                isDeleting={deleteItem.isPending}
               />
             ))}
           </div>
@@ -192,7 +203,10 @@ export function ShoppingScreen() {
 
         {/* Info box */}
         <div className="bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 rounded-2xl p-5 space-y-2">
-          <h4 className="font-semibold text-sm">💡 Como funciona?</h4>
+          <h4 className="font-semibold text-sm flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-primary" />
+            Como funciona?
+          </h4>
           <ul className="text-sm text-muted-foreground space-y-1">
             <li>
               • Reportar item que acabou:{" "}

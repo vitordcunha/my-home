@@ -25,7 +25,7 @@ export function useRemoveMember() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profiles"] });
       toast({
-        title: "✅ Membro removido",
+        title: "Membro removido",
         description: "O membro foi removido da casa.",
       });
     },

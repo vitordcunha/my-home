@@ -19,7 +19,7 @@ export function useRegenerateInviteCode() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["household"] });
       toast({
-        title: "✅ Código regenerado",
+        title: "Código regenerado",
         description: "Um novo código de convite foi gerado.",
       });
     },

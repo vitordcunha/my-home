@@ -1,7 +1,8 @@
 import { ExpenseWithPaidBy, EXPENSE_CATEGORY_EMOJIS } from "./types";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Users } from "lucide-react";
+import { Users, Package } from "lucide-react";
+import { getIconFromEmoji } from "@/lib/emoji-icons";
 
 interface ExpenseCardProps {
   expense: ExpenseWithPaidBy;
@@ -38,6 +39,8 @@ export function ExpenseCard({ expense }: ExpenseCardProps) {
       ? "✏️"
       : EXPENSE_CATEGORY_EMOJIS[expense.category] || "📦";
 
+  const IconComponent = getIconFromEmoji(emoji) || Package;
+
   const categoryLabel =
     expense.category === "custom" && expense.custom_category
       ? expense.custom_category
@@ -52,7 +55,9 @@ export function ExpenseCard({ expense }: ExpenseCardProps) {
     <div className="bg-card border border-border rounded-xl p-4 space-y-3 hover-lift">
       <div className="flex items-start justify-between">
         <div className="flex items-start gap-3 flex-1">
-          <div className="text-2xl">{emoji}</div>
+          <div className="flex items-center justify-center h-8 w-8">
+            <IconComponent className="h-6 w-6 text-primary" />
+          </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-base leading-tight">
               {categoryLabel}

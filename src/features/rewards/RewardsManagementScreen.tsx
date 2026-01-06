@@ -13,7 +13,16 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Plus, Loader2, Gift, Lock, Edit2, Trash2, Check } from "lucide-react";
+import {
+  Plus,
+  Loader2,
+  Gift,
+  Lock,
+  Edit2,
+  Trash2,
+  Check,
+  Star,
+} from "lucide-react";
 
 interface RewardFormData {
   id?: string;
@@ -176,7 +185,7 @@ export function RewardsManagementScreen() {
               >
                 <div className="flex items-start gap-4 flex-1 min-w-0">
                   <div className="flex items-center justify-center h-14 w-14 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 shrink-0">
-                    <span className="text-3xl">🎁</span>
+                    <Gift className="h-8 w-8 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0 space-y-2">
                     <h3
@@ -186,7 +195,7 @@ export function RewardsManagementScreen() {
                       {reward.nome}
                     </h3>
                     <div className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200/50 dark:border-amber-800/30 w-fit">
-                      <span className="text-base">⭐</span>
+                      <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
                       <span className="text-sm font-semibold text-amber-900 dark:text-amber-100">
                         {reward.custo_pontos} pontos
                       </span>
@@ -251,7 +260,7 @@ export function RewardsManagementScreen() {
                   </p>
                 </div>
                 <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-secondary shrink-0">
-                  <span className="text-xs">⭐</span>
+                  <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
                   <span className="text-xs font-semibold">
                     {reward.custo_pontos}
                   </span>
@@ -318,7 +327,7 @@ export function RewardsManagementScreen() {
                   className="flex-1 px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent bg-background text-foreground transition-all"
                 />
                 <div className="flex items-center gap-1.5 px-4 py-3 rounded-full bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200/50 dark:border-amber-800/30 shrink-0">
-                  <span className="text-base">⭐</span>
+                  <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
                   <span className="text-sm font-semibold text-amber-900 dark:text-amber-100">
                     {formData.custo_pontos}
                   </span>

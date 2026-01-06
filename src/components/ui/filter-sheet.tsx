@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
+import { X, RefreshCw, CheckCircle2, User, FolderOpen, Star } from "lucide-react";
 
 export interface FilterState {
   assignedTo: string[];
@@ -174,8 +174,9 @@ export function FilterSheet({
 
             {/* Recorrência */}
             <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-muted-foreground">
-                🔄 RECORRÊNCIA
+              <h3 className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+                <RefreshCw className="h-4 w-4" />
+                RECORRÊNCIA
               </h3>
               <div className="flex flex-wrap gap-2">
                 {[
@@ -203,8 +204,9 @@ export function FilterSheet({
 
             {/* Status */}
             <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-muted-foreground">
-                ✅ STATUS
+              <h3 className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4" />
+                STATUS
               </h3>
               <div className="flex flex-wrap gap-2">
                 {[
@@ -263,7 +265,7 @@ export function ActiveFiltersChips({
   onRemoveFilter,
   profiles = [],
 }: ActiveFiltersChipsProps) {
-  const chips: Array<{ key: keyof FilterState; value: string; label: string }> = [];
+  const chips: Array<{ key: keyof FilterState; value: string; label: string; icon?: any }> = [];
 
   // Assigned to
   filters.assignedTo.forEach((id) => {
@@ -272,14 +274,15 @@ export function ActiveFiltersChips({
       chips.push({
         key: "assignedTo",
         value: id,
-        label: `👤 ${profile.nome}`,
+        label: `${profile.nome}`,
+        icon: User,
       });
     }
   });
 
   // Categories
   filters.categories.forEach((cat) => {
-    chips.push({ key: "categories", value: cat, label: `📁 ${cat}` });
+    chips.push({ key: "categories", value: cat, label: cat, icon: FolderOpen });
   });
 
   // Points range
@@ -287,7 +290,8 @@ export function ActiveFiltersChips({
     chips.push({
       key: "pointsRange",
       value: "",
-      label: `⭐ ${filters.pointsRange[0]}-${filters.pointsRange[1]} pts`,
+      label: `${filters.pointsRange[0]}-${filters.pointsRange[1]} pts`,
+      icon: Star,
     });
   }
 
@@ -301,7 +305,8 @@ export function ActiveFiltersChips({
     chips.push({
       key: "recurrenceType",
       value: type,
-      label: `🔄 ${recurrenceLabels[type]}`,
+      label: recurrenceLabels[type],
+      icon: RefreshCw,
     });
   });
 
@@ -315,7 +320,8 @@ export function ActiveFiltersChips({
     chips.push({
       key: "status",
       value: status,
-      label: `✅ ${statusLabels[status]}`,
+      label: statusLabels[status],
+      icon: CheckCircle2,
     });
   });
 
@@ -329,6 +335,8 @@ export function ActiveFiltersChips({
           variant="secondary"
           className="shrink-0 snap-start flex items-center gap-2 px-3 py-2 h-9"
         >
+          {chip.icon && <chip.icon className="h-3 w-3" />}
+          {chip.icon && <chip.icon className="h-3 w-3" />}
           <span className="text-sm">{chip.label}</span>
           <button
             onClick={() => onRemoveFilter(chip.key, chip.value)}

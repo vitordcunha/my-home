@@ -112,7 +112,7 @@ export function useAddExpense() {
 
       // Toast de sucesso
       toast({
-        title: "✅ Despesa registrada!",
+        title: "Despesa registrada!",
         description: `${variables.description} • +10 pts`,
       });
     },

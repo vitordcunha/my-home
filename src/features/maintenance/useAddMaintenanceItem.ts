@@ -108,7 +108,7 @@ export function useAddMaintenanceItem() {
 
       // Toast de sucesso
       toast({
-        title: "✅ Item reportado!",
+        title: "Item reportado!",
         description: `${variables.title} • +5 pts`,
       });
     },

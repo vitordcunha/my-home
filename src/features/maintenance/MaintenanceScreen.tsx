@@ -4,7 +4,7 @@ import { useProfileQuery } from "@/features/auth/useProfileQuery";
 import { useMaintenanceItemsQuery } from "./useMaintenanceItemsQuery";
 import { AddMaintenanceSheet } from "./AddMaintenanceSheet";
 import { MaintenanceItemCard } from "./MaintenanceItemCard";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, Wrench, Lightbulb, Circle } from "lucide-react";
 
 export function MaintenanceScreen() {
   const { user } = useAuth();
@@ -60,7 +60,7 @@ export function MaintenanceScreen() {
         {!hasItems && (
           <div className="text-center py-16 space-y-6 animate-in">
             <div className="inline-flex items-center justify-center h-24 w-24 rounded-3xl bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-900/30 dark:to-amber-900/30">
-              <span className="text-6xl">🔧</span>
+              <Wrench className="h-12 w-12 text-orange-600 dark:text-orange-400" />
             </div>
             <div className="space-y-2">
               <h3 className="text-xl font-semibold">Nenhum item pendente</h3>
@@ -76,7 +76,8 @@ export function MaintenanceScreen() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold flex items-center gap-2">
-                🔴 Urgente ({urgentItems.length})
+                <Circle className="h-4 w-4 fill-red-500 text-red-500" />
+                Urgente ({urgentItems.length})
               </h3>
             </div>
             {urgentItems.map((item) => (
@@ -90,7 +91,8 @@ export function MaintenanceScreen() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold flex items-center gap-2">
-                🟡 Importante ({importantItems.length})
+                <Circle className="h-4 w-4 fill-amber-500 text-amber-500" />
+                Importante ({importantItems.length})
               </h3>
             </div>
             {importantItems.map((item) => (
@@ -104,7 +106,8 @@ export function MaintenanceScreen() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold flex items-center gap-2">
-                🟢 Quando der ({wheneverItems.length})
+                <Circle className="h-4 w-4 fill-green-500 text-green-500" />
+                Quando der ({wheneverItems.length})
               </h3>
             </div>
             {wheneverItems.map((item) => (
@@ -115,7 +118,10 @@ export function MaintenanceScreen() {
 
         {/* Info box */}
         <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950 dark:to-amber-950 border border-orange-200 dark:border-orange-900 rounded-2xl p-5 space-y-2">
-          <h4 className="font-semibold text-sm">💡 Como funciona?</h4>
+          <h4 className="font-semibold text-sm flex items-center gap-2">
+            <Lightbulb className="h-4 w-4" />
+            Como funciona?
+          </h4>
           <ul className="text-sm text-muted-foreground space-y-1">
             <li>
               • Reportar problema:{" "}

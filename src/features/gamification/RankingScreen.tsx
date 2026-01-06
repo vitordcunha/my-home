@@ -2,7 +2,15 @@ import { useRankingQuery } from "./useRankingQuery";
 import { useAuth } from "@/features/auth/useAuth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Trophy, Medal, Award } from "lucide-react";
+import {
+  Loader2,
+  Trophy,
+  Medal,
+  Award,
+  AlertTriangle,
+  Star,
+  Lightbulb,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const positionIcons = [
@@ -39,7 +47,7 @@ export default function RankingScreen() {
       {error && (
         <div className="text-center py-16 animate-in">
           <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-destructive/10 mb-4">
-            <span className="text-3xl">⚠️</span>
+            <AlertTriangle className="h-8 w-8 text-destructive" />
           </div>
           <p className="text-destructive font-medium">
             Erro ao carregar ranking
@@ -50,7 +58,7 @@ export default function RankingScreen() {
       {ranking && ranking.length === 0 && (
         <div className="text-center py-16 space-y-6 animate-in">
           <div className="inline-flex items-center justify-center h-24 w-24 rounded-3xl bg-gradient-to-br from-primary/10 to-primary/5">
-            <span className="text-6xl">🏆</span>
+            <Trophy className="h-12 w-12 text-primary" />
           </div>
           <div className="space-y-2">
             <h3 className="text-xl font-semibold">Ranking vazio</h3>
@@ -122,7 +130,7 @@ export default function RankingScreen() {
                     <p className="text-2xl font-bold bg-gradient-to-br from-amber-600 to-orange-500 bg-clip-text text-transparent">
                       {profile.total_points}
                     </p>
-                    <span className="text-lg">⭐</span>
+                    <Star className="h-5 w-5 fill-amber-500 text-amber-500" />
                   </div>
                   <p className="text-xs text-muted-foreground font-medium">
                     pontos
@@ -135,9 +143,10 @@ export default function RankingScreen() {
       )}
 
       {ranking && ranking.length > 0 && (
-        <div className="bg-gradient-to-r from-muted/50 to-muted/30 rounded-2xl p-5 text-center">
+        <div className="bg-gradient-to-r from-muted/50 to-muted/30 rounded-2xl p-5 text-center flex items-center justify-center gap-2">
+          <Lightbulb className="h-4 w-4 text-muted-foreground" />
           <p className="text-sm text-muted-foreground font-medium">
-            💡 Complete mais tarefas para subir no ranking!
+            Complete mais tarefas para subir no ranking!
           </p>
         </div>
       )}

@@ -37,7 +37,7 @@ export function useRedeemReward() {
       vibrate(100);
 
       toast({
-        title: "🎁 Prêmio resgatado!",
+        title: "Prêmio resgatado!",
         description: "Aproveite sua recompensa!",
       });
 
@@ -57,7 +57,7 @@ export function useRedeemReward() {
           : errorMessage;
       toast({
         variant: "destructive",
-        title: "❌ Erro ao resgatar",
+        title: "Erro ao resgatar",
         description: truncatedError,
       });
     },

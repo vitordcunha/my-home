@@ -23,7 +23,7 @@ export function useRestoreTask() {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["tasks", "archived"] });
       toast({
-        title: "✅ Tarefa restaurada!",
+        title: "Tarefa restaurada!",
         description: "A tarefa foi restaurada com sucesso.",
       });
     },

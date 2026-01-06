@@ -29,7 +29,7 @@ export function useDeleteTask() {
       vibrate(50);
 
       toast({
-        title: "🗑️ Tarefa removida",
+        title: "Tarefa removida",
         description: "A tarefa foi desativada.",
       });
 
@@ -46,7 +46,7 @@ export function useDeleteTask() {
           : errorMessage;
       toast({
         variant: "destructive",
-        title: "❌ Erro ao remover",
+        title: "Erro ao remover",
         description: truncatedError,
       });
     },

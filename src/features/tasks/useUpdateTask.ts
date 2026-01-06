@@ -45,7 +45,7 @@ export function useUpdateTask() {
       vibrate(50);
 
       toast({
-        title: "✅ Tarefa atualizada!",
+        title: "Tarefa atualizada!",
         description: "As alterações foram salvas.",
       });
 
@@ -62,7 +62,7 @@ export function useUpdateTask() {
           : errorMessage;
       toast({
         variant: "destructive",
-        title: "❌ Erro ao atualizar",
+        title: "Erro ao atualizar",
         description: truncatedError,
       });
     },

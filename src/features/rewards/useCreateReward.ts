@@ -32,7 +32,7 @@ export function useCreateReward() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["rewards"] });
       toast({
-        title: "✅ Prêmio criado!",
+        title: "Prêmio criado!",
         description: "O novo prêmio está disponível na loja.",
       });
     },

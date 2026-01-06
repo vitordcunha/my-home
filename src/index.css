@@ -237,6 +237,10 @@
     padding-top: env(safe-area-inset-top);
   }
 
+  .bottom-24-safe {
+    bottom: calc(6rem + env(safe-area-inset-bottom));
+  }
+
   /* Otimizações mobile touch */
   * {
     -webkit-tap-highlight-color: transparent;

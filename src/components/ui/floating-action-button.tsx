@@ -32,7 +32,7 @@ export function FloatingActionButton({
     <button
       onClick={onClick}
       className={cn(
-        "group fixed bottom-24 right-6 z-30 shadow-soft-lg hover:shadow-xl transition-all hover:scale-105 active:scale-95 flex items-center justify-center",
+        "group fixed bottom-24-safe right-6 z-30 shadow-soft-lg hover:shadow-xl transition-all hover:scale-105 active:scale-95 flex items-center justify-center",
         variantClasses[variant],
         sizeClasses[size],
         mobileOnly && "md:hidden"

@@ -15,6 +15,7 @@ interface UpdateTaskParams {
   recurrence_type: "daily" | "weekly" | "once";
   days_of_week?: number[];
   assigned_to?: string;
+  rotation_enabled?: boolean;
 }
 
 interface UpdateTaskContext {
@@ -37,6 +38,10 @@ export function useUpdateTask() {
           recurrence_type: updates.recurrence_type,
           days_of_week: updates.days_of_week || null,
           assigned_to: updates.assigned_to || null,
+          rotation_enabled:
+            updates.rotation_enabled !== undefined
+              ? updates.rotation_enabled
+              : undefined,
         } as TaskUpdate)
         .eq("id", id)
         .select()
@@ -82,6 +87,10 @@ export function useUpdateTask() {
                   updates.assigned_to !== undefined
                     ? updates.assigned_to || null
                     : task.assigned_to,
+                rotation_enabled:
+                  updates.rotation_enabled !== undefined
+                    ? updates.rotation_enabled
+                    : task.rotation_enabled,
                 updated_at: new Date().toISOString(),
               } as TaskWithStatus;
             }

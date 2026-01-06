@@ -74,6 +74,7 @@ export interface Database {
           assigned_to: string | null;
           is_active: boolean;
           household_id: string | null;
+          rotation_enabled: boolean;
         };
         Insert: {
           id?: string;
@@ -87,6 +88,7 @@ export interface Database {
           assigned_to?: string | null;
           is_active?: boolean;
           household_id?: string | null;
+          rotation_enabled?: boolean;
         };
         Update: {
           id?: string;
@@ -100,6 +102,7 @@ export interface Database {
           assigned_to?: string | null;
           is_active?: boolean;
           household_id?: string | null;
+          rotation_enabled?: boolean;
         };
       };
       tasks_history: {

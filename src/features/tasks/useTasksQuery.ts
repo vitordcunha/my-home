@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
-import { isWithinLast24Hours } from "@/lib/utils";
+import { isCompletedToday } from "@/lib/utils";
+import { startOfDay } from "date-fns";
 import { Database } from "@/types/database";
 
 type TaskMaster = Database["public"]["Tables"]["tasks_master"]["Row"];
@@ -36,14 +37,12 @@ export function useTasksQuery(options?: UseTasksQueryOptions) {
 
       if (tasksError) throw tasksError;
 
-      // Get today's task history
+      // Get today's task history (from start of today)
+      const startOfToday = startOfDay(new Date());
       const { data: history, error: historyError } = await supabase
         .from("tasks_history")
         .select("*")
-        .gte(
-          "completed_at",
-          new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-        );
+        .gte("completed_at", startOfToday.toISOString());
 
       if (historyError) throw historyError;
 
@@ -72,14 +71,14 @@ export function useTasksQuery(options?: UseTasksQueryOptions) {
           return false;
         })
         .map((task) => {
-          // Check if completed in last 24h
-          const completedRecently = (history as TaskHistory[]).some(
-            (h) => h.task_id === task.id && isWithinLast24Hours(h.completed_at)
+          // Check if completed today (same calendar day)
+          const completedToday = (history as TaskHistory[]).some(
+            (h) => h.task_id === task.id && isCompletedToday(h.completed_at)
           );
 
           return {
             ...task,
-            is_completed_today: completedRecently,
+            is_completed_today: completedToday,
           } as TaskWithStatus;
         })
         .filter((task) => !task.is_completed_today); // Only show uncompleted tasks

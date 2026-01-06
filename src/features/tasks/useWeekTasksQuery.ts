@@ -45,8 +45,8 @@ export function useWeekTasksQuery(weekStart?: Date) {
       const { data: history } = await supabase
         .from("tasks_history")
         .select("*")
-        .gte("created_at", start.toISOString())
-        .lte("created_at", end.toISOString());
+        .gte("completed_at", start.toISOString())
+        .lte("completed_at", end.toISOString());
 
       const days = eachDayOfInterval({ start, end }).map((date) => {
         const dayOfWeek = date.getDay();
@@ -73,13 +73,13 @@ export function useWeekTasksQuery(weekStart?: Date) {
           return false;
         });
 
-        // Remover tarefas concluídas nas últimas 24h
+        // Remover tarefas concluídas no mesmo dia
         const filteredTasks = dayTasks.filter((task: any) => {
-          const recentCompletion = history?.find(
+          const completedOnThisDay = history?.find(
             (h: any) =>
-              h.task_id === task.id && isSameDay(new Date(h.created_at), date)
+              h.task_id === task.id && isSameDay(new Date(h.completed_at), date)
           );
-          return !recentCompletion;
+          return !completedOnThisDay;
         }) as TaskWithStatus[];
 
         const totalPoints = filteredTasks.reduce(

@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Database } from "@/types/database";
-import { Check, Users, Edit2, Trash2, MoreVertical, Star, Sparkles } from "lucide-react";
+import { Check, Users, Edit2, Trash2, MoreVertical, Star, Sparkles, RotateCw } from "lucide-react";
 import TaskFormDialog from "./TaskFormDialog";
 import { useSwipeable } from "react-swipeable";
 import { useHaptic } from "@/hooks/useHaptic";
@@ -241,18 +241,25 @@ export default function TaskCard({ task }: TaskCardProps) {
                       (p) => p.id === task.assigned_to
                     );
                     return assignedProfile ? (
-                      assignedProfile.avatar ? (
-                        <Avatar className="h-8 w-8 shrink-0 border-2 border-border/50">
-                          <AvatarImage src={assignedProfile.avatar} />
-                          <AvatarFallback className="bg-gradient-to-br from-primary/10 to-primary/5 text-primary font-semibold text-xs">
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {assignedProfile.avatar ? (
+                          <Avatar className="h-8 w-8 shrink-0 border-2 border-border/50">
+                            <AvatarImage src={assignedProfile.avatar} />
+                            <AvatarFallback className="bg-gradient-to-br from-primary/10 to-primary/5 text-primary font-semibold text-xs">
+                              {assignedProfile.nome[0].toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                        ) : (
+                          <div className="h-8 w-8 shrink-0 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 border-2 border-border/50 flex items-center justify-center text-primary font-semibold text-xs">
                             {assignedProfile.nome[0].toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                      ) : (
-                        <div className="h-8 w-8 shrink-0 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 border-2 border-border/50 flex items-center justify-center text-primary font-semibold text-xs">
-                          {assignedProfile.nome[0].toUpperCase()}
-                        </div>
-                      )
+                          </div>
+                        )}
+                        {task.rotation_enabled && (
+                          <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20" title="Rodízio automático ativo">
+                            <RotateCw className="h-3 w-3 text-primary" />
+                          </div>
+                        )}
+                      </div>
                     ) : null;
                   })()}
               </div>

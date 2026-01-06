@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { isSameDay, startOfDay } from "date-fns";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -10,6 +11,12 @@ export function isWithinLast24Hours(date: Date | string): boolean {
   const now = new Date();
   const diff = now.getTime() - compareDate.getTime();
   return diff < 24 * 60 * 60 * 1000;
+}
+
+export function isCompletedToday(date: Date | string): boolean {
+  const compareDate = typeof date === "string" ? new Date(date) : date;
+  const today = new Date();
+  return isSameDay(compareDate, today);
 }
 
 export function vibrate(duration: number = 50) {

@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import { ProfileSelectSkeleton } from "@/components/skeletons/ProfileSelectSkeleton";
 import { useHaptic } from "@/hooks/useHaptic";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface TaskFormDialogProps {
   open: boolean;
@@ -28,6 +29,7 @@ interface TaskFormDialogProps {
     recurrence_type: "daily" | "weekly" | "once";
     days_of_week: number[] | null;
     assigned_to: string | null;
+    rotation_enabled?: boolean;
   };
 }
 
@@ -63,6 +65,7 @@ export default function TaskFormDialog({
     0, 1, 2, 3, 4, 5, 6,
   ]);
   const [assignedTo, setAssignedTo] = useState<string>("");
+  const [rotationEnabled, setRotationEnabled] = useState(false);
 
   // Reset form when opening/closing or when task changes
   useEffect(() => {
@@ -74,6 +77,7 @@ export default function TaskFormDialog({
       setRecurrenceType(task.recurrence_type);
       setSelectedDays(task.days_of_week || [0, 1, 2, 3, 4, 5, 6]);
       setAssignedTo(task.assigned_to || "");
+      setRotationEnabled(task.rotation_enabled || false);
     } else if (open && !task) {
       // Creating new task - reset to defaults
       setNome("");
@@ -82,6 +86,7 @@ export default function TaskFormDialog({
       setRecurrenceType("daily");
       setSelectedDays([0, 1, 2, 3, 4, 5, 6]);
       setAssignedTo("");
+      setRotationEnabled(false);
     }
   }, [open, task]);
 
@@ -99,6 +104,7 @@ export default function TaskFormDialog({
       recurrence_type: recurrenceType,
       days_of_week: recurrenceType === "weekly" ? selectedDays : undefined,
       assigned_to: assignedTo || undefined,
+      rotation_enabled: rotationEnabled && assignedTo ? true : false,
     };
 
     trigger("success");
@@ -241,6 +247,28 @@ export default function TaskFormDialog({
               </div>
             )}
           </div>
+
+          {/* Rotation Option - Only show if someone is assigned */}
+          {assignedTo && (
+            <div className="flex items-center justify-between p-4 border border-border rounded-lg bg-muted/20">
+              <div className="space-y-0.5 flex-1">
+                <label className="text-sm font-medium flex items-center gap-2 cursor-pointer">
+                  <span>🔄 Rodízio Automático</span>
+                </label>
+                <p className="text-xs text-muted-foreground">
+                  Ao completar, a tarefa passa automaticamente para o próximo membro da casa
+                </p>
+              </div>
+              <Checkbox
+                checked={rotationEnabled}
+                onCheckedChange={(checked) => {
+                  trigger("light");
+                  setRotationEnabled(checked === true);
+                }}
+                className="ml-4"
+              />
+            </div>
+          )}
 
           {/* XP Value */}
           <div>

@@ -16,6 +16,7 @@ interface CreateTaskParams {
   created_by: string;
   assigned_to?: string;
   household_id: string;
+  rotation_enabled?: boolean;
 }
 
 interface CreateTaskContext {
@@ -41,6 +42,7 @@ export function useCreateTask() {
           assigned_to: task.assigned_to || null,
           is_active: true,
           household_id: task.household_id,
+          rotation_enabled: task.rotation_enabled || false,
         })
         .select()
         .single();
@@ -91,6 +93,7 @@ export function useCreateTask() {
               assigned_to: task.assigned_to || null,
               is_active: true,
               household_id: task.household_id,
+              rotation_enabled: task.rotation_enabled || false,
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString(),
               is_completed_today: false,

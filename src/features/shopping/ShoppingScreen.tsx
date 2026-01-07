@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/features/auth/useAuth";
 import { useProfileQuery } from "@/features/auth/useProfileQuery";
 import { useProfilesQuery } from "@/features/auth/useProfilesQuery";
@@ -14,12 +14,15 @@ import { ReceiptPreviewSheet } from "./ReceiptPreviewSheet";
 import { ShoppingItemCard } from "./ShoppingItemCard";
 import { Button } from "@/components/ui/button";
 import { FloatingActionButton } from "@/components/ui/floating-action-button";
-import { ShoppingCart, Sparkles, Upload } from "lucide-react";
+import { ShoppingCart, Sparkles, Upload, X } from "lucide-react";
 import { ShoppingCategory } from "./types";
 import { ShoppingListSkeleton } from "@/components/skeletons/ShoppingSkeleton";
 
 import { PullToRefreshWrapper } from "@/components/ui/pull-to-refresh";
 import { useQueryClient } from "@tanstack/react-query";
+import { PageHeader } from "@/components/ui/page-header";
+
+const STORAGE_KEY = "shopping-cart-selection";
 
 export function ShoppingScreen() {
   const { user } = useAuth();
@@ -36,7 +39,25 @@ export function ShoppingScreen() {
   const [showAddSheet, setShowAddSheet] = useState(false);
   const [showCompleteSheet, setShowCompleteSheet] = useState(false);
   const [showReceiptSheet, setShowReceiptSheet] = useState(false);
-  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(() => {
+    if (typeof window === "undefined") return new Set();
+    try {
+      const saved = window.localStorage.getItem(STORAGE_KEY);
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch (e) {
+      console.error("Failed to parse selected items", e);
+      return new Set();
+    }
+  });
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(selectedItems)));
+    } catch (e) {
+      console.error("Failed to save selected items", e);
+    }
+  }, [selectedItems]);
 
   const handleRefresh = async () => {
     await queryClient.invalidateQueries({ queryKey: ["shopping-items"] });
@@ -191,11 +212,16 @@ export function ShoppingScreen() {
         <div className="space-y-8">
 
           {/* Header */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-bold tracking-tight">
-                Lista de Compras
-              </h2>
+          {/* Header */}
+          <PageHeader
+            title="Lista de Compras"
+            description={
+              hasItems
+                ? `${items.length} ${items.length === 1 ? "item" : "itens"
+                } para comprar`
+                : "Tudo abastecido por aqui!"
+            }
+            actions={
               <Button
                 variant="outline"
                 size="icon"
@@ -205,29 +231,33 @@ export function ShoppingScreen() {
               >
                 <Upload className="h-5 w-5 text-muted-foreground" />
               </Button>
-            </div>
-            <p className="text-base text-muted-foreground">
-              {hasItems
-                ? `${items.length} ${items.length === 1 ? "item" : "itens"
-                } para comprar`
-                : "Tudo abastecido por aqui!"}
-            </p>
-          </div>
+            }
+          />
 
           {/* Complete trip button (shows when items are selected) */}
           {hasSelection && (
-            <Button
-              onClick={handleOpenCompleteSheet}
-              size="lg"
-              className="w-full rounded-xl shadow-md hover:shadow-lg transition-all gap-2 thumb-friendly bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-              disabled={completeTrip.isPending}
-            >
-              <ShoppingCart className="h-5 w-5" />
-              <span className="font-semibold">
-                Finalizar Compras ({selectedItems.size}) • +
-                {50 + selectedItems.size * 5} pts
-              </span>
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="lg"
+                className="h-12 w-12 p-0 rounded-xl border-dashed border-2 hover:bg-muted shrink-0"
+                onClick={() => setSelectedItems(new Set())}
+                aria-label="Limpar seleção"
+              >
+                <X className="h-5 w-5 text-muted-foreground" />
+              </Button>
+              <Button
+                onClick={handleOpenCompleteSheet}
+                size="lg"
+                className="flex-1 rounded-xl shadow-md hover:shadow-lg transition-all gap-2 thumb-friendly bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                disabled={completeTrip.isPending}
+              >
+                <ShoppingCart className="h-5 w-5" />
+                <span className="font-semibold">
+                  Finalizar ({selectedItems.size}) • +{50 + selectedItems.size * 5} pts
+                </span>
+              </Button>
+            </div>
           )}
 
           {/* Empty state */}

@@ -18,7 +18,6 @@ import {
 
     ChevronDown,
     ChevronUp,
-    Wallet,
     TrendingUp,
     TrendingDown,
     FileText,
@@ -43,6 +42,7 @@ import { useAddExpense } from "./useAddExpense";
 
 import { PullToRefreshWrapper } from "@/components/ui/pull-to-refresh";
 import { useQueryClient } from "@tanstack/react-query";
+import { PageHeader } from "@/components/ui/page-header";
 
 type ViewMode = "me" | "household";
 const VIEW_MODE_STORAGE_KEY = "financial-dashboard-view-mode";
@@ -209,34 +209,32 @@ export function FinancialDashboard() {
             <div className="space-y-6 pb-24">
                 {/* --- Header & View Toggle --- */}
                 <div className="flex flex-col gap-4">
-                    <div className="flex items-center justify-between">
-                        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600">
-                            <Wallet className="h-6 w-6 text-primary" />
-                            Financeiro
-                        </h1>
-
-                        {/* Toggle Discreto */}
-                        <div className="flex bg-muted/50 rounded-lg p-0.5 backdrop-blur-sm border border-white/10">
-                            <button
-                                onClick={() => setViewMode("me")}
-                                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${viewMode === "me"
-                                    ? "bg-background shadow-sm text-foreground"
-                                    : "text-muted-foreground hover:text-foreground"
-                                    }`}
-                            >
-                                Minha Visão
-                            </button>
-                            <button
-                                onClick={() => setViewMode("household")}
-                                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${viewMode === "household"
-                                    ? "bg-background shadow-sm text-foreground"
-                                    : "text-muted-foreground hover:text-foreground"
-                                    }`}
-                            >
-                                Visão Casa
-                            </button>
-                        </div>
-                    </div>
+                    <PageHeader
+                        title="Financeiro"
+                        description="Gestão de receitas e despesas"
+                        actions={
+                            <div className="flex bg-muted/50 rounded-lg p-0.5 backdrop-blur-sm border border-white/10">
+                                <button
+                                    onClick={() => setViewMode("me")}
+                                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${viewMode === "me"
+                                        ? "bg-background shadow-sm text-foreground"
+                                        : "text-muted-foreground hover:text-foreground"
+                                        }`}
+                                >
+                                    Minha Visão
+                                </button>
+                                <button
+                                    onClick={() => setViewMode("household")}
+                                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${viewMode === "household"
+                                        ? "bg-background shadow-sm text-foreground"
+                                        : "text-muted-foreground hover:text-foreground"
+                                        }`}
+                                >
+                                    Visão Casa
+                                </button>
+                            </div>
+                        }
+                    />
 
                     {/* --- Annual Overview --- */}
                     <AnnualOverview

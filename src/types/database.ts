@@ -202,6 +202,64 @@ export interface Database {
           }
         ];
       };
+      documents: {
+        Row: {
+          id: string;
+          created_at: string;
+          user_id: string;
+          household_id: string;
+          title: string;
+          description: string | null;
+          file_path: string;
+          file_type: string;
+          category: "bill" | "manual" | "contract" | "identity" | "other";
+          keywords: string[] | null;
+          expiry_date: string | null;
+          is_private: boolean;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          user_id?: string;
+          household_id: string;
+          title: string;
+          description?: string | null;
+          file_path: string;
+          file_type: string;
+          category: "bill" | "manual" | "contract" | "identity" | "other";
+          keywords?: string[] | null;
+          expiry_date?: string | null;
+          is_private?: boolean;
+        };
+        Update: {
+          id?: string;
+          created_at?: string;
+          user_id?: string;
+          household_id?: string;
+          title?: string;
+          description?: string | null;
+          file_path?: string;
+          file_type?: string;
+          category?: "bill" | "manual" | "contract" | "identity" | "other";
+          keywords?: string[] | null;
+          expiry_date?: string | null;
+          is_private?: boolean;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "documents_household_id_fkey";
+            columns: ["household_id"];
+            referencedRelation: "households";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "documents_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       shopping_items: {
         Row: {
           id: string;

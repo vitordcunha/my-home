@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, ShoppingCart, Trophy, Wallet /*, Wrench */ } from "lucide-react";
+import { Home, ShoppingCart, Trophy, Wallet, FileText /*, Wrench */ } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useHaptic } from "@/hooks/useHaptic";
 
@@ -18,6 +18,11 @@ const navItems = [
     to: "/shopping",
     icon: ShoppingCart,
     label: "Mercado",
+  },
+  {
+    to: "/documents",
+    icon: FileText,
+    label: "Docs",
   },
   // {
   //   to: "/maintenance",

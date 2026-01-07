@@ -191,3 +191,5 @@ Se tiver dúvidas ou problemas:
 1. Revise a documentação das migrations em `supabase/migrations/`
 2. Verifique os logs do Supabase
 3. Entre em contato com o time de desenvolvimento
+
+

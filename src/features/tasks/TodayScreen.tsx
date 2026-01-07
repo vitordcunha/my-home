@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import TaskList from "@/components/tasks/TaskList";
 import TaskFormDialog from "@/components/tasks/TaskFormDialog";
 import { Button } from "@/components/ui/button";
 import { FloatingActionButton } from "@/components/ui/floating-action-button";
-import { Plus, User, Users, History, CalendarDays } from "lucide-react";
+import { History, CalendarDays, Plus } from "lucide-react";
 import { useAuth } from "@/features/auth/useAuth";
 import { PullToRefreshWrapper } from "@/components/ui/pull-to-refresh";
 import { useQueryClient } from "@tanstack/react-query";
@@ -14,23 +14,49 @@ import { useProfileQuery } from "@/features/auth/useProfileQuery";
 import { useUserBalanceQuery } from "@/features/expenses/useUserBalanceQuery";
 import { useShoppingItemsQuery } from "@/features/shopping/useShoppingItemsQuery";
 import { useRankingQuery } from "@/features/gamification/useRankingQuery";
+import { PersonFilter } from "@/features/tasks/PersonFilter";
+import { useHouseholdQuery } from "@/features/households/useHouseholdQuery";
+import { PageHeader } from "@/components/ui/page-header";
+import { QuickActions } from "@/components/dashboard/QuickActions";
+import { AddExpenseSheet } from "@/features/expenses/AddExpenseSheet";
+import { AddItemSheet } from "@/features/shopping/AddItemSheet";
+import { useAddShoppingItem } from "@/features/shopping/useAddShoppingItem";
+import { ShoppingCategory } from "@/features/shopping/types";
 
 export default function TodayScreen() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [onlyMyTasks, setOnlyMyTasks] = useState(true);
+  const [showExpenseSheet, setShowExpenseSheet] = useState(false);
+  const [showItemSheet, setShowItemSheet] = useState(false);
+
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   // Fetch all data for dashboard
   const { data: profile } = useProfileQuery(user?.id);
+  const { data: household } = useHouseholdQuery(profile?.household_id);
+  const members = household?.members || [];
+
+  const addItem = useAddShoppingItem();
+
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user?.id && selectedUserId === null) {
+      setSelectedUserId(user.id);
+    }
+    // Only run once when user loads
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
   const { data: allTasks } = useTasksQuery({ onlyMyTasks: false });
-  const { data: myTasks } = useTasksQuery({
-    onlyMyTasks: true,
-    userId: user?.id,
+  const { data: filteredTasks } = useTasksQuery({
+    onlyMyTasks: !!selectedUserId,
+    userId: selectedUserId ?? undefined,
   });
+
   const { data: balance } = useUserBalanceQuery(
-    user?.id,
+    selectedUserId || user?.id,
     profile?.household_id ?? undefined
   );
   const { data: shoppingItems } = useShoppingItemsQuery(
@@ -43,6 +69,28 @@ export default function TodayScreen() {
     await queryClient.invalidateQueries({ queryKey: ["balance"] });
     await queryClient.invalidateQueries({ queryKey: ["shopping"] });
     await queryClient.invalidateQueries({ queryKey: ["ranking"] });
+    await queryClient.invalidateQueries({ queryKey: ["household"] });
+  };
+
+  const handleAddItem = (data: {
+    name: string;
+    category: ShoppingCategory;
+    emoji: string;
+  }) => {
+    if (!profile?.household_id || !user?.id) return;
+
+    addItem.mutate(
+      {
+        householdId: profile.household_id,
+        userId: user.id,
+        ...data,
+      },
+      {
+        onSuccess: () => {
+          setShowItemSheet(false);
+        },
+      }
+    );
   };
 
   const today = new Date().toLocaleDateString("pt-BR", {
@@ -56,7 +104,7 @@ export default function TodayScreen() {
     tasksData: {
       total: allTasks?.length || 0,
       completed: 0, // Tasks are filtered to show only pending ones
-      myTasks: myTasks?.length || 0,
+      myTasks: filteredTasks?.length || 0,
     },
     balanceData: {
       balance: balance?.net_balance ?? 0,
@@ -84,26 +132,30 @@ export default function TodayScreen() {
   return (
     <>
       <PullToRefreshWrapper onRefresh={handleRefresh}>
-        <div className="space-y-8">
-          {/* Header da página */}
-          <div className="flex items-end justify-between gap-4">
-            <div className="space-y-2">
-              <h2 className="text-3xl font-bold tracking-tight">
-                Resumo de Hoje
-              </h2>
-              <p className="text-base text-muted-foreground capitalize">
-                {today}
-              </p>
-            </div>
-            <Button
-              onClick={() => setShowCreateDialog(true)}
-              className="hidden md:flex thumb-friendly rounded-xl shadow-sm hover:shadow transition-all gap-2"
-              size="default"
-            >
-              <Plus className="h-4 w-4" />
-              <span className="font-medium">Nova Tarefa</span>
-            </Button>
-          </div>
+        <div className="space-y-6">
+          {/* Header da página atualizado */}
+          <PageHeader
+            title="Resumo de Hoje"
+            description={today}
+            className="capitalize"
+            actions={
+              <Button
+                onClick={() => setShowCreateDialog(true)}
+                className="hidden md:flex thumb-friendly rounded-xl shadow-sm hover:shadow transition-all gap-2"
+                size="default"
+              >
+                <Plus className="h-4 w-4" />
+                <span className="font-medium">Nova Tarefa</span>
+              </Button>
+            }
+          />
+
+          {/* Widget de Acesso Rápido */}
+          <QuickActions
+            onNewTask={() => setShowCreateDialog(true)}
+            onNewExpense={() => setShowExpenseSheet(true)}
+            onNewItem={() => setShowItemSheet(true)}
+          />
 
           {/* Dashboard com Bento Grid */}
           <DashboardGrid
@@ -116,7 +168,16 @@ export default function TodayScreen() {
           {/* Seção de Tarefas */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-xl font-semibold">Suas Tarefas</h3>
+              <h3 className="text-xl font-semibold">
+                {selectedUserId
+                  ? selectedUserId === user?.id
+                    ? "Suas Tarefas"
+                    : `Tarefas de ${members
+                      .find((m) => m.id === selectedUserId)
+                      ?.nome.split(" ")[0] || "..."
+                    }`
+                  : "Todas as Tarefas"}
+              </h3>
               <div className="flex items-center gap-2">
                 <Button
                   onClick={() => navigate("/tasks/week")}
@@ -138,38 +199,27 @@ export default function TodayScreen() {
                     Histórico
                   </span>
                 </Button>
+
+                <div className="border-l ml-1 w-1 h-6" />
+
+                <PersonFilter
+                  members={members}
+                  selectedUserId={selectedUserId}
+                  onSelectUserId={setSelectedUserId}
+                />
               </div>
             </div>
 
-            {/* Filtro de visualização */}
-            <div className="flex items-center gap-2">
-              <Button
-                onClick={() => setOnlyMyTasks(true)}
-                variant={onlyMyTasks ? "default" : "outline"}
-                size="sm"
-                className="rounded-xl transition-all gap-2"
-              >
-                <User className="h-4 w-4" />
-                <span className="font-medium">Minhas Tarefas</span>
-              </Button>
-              <Button
-                onClick={() => setOnlyMyTasks(false)}
-                variant={!onlyMyTasks ? "default" : "outline"}
-                size="sm"
-                className="rounded-xl transition-all gap-2"
-              >
-                <Users className="h-4 w-4" />
-                <span className="font-medium">Todas as Tarefas</span>
-              </Button>
-            </div>
-
             {/* Lista de tarefas */}
-            <TaskList onlyMyTasks={onlyMyTasks} userId={user?.id} />
+            <TaskList
+              onlyMyTasks={!!selectedUserId}
+              userId={selectedUserId || undefined}
+            />
           </div>
         </div>
       </PullToRefreshWrapper>
 
-      {/* Floating Action Button - Design mais elegante */}
+      {/* Floating Action Button */}
       <FloatingActionButton
         onClick={() => setShowCreateDialog(true)}
         ariaLabel="Criar nova tarefa"
@@ -181,6 +231,20 @@ export default function TodayScreen() {
       <TaskFormDialog
         open={showCreateDialog}
         onOpenChange={setShowCreateDialog}
+      />
+
+      <AddExpenseSheet
+        open={showExpenseSheet}
+        onOpenChange={setShowExpenseSheet}
+        householdId={profile?.household_id || ""}
+        userId={user?.id || ""}
+      />
+
+      <AddItemSheet
+        open={showItemSheet}
+        onOpenChange={setShowItemSheet}
+        onSubmit={handleAddItem}
+        isPending={addItem.isPending}
       />
     </>
   );

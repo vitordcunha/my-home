@@ -41,6 +41,10 @@
     --input: 240 6% 90%;
     --ring: 221 65% 58%;
 
+    /* Warning color */
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
     /* Radius mais suave */
     --radius: 0.75rem;
 
@@ -75,6 +79,10 @@
     --border: 220 15% 22%;
     --input: 220 15% 22%;
     --ring: 221 65% 58%;
+
+    /* Warning color */
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
 
     /* Cores específicas para categorias */
     --category-market: 142 65% 52%;

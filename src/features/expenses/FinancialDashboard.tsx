@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useAuth } from "@/features/auth/useAuth";
 import { useProfileQuery } from "@/features/auth/useProfileQuery";
 import { AnnualOverview } from "./AnnualOverview";
-import { FinancialOverviewCard } from "./FinancialOverviewCard";
+
 import { CashFlowChart } from "./CashFlowChart";
 import { CashFlowSankey } from "./CashFlowSankey";
 import { useFinancialBalance, useFinancialTimeline, TimelineItem } from "./useFinancialBalance";
@@ -24,7 +24,8 @@ import {
     Target,
     Download,
     Filter,
-    Upload
+    Upload,
+    Repeat
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FloatingActionButton } from "@/components/ui/floating-action-button";
@@ -43,6 +44,7 @@ import { useAddExpense } from "./useAddExpense";
 import { PullToRefreshWrapper } from "@/components/ui/pull-to-refresh";
 import { useQueryClient } from "@tanstack/react-query";
 import { PageHeader } from "@/components/ui/page-header";
+import { FinancialSummaryCard } from "./FinancialSummaryCard";
 
 type ViewMode = "me" | "household";
 const VIEW_MODE_STORAGE_KEY = "financial-dashboard-view-mode";
@@ -252,9 +254,10 @@ export function FinancialDashboard() {
                     />
                 </div>
 
-                {/* --- Hero Card (Saldo) --- */}
-                <FinancialOverviewCard
+                {/* --- Financial Summary (Unified) --- */}
+                <FinancialSummaryCard
                     householdId={profile?.household_id || undefined}
+                    userId={user?.id}
                     month={selectedMonth}
                     year={selectedYear}
                 />
@@ -452,55 +455,69 @@ export function FinancialDashboard() {
 
                                             {/* Lista de itens do dia */}
                                             <div className="pl-10 space-y-2 pr-1">
-                                                {group.items.map((item, itemIndex) => (
-                                                    <motion.div
-                                                        key={item.item_id}
-                                                        whileHover={{ scale: 1.02 }}
-                                                        whileTap={{ scale: 0.98 }}
-                                                        initial={{ opacity: 0, x: -10 }}
-                                                        animate={{ opacity: 1, x: 0 }}
-                                                        transition={{ delay: itemIndex * 0.05 }}
-                                                    >
-                                                        <Card
-                                                            className="overflow-hidden border-0 shadow-sm glass-card hover:bg-white/60 dark:hover:bg-black/40 transition-all group cursor-pointer"
-                                                            onClick={() => handleEditItem(item)}
+                                                {group.items.map((item, itemIndex) => {
+                                                    const isRecurring = item.type === 'expense'
+                                                        ? allExpenses?.find(e => e.id === item.item_id)?.is_recurring
+                                                        : allIncomes?.find(i => i.id === item.item_id)?.is_recurring;
+
+                                                    return (
+                                                        <motion.div
+                                                            key={item.item_id}
+                                                            whileHover={{ scale: 1.02 }}
+                                                            whileTap={{ scale: 0.98 }}
+                                                            initial={{ opacity: 0, x: -10 }}
+                                                            animate={{ opacity: 1, x: 0 }}
+                                                            transition={{ delay: itemIndex * 0.05 }}
                                                         >
-                                                            <div className="flex items-center p-3 gap-3">
-                                                                <div className={`p-2 rounded-xl flex-shrink-0 ${item.type === 'income'
-                                                                    ? 'bg-green-100/50 text-green-700 dark:bg-green-900/20 dark:text-green-400'
-                                                                    : 'bg-red-100/50 text-red-700 dark:bg-red-900/20 dark:text-red-400'
-                                                                    }`}>
-                                                                    {item.type === 'income' ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
-                                                                </div>
-
-                                                                <div className="flex-1 min-w-0">
-                                                                    <div className="flex items-center justify-between mb-0.5">
-                                                                        <p className="font-medium text-sm truncate pr-2">{item.description}</p>
-                                                                        <span className={`font-semibold text-sm whitespace-nowrap ${item.type === 'income'
-                                                                            ? 'text-green-600 dark:text-green-400'
-                                                                            : 'text-red-600 dark:text-red-400'
-                                                                            }`}>
-                                                                            {item.type === 'income' ? "+" : "-"}
-                                                                            {formatCurrency(Math.abs(item.amount))}
-                                                                        </span>
+                                                            <Card
+                                                                className="overflow-hidden border-0 shadow-sm glass-card hover:bg-white/60 dark:hover:bg-black/40 transition-all group cursor-pointer"
+                                                                onClick={() => handleEditItem(item)}
+                                                            >
+                                                                <div className="flex items-center p-3 gap-3">
+                                                                    <div className={`p-2 rounded-xl flex-shrink-0 ${item.type === 'income'
+                                                                        ? 'bg-green-100/50 text-green-700 dark:bg-green-900/20 dark:text-green-400'
+                                                                        : 'bg-red-100/50 text-red-700 dark:bg-red-900/20 dark:text-red-400'
+                                                                        }`}>
+                                                                        {item.type === 'income' ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
                                                                     </div>
 
-                                                                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                                                                        <span className="flex items-center gap-1.5">
-                                                                            {item.category || "Sem categoria"}
-                                                                            {item.is_projected && (
-                                                                                <span className="px-1.5 py-0.5 rounded-[4px] bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 font-medium text-[10px] uppercase">
-                                                                                    Projetado
-                                                                                </span>
-                                                                            )}
-                                                                        </span>
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <div className="flex items-center justify-between mb-0.5">
+                                                                            <p className="font-medium text-sm truncate pr-2">{item.description}</p>
+                                                                            <span className={`font-semibold text-sm whitespace-nowrap ${item.type === 'income'
+                                                                                ? 'text-green-600 dark:text-green-400'
+                                                                                : 'text-red-600 dark:text-red-400'
+                                                                                }`}>
+                                                                                {item.type === 'income' ? "+" : "-"}
+                                                                                {formatCurrency(Math.abs(item.amount))}
+                                                                            </span>
+                                                                        </div>
 
+                                                                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                                                            <span className="flex items-center gap-1.5 flex-wrap">
+                                                                                {item.category || "Sem categoria"}
+
+                                                                                {isRecurring && (
+                                                                                    <span className="flex items-center gap-0.5 text-[10px] bg-blue-500/10 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded-sm">
+                                                                                        <Repeat className="w-3 h-3" />
+                                                                                        <span className="hidden sm:inline">Recorrente</span>
+                                                                                    </span>
+                                                                                )}
+
+                                                                                {item.is_projected && (
+                                                                                    <span className="px-1.5 py-0.5 rounded-[4px] bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 font-medium text-[10px] uppercase">
+                                                                                        Projetado
+                                                                                    </span>
+                                                                                )}
+                                                                            </span>
+
+                                                                        </div>
                                                                     </div>
                                                                 </div>
-                                                            </div>
-                                                        </Card>
-                                                    </motion.div>
-                                                ))}
+                                                            </Card>
+                                                        </motion.div>
+                                                    );
+                                                })}
                                             </div>
                                         </motion.div>
                                     ))}

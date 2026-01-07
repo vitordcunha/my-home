@@ -3,6 +3,7 @@ import { useFinancialBalance } from "./useFinancialBalance";
 import { TrendingUp, TrendingDown, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
 interface FinancialOverviewCardProps {
   householdId?: string;
@@ -75,12 +76,11 @@ export function FinancialOverviewCard({
               {monthLabel}
             </CardTitle>
             <div
-              className={`px-3 py-1 rounded-full text-xs font-semibold ${isCritical
-                  ? "bg-red-500/10 text-red-600 dark:text-red-400"
-                  : isWarning
-                    ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                    : "bg-green-500/10 text-green-600 dark:text-green-400"
-                }`}
+              className={cn("px-3 py-1 rounded-full text-xs font-semibold",
+                isCritical ? "bg-destructive/10 text-destructive" :
+                  isWarning ? "bg-warning/10 text-warning" :
+                    "bg-success/10 text-success")
+              }
             >
               {isCritical
                 ? "Crítico"
@@ -95,10 +95,7 @@ export function FinancialOverviewCard({
           <div className="space-y-1">
             <p className="text-sm text-muted-foreground">Saldo Projetado</p>
             <p
-              className={`text-3xl font-bold ${isPositive
-                  ? "text-green-600 dark:text-green-400"
-                  : "text-red-600 dark:text-red-400"
-                }`}
+              className={cn("text-3xl font-bold", isPositive ? "text-success" : "text-destructive")}
             >
               {formatCurrency(projected_balance)}
             </p>
@@ -120,7 +117,7 @@ export function FinancialOverviewCard({
               <p className="text-xs text-muted-foreground mb-1">
                 Receitas Realizadas
               </p>
-              <p className="text-lg font-semibold text-green-600 dark:text-green-400">
+              <p className="text-lg font-semibold text-success">
                 {formatCurrency(total_income)}
               </p>
               {projected_income > 0 && (
@@ -133,7 +130,7 @@ export function FinancialOverviewCard({
               <p className="text-xs text-muted-foreground mb-1">
                 Despesas Pagas
               </p>
-              <p className="text-lg font-semibold text-red-600 dark:text-red-400">
+              <p className="text-lg font-semibold text-destructive">
                 {formatCurrency(total_expenses)}
               </p>
               {projected_expenses > 0 && (
@@ -151,10 +148,7 @@ export function FinancialOverviewCard({
                 Saldo Inicial (do mês anterior)
               </p>
               <p
-                className={`text-lg font-semibold ${opening_balance >= 0
-                    ? "text-green-600 dark:text-green-400"
-                    : "text-red-600 dark:text-red-400"
-                  }`}
+                className={cn("text-lg font-semibold", opening_balance >= 0 ? "text-success" : "text-destructive")}
               >
                 {formatCurrency(opening_balance)}
               </p>
@@ -168,10 +162,7 @@ export function FinancialOverviewCard({
                 Saldo Realizado (até agora)
               </p>
               <p
-                className={`text-xl font-semibold ${net_balance >= 0
-                    ? "text-green-600 dark:text-green-400"
-                    : "text-red-600 dark:text-red-400"
-                  }`}
+                className={cn("text-xl font-semibold", net_balance >= 0 ? "text-success" : "text-destructive")}
               >
                 {formatCurrency(net_balance)}
               </p>
@@ -182,17 +173,17 @@ export function FinancialOverviewCard({
 
       {/* Card de Insights */}
       {(isWarning || isCritical) && (
-        <Card className="border-amber-500/20 bg-amber-500/5">
+        <Card className="border-warning/20 bg-warning/5">
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
-              <TrendingDown className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5" />
+              <TrendingDown className="h-5 w-5 text-warning mt-0.5" />
               <div className="flex-1 space-y-1">
-                <p className="text-sm font-semibold text-amber-900 dark:text-amber-100">
+                <p className="text-sm font-semibold text-foreground/90">
                   {isCritical
                     ? "Atenção: Saldo crítico"
                     : "Atenção: Saldo baixo"}
                 </p>
-                <p className="text-xs text-amber-800 dark:text-amber-200">
+                <p className="text-xs text-muted-foreground">
                   {isCritical
                     ? `Você está projetado para fechar o mês com ${formatCurrency(
                       Math.abs(projected_balance)
@@ -206,15 +197,15 @@ export function FinancialOverviewCard({
       )}
 
       {isPositive && projected_balance > 1000 && (
-        <Card className="border-green-500/20 bg-green-500/5">
+        <Card className="border-success/20 bg-success/5">
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
-              <TrendingUp className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5" />
+              <TrendingUp className="h-5 w-5 text-success mt-0.5" />
               <div className="flex-1 space-y-1">
-                <p className="text-sm font-semibold text-green-900 dark:text-green-100">
+                <p className="text-sm font-semibold text-foreground/90">
                   Excelente planejamento!
                 </p>
-                <p className="text-xs text-green-800 dark:text-green-200">
+                <p className="text-xs text-muted-foreground">
                   Você está projetado para fechar o mês com saldo positivo. Ótimo
                   trabalho!
                 </p>

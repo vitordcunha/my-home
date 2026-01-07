@@ -14,6 +14,8 @@ import {
   Pencil,
   CheckCircle2,
   Trash2,
+  Calendar,
+  Repeat,
 } from "lucide-react";
 import { useHaptic } from "@/hooks/useHaptic";
 
@@ -40,7 +42,13 @@ export function AddExpenseSheet({
   const [isSplit, setIsSplit] = useState(false);
   const [showSplitOptions, setShowSplitOptions] = useState(false);
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
+  const [paidAt, setPaidAt] = useState<string>("");
   const [competenceDate, setCompetenceDate] = useState<string>("");
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurrenceFrequency, setRecurrenceFrequency] = useState<
+    "monthly" | "weekly" | null
+  >(null);
+  const [recurrenceDay, setRecurrenceDay] = useState<string>("");
 
   const { data: household } = useHouseholdQuery(householdId);
   const addExpense = useAddExpense();
@@ -64,6 +72,18 @@ export function AddExpenseSheet({
           ? new Date((expenseToEdit as any).competence_date).toISOString().slice(0, 10)
           : ""
       );
+      setPaidAt(
+        expenseToEdit.paid_at
+          ? new Date(expenseToEdit.paid_at).toISOString().slice(0, 16)
+          : ""
+      );
+      setIsRecurring(expenseToEdit.is_recurring);
+      setRecurrenceFrequency(expenseToEdit.recurrence_frequency as any);
+      setRecurrenceDay(expenseToEdit.recurrence_day?.toString() || "");
+    } else if (open) {
+      if (!paidAt) {
+        setPaidAt(new Date().toISOString().slice(0, 16));
+      }
     } else if (!open) {
       // Limpar formulário ao fechar
       resetForm();
@@ -105,8 +125,31 @@ export function AddExpenseSheet({
 
     trigger("success");
 
-    // Calcular competence_date (se não especificada, usar paid_at)
-    const finalCompetenceDate = competenceDate || new Date().toISOString().slice(0, 10);
+    // Calcular paid_at e competence_date
+    const finalPaidAt = paidAt ? new Date(paidAt).toISOString() : new Date().toISOString();
+    const finalCompetenceDate = competenceDate || finalPaidAt.slice(0, 10);
+
+    // Se é recorrente, calcular next_occurrence_date
+    let nextOccurrenceDate: string | undefined = undefined;
+    if (isRecurring && recurrenceFrequency && recurrenceDay) {
+      const today = new Date();
+      const day = parseInt(recurrenceDay);
+
+      if (recurrenceFrequency === "monthly") {
+        const nextMonth = new Date(
+          today.getFullYear(),
+          today.getMonth() + 1,
+          day
+        );
+        nextOccurrenceDate = nextMonth.toISOString();
+      } else if (recurrenceFrequency === "weekly") {
+        // Para semanal, usar o próximo dia da semana
+        const daysUntilNext = (day - today.getDay() + 7) % 7 || 7;
+        const nextWeek = new Date(today);
+        nextWeek.setDate(today.getDate() + daysUntilNext);
+        nextOccurrenceDate = nextWeek.toISOString();
+      }
+    }
 
     if (isEditMode && expenseToEdit) {
       // Modo de edição
@@ -125,7 +168,12 @@ export function AddExpenseSheet({
               : undefined
             : [],
           split_type: isSplit ? "equal" : "individual",
+          paid_at: finalPaidAt,
           competence_date: finalCompetenceDate,
+          is_recurring: isRecurring,
+          recurrence_frequency: recurrenceFrequency || null,
+          recurrence_day: recurrenceDay ? parseInt(recurrenceDay) : null,
+          next_occurrence_date: nextOccurrenceDate,
         } as any,
         {
           onSuccess: () => {
@@ -153,7 +201,12 @@ export function AddExpenseSheet({
             : [],
           split_type: isSplit ? "equal" : "individual",
           created_by: userId,
+          paid_at: finalPaidAt,
           competence_date: finalCompetenceDate,
+          is_recurring: isRecurring,
+          recurrence_frequency: recurrenceFrequency || null,
+          recurrence_day: recurrenceDay ? parseInt(recurrenceDay) : null,
+          next_occurrence_date: nextOccurrenceDate,
         } as any,
         {
           onSuccess: () => {
@@ -182,6 +235,10 @@ export function AddExpenseSheet({
     setDescription("");
     setCustomCategory("");
     setCompetenceDate("");
+    setPaidAt("");
+    setIsRecurring(false);
+    setRecurrenceFrequency(null);
+    setRecurrenceDay("");
   };
 
   return (
@@ -346,6 +403,19 @@ export function AddExpenseSheet({
                 />
               </div>
 
+              <div>
+                <label className="text-sm font-medium flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Data da Despesa
+                </label>
+                <input
+                  type="datetime-local"
+                  value={paidAt}
+                  onChange={(e) => setPaidAt(e.target.value)}
+                  className="w-full mt-1.5 px-4 h-12 rounded-xl border border-border bg-background text-base text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
+                />
+              </div>
+
               {/* Campo de Competência */}
               <div>
                 <label className="text-sm font-medium">Mês de Competência (Opcional)</label>
@@ -358,6 +428,73 @@ export function AddExpenseSheet({
                 <p className="text-xs text-muted-foreground mt-1">
                   💡 Use para contabilizar em outro mês do orçamento
                 </p>
+              </div>
+
+              {/* Opção de Recorrência */}
+              <div className="space-y-3">
+                <label className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-accent cursor-pointer">
+                  <Checkbox
+                    checked={isRecurring}
+                    onCheckedChange={(checked) => setIsRecurring(checked as boolean)}
+                  />
+                  <div className="flex items-center gap-2">
+                    <Repeat className="h-4 w-4" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">Despesa Recorrente</p>
+                    </div>
+                  </div>
+                </label>
+
+                {isRecurring && (
+                  <div className="pl-7 space-y-3">
+                    <div>
+                      <label className="text-sm font-medium">Frequência</label>
+                      <div className="flex gap-2 mt-1.5">
+                        <button
+                          onClick={() => setRecurrenceFrequency("monthly")}
+                          className={`flex-1 px-4 py-2 rounded-lg border transition-colors ${recurrenceFrequency === "monthly"
+                            ? "border-primary bg-primary/10"
+                            : "border-border"
+                            }`}
+                        >
+                          Mensal
+                        </button>
+                        <button
+                          onClick={() => setRecurrenceFrequency("weekly")}
+                          className={`flex-1 px-4 py-2 rounded-lg border transition-colors ${recurrenceFrequency === "weekly"
+                            ? "border-primary bg-primary/10"
+                            : "border-border"
+                            }`}
+                        >
+                          Semanal
+                        </button>
+                      </div>
+                    </div>
+
+                    {recurrenceFrequency && (
+                      <div>
+                        <label className="text-sm font-medium">
+                          {recurrenceFrequency === "monthly"
+                            ? "Dia do mês"
+                            : "Dia da semana (0=Dom, 1=Seg, ...)"}
+                        </label>
+                        <input
+                          type="number"
+                          min={recurrenceFrequency === "monthly" ? 1 : 0}
+                          max={recurrenceFrequency === "monthly" ? 31 : 6}
+                          value={recurrenceDay}
+                          onChange={(e) => setRecurrenceDay(e.target.value)}
+                          className="w-full mt-1.5 px-4 h-12 rounded-xl border border-border bg-background text-base text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
+                          placeholder={
+                            recurrenceFrequency === "monthly"
+                              ? "Ex: 5"
+                              : "Ex: 1"
+                          }
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Opção de dividir */}
@@ -423,7 +560,7 @@ export function AddExpenseSheet({
                 <ConfirmButton
                   variant="outline"
                   onConfirm={handleDelete}
-                  className="w-full border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-300 transition-colors"
+                  className="w-full border-destructive/20 text-destructive hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-colors"
                   disabled={deleteExpense.isPending}
                   confirmText="Você tem certeza?"
                   defaultText="Apagar Despesa"

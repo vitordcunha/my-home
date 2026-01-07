@@ -305,14 +305,14 @@ export function IncomeFormSheet({
                     nextMonth.setMonth(nextMonth.getMonth() + 1);
                     nextMonth.setDate(1);
                     return (
-                      <div className="mt-2 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                        <p className="text-xs text-blue-600 dark:text-blue-400 mb-2">
+                      <div className="mt-2 p-3 rounded-lg bg-primary/10 border border-primary/20">
+                        <p className="text-xs text-primary mb-2">
                           💡 Sugestão: Este salário foi recebido no fim do mês. Deseja contabilizar em {nextMonth.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}?
                         </p>
                         <button
                           type="button"
                           onClick={() => setCompetenceDate(nextMonth.toISOString().slice(0, 10))}
-                          className="text-xs px-3 py-1.5 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                          className="text-xs px-3 py-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
                         >
                           Sim, usar mês seguinte
                         </button>
@@ -434,7 +434,7 @@ export function IncomeFormSheet({
                 <ConfirmButton
                   variant="outline"
                   onConfirm={handleDelete}
-                  className="w-full border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-300 transition-colors"
+                  className="w-full border-destructive/20 text-destructive hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-colors"
                   disabled={deleteIncome.isPending}
                   confirmText="Toque para confirmar"
                   defaultText="Apagar Receita"

@@ -89,7 +89,7 @@ export function ConfirmButton({
   const shouldShowBadge = isIconButton ? true : showBadge;
 
   return (
-    <div ref={containerRef} className="relative inline-flex">
+    <div ref={containerRef} className="relative inline-flex w-full">
       {isConfirming && shouldShowBadge && (
         <span
           className={cn(
@@ -111,19 +111,19 @@ export function ConfirmButton({
         className={cn(
           "transition-all",
           isConfirming &&
-            variant === "destructive" &&
-            "bg-destructive/90 hover:bg-destructive",
+          variant === "destructive" &&
+          "bg-destructive/90 hover:bg-destructive",
           isConfirming &&
-            variant === "ghost" &&
-            "text-destructive bg-destructive/20 hover:bg-destructive/30",
+          variant === "ghost" &&
+          "text-destructive bg-destructive/20 hover:bg-destructive/30",
           className
         )}
         title={isConfirming ? "Clique novamente para confirmar" : undefined}
         {...props}
       >
-        {isIconButton || !isConfirming
+        {!shouldShowBadge && !isConfirming
           ? children
-          : defaultText || confirmText}
+          : confirmText || defaultText}
       </Button>
     </div>
   );

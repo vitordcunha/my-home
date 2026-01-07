@@ -4,7 +4,7 @@ import { IncomeInsert, IncomeUpdate } from "./useIncomesQuery";
 import { useToast } from "@/hooks/use-toast";
 
 interface AddIncomeData
-  extends Omit<IncomeInsert, "id" | "created_at" | "updated_at"> {}
+  extends Omit<IncomeInsert, "id" | "created_at" | "updated_at"> { }
 
 export function useAddIncome() {
   const queryClient = useQueryClient();
@@ -39,6 +39,9 @@ export function useAddIncome() {
       });
       queryClient.invalidateQueries({
         queryKey: ["financialBalance", variables.household_id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["financialTimeline", variables.household_id],
       });
       toast({
         title: "Receita registrada!",
@@ -75,6 +78,9 @@ export function useUpdateIncome() {
       queryClient.invalidateQueries({ queryKey: ["incomes"] });
       queryClient.invalidateQueries({
         queryKey: ["financialBalance", data.household_id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["financialTimeline", data.household_id],
       });
       toast({
         title: "Receita atualizada",
@@ -114,6 +120,9 @@ export function useDeleteIncome() {
         queryClient.invalidateQueries({ queryKey: ["incomes", householdId] });
         queryClient.invalidateQueries({
           queryKey: ["financialBalance", householdId],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["financialTimeline", householdId],
         });
       }
       toast({

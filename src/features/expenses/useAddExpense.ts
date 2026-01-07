@@ -4,7 +4,7 @@ import { ExpenseInsert } from "./types";
 import { toast } from "@/hooks/use-toast";
 
 interface AddExpenseData
-  extends Omit<ExpenseInsert, "id" | "created_at" | "updated_at"> {}
+  extends Omit<ExpenseInsert, "id" | "created_at" | "updated_at"> { }
 
 export function useAddExpense() {
   const queryClient = useQueryClient();
@@ -108,6 +108,13 @@ export function useAddExpense() {
       });
       queryClient.invalidateQueries({
         queryKey: ["totalSpent", variables.household_id],
+      });
+      // Invalidar queries de saldo e extrato que alimentam a dashboard principal
+      queryClient.invalidateQueries({
+        queryKey: ["financialBalance", variables.household_id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["financialTimeline", variables.household_id],
       });
 
       // Toast de sucesso

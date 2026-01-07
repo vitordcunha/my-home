@@ -5,13 +5,16 @@ import { useProfilesQuery } from "@/features/auth/useProfilesQuery";
 import { useShoppingItemsQuery } from "./useShoppingItemsQuery";
 import { useAddShoppingItem } from "./useAddShoppingItem";
 import { useCompleteShoppingTrip } from "./useCompleteShoppingTrip";
+
 import { useDeleteShoppingItem } from "./useDeleteShoppingItem";
+import { useAddExpense } from "@/features/expenses/useAddExpense";
 import { AddItemSheet } from "./AddItemSheet";
 import { CompleteShoppingSheet } from "./CompleteShoppingSheet";
+import { ReceiptPreviewSheet } from "./ReceiptPreviewSheet";
 import { ShoppingItemCard } from "./ShoppingItemCard";
 import { Button } from "@/components/ui/button";
 import { FloatingActionButton } from "@/components/ui/floating-action-button";
-import { ShoppingCart, Sparkles } from "lucide-react";
+import { ShoppingCart, Sparkles, Upload } from "lucide-react";
 import { ShoppingCategory } from "./types";
 import { ShoppingListSkeleton } from "@/components/skeletons/ShoppingSkeleton";
 
@@ -32,6 +35,7 @@ export function ShoppingScreen() {
 
   const [showAddSheet, setShowAddSheet] = useState(false);
   const [showCompleteSheet, setShowCompleteSheet] = useState(false);
+  const [showReceiptSheet, setShowReceiptSheet] = useState(false);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
 
   const handleRefresh = async () => {
@@ -128,6 +132,42 @@ export function ShoppingScreen() {
     });
   };
 
+  // --- Logic for Receipt Scanner ---
+  const { mutate: addExpense } = useAddExpense();
+
+  const handleSaveReceipt = (data: import("./ReceiptPreviewSheet").ReceiptData) => {
+    if (!user?.id || !profile?.household_id) return;
+
+    // 1. Identify matched items in the shopping list (using AI results)
+    const matchedItemIds = data.items
+      .map(item => item.matched_shopping_item_id)
+      .filter((id): id is string => !!id);
+
+    // 2. Mark matched items as purchased
+    if (matchedItemIds.length > 0) {
+      completeTrip.mutate({
+        itemIds: matchedItemIds,
+        userId: user.id,
+        householdId: profile.household_id,
+      });
+    }
+
+    // 3. Create the Expense Record
+    addExpense({
+      household_id: profile.household_id,
+      description: data.establishment_name || "Compra via Scanner",
+      amount: data.total_amount,
+      category: "mercado",
+      paid_by: user.id,
+      paid_at: data.purchase_date || new Date().toISOString(),
+      is_split: false,
+      is_recurring: false,
+      created_by: user.id,
+    });
+
+    setShowReceiptSheet(false);
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-8">
@@ -152,9 +192,20 @@ export function ShoppingScreen() {
 
           {/* Header */}
           <div className="space-y-3">
-            <h2 className="text-3xl font-bold tracking-tight">
-              Lista de Compras
-            </h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-3xl font-bold tracking-tight">
+                Lista de Compras
+              </h2>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setShowReceiptSheet(true)}
+                className="rounded-full h-10 w-10 border-dashed border-2 hover:bg-muted"
+                aria-label="Escanear Nota"
+              >
+                <Upload className="h-5 w-5 text-muted-foreground" />
+              </Button>
+            </div>
             <p className="text-base text-muted-foreground">
               {hasItems
                 ? `${items.length} ${items.length === 1 ? "item" : "itens"
@@ -260,6 +311,15 @@ export function ShoppingScreen() {
         userId={user?.id || ""}
         onComplete={handleCompleteTrip}
         isPending={completeTrip.isPending}
+      />
+
+      {/* Receipt Preview Sheet */}
+      <ReceiptPreviewSheet
+        open={showReceiptSheet}
+        onOpenChange={setShowReceiptSheet}
+        householdId={profile?.household_id || undefined}
+        onSave={handleSaveReceipt}
+        shoppingListItems={items?.map(i => ({ id: i.id, name: i.name })) || []}
       />
     </>
   );

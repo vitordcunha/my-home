@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { useAddIncome, useUpdateIncome } from "./useIncomeMutations";
-import { CheckCircle2, Calendar, Repeat } from "lucide-react";
+import { ConfirmButton } from "@/components/ui/confirm-button";
+import { useAddIncome, useUpdateIncome, useDeleteIncome } from "./useIncomeMutations";
+import { CheckCircle2, Calendar, Repeat, Trash2 } from "lucide-react";
 import { useHaptic } from "@/hooks/useHaptic";
 import { Income } from "./useIncomesQuery";
 
@@ -44,9 +45,21 @@ export function IncomeFormSheet({
 
   const addIncome = useAddIncome();
   const updateIncome = useUpdateIncome();
+  const deleteIncome = useDeleteIncome();
   const { trigger } = useHaptic();
 
   const isEditMode = !!incomeToEdit;
+
+  const handleDelete = () => {
+    if (!incomeToEdit) return;
+
+    deleteIncome.mutate(incomeToEdit.id, {
+      onSuccess: () => {
+        onOpenChange(false);
+        resetForm();
+      },
+    });
+  };
 
   // Preencher formulário quando estiver editando
   useEffect(() => {
@@ -416,6 +429,20 @@ export function IncomeFormSheet({
               >
                 ← Voltar
               </Button>
+
+              {isEditMode && (
+                <ConfirmButton
+                  variant="outline"
+                  onConfirm={handleDelete}
+                  className="w-full border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-300 transition-colors"
+                  disabled={deleteIncome.isPending}
+                  confirmText="Toque para confirmar"
+                  defaultText="Apagar Receita"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Apagar Receita
+                </ConfirmButton>
+              )}
             </div>
           )}
         </div>

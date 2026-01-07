@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { ConfirmButton } from "@/components/ui/confirm-button";
 import { useAddExpense } from "./useAddExpense";
-import { useUpdateExpense } from "./useExpenseMutations";
+import { useUpdateExpense, useDeleteExpense } from "./useExpenseMutations";
 import { EXPENSE_QUICK_ACTIONS, ExpenseCategory, Expense } from "./types";
 import { useHouseholdQuery } from "@/features/households/useHouseholdQuery";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -12,6 +13,7 @@ import {
   Rocket,
   Pencil,
   CheckCircle2,
+  Trash2,
 } from "lucide-react";
 import { useHaptic } from "@/hooks/useHaptic";
 
@@ -43,6 +45,7 @@ export function AddExpenseSheet({
   const { data: household } = useHouseholdQuery(householdId);
   const addExpense = useAddExpense();
   const updateExpense = useUpdateExpense();
+  const deleteExpense = useDeleteExpense();
   const { trigger } = useHaptic();
 
   const isEditMode = !!expenseToEdit;
@@ -160,6 +163,17 @@ export function AddExpenseSheet({
         }
       );
     }
+  };
+
+  const handleDelete = () => {
+    if (!expenseToEdit) return;
+
+    deleteExpense.mutate(expenseToEdit.id, {
+      onSuccess: () => {
+        onOpenChange(false);
+        resetForm();
+      },
+    });
   };
 
   const resetForm = () => {
@@ -404,6 +418,20 @@ export function AddExpenseSheet({
               <Button variant="ghost" onClick={resetForm} className="w-full">
                 ← Voltar
               </Button>
+
+              {isEditMode && (
+                <ConfirmButton
+                  variant="outline"
+                  onConfirm={handleDelete}
+                  className="w-full border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-300 transition-colors"
+                  disabled={deleteExpense.isPending}
+                  confirmText="Você tem certeza?"
+                  defaultText="Apagar Despesa"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Apagar Despesa
+                </ConfirmButton>
+              )}
             </div>
           )}
         </div>

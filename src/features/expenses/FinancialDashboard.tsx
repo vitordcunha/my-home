@@ -24,7 +24,8 @@ import {
     FileText,
     Target,
     Download,
-    Filter
+    Filter,
+    Upload
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FloatingActionButton } from "@/components/ui/floating-action-button";
@@ -37,6 +38,8 @@ import { AddExpenseSheet } from "./AddExpenseSheet";
 import { IncomeFormSheet } from "./IncomeFormSheet";
 import { ImportStatementSheet } from "./ImportStatementSheet";
 import { BudgetManagementSheet } from "./BudgetManagementSheet";
+import { ReceiptPreviewSheet } from "@/features/shopping/ReceiptPreviewSheet";
+import { useAddExpense } from "./useAddExpense";
 
 import { PullToRefreshWrapper } from "@/components/ui/pull-to-refresh";
 import { useQueryClient } from "@tanstack/react-query";
@@ -68,6 +71,7 @@ export function FinancialDashboard() {
     const [showExpenseSheet, setShowExpenseSheet] = useState(false);
     const [showIncomeSheet, setShowIncomeSheet] = useState(false);
     const [showImportSheet, setShowImportSheet] = useState(false);
+    const [showReceiptSheet, setShowReceiptSheet] = useState(false);
 
     const [showBudgetSheet, setShowBudgetSheet] = useState(false);
     const [chartMode, setChartMode] = useState<"bar" | "flow">("flow");
@@ -177,10 +181,27 @@ export function FinancialDashboard() {
         await Promise.all([
             queryClient.invalidateQueries({ queryKey: ["expenses"] }),
             queryClient.invalidateQueries({ queryKey: ["incomes"] }),
-            queryClient.invalidateQueries({ queryKey: ["financial-balance"] }),
-            queryClient.invalidateQueries({ queryKey: ["financial-timeline"] }),
+            queryClient.invalidateQueries({ queryKey: ["financialBalance"] }),
+            queryClient.invalidateQueries({ queryKey: ["financialTimeline"] }),
             queryClient.invalidateQueries({ queryKey: ["profile"] })
         ]);
+    };
+
+    const { mutate: addExpense } = useAddExpense();
+    const handleSaveReceipt = (data: import("@/features/shopping/ReceiptPreviewSheet").ReceiptData) => {
+        if (!user?.id || !profile?.household_id) return;
+        addExpense({
+            household_id: profile.household_id,
+            description: data.establishment_name || "Despesa Escaneada",
+            amount: data.total_amount,
+            category: "mercado",
+            paid_by: user.id,
+            paid_at: data.purchase_date || new Date().toISOString(),
+            is_split: false,
+            is_recurring: false,
+            created_by: user.id,
+        });
+        setShowReceiptSheet(false);
     };
 
     return (
@@ -324,6 +345,15 @@ export function FinancialDashboard() {
                         >
                             <Download className="h-4 w-4 text-blue-600" />
                             <span className="text-[10px] uppercase font-bold tracking-wider">Importar</span>
+                        </Button>
+
+                        <Button
+                            variant="outline"
+                            className="flex flex-col items-center gap-1 h-auto py-3 px-0 border-dashed border-2 hover:border-solid hover:bg-accent/50"
+                            onClick={() => setShowReceiptSheet(true)}
+                        >
+                            <Upload className="h-4 w-4 text-orange-600" />
+                            <span className="text-[10px] uppercase font-bold tracking-wider">Escanear</span>
                         </Button>
 
                         <Button
@@ -524,6 +554,14 @@ export function FinancialDashboard() {
                     onOpenChange={setShowBudgetSheet}
                     householdId={profile?.household_id || ""}
                     userId={user?.id || ""}
+                />
+
+                <ReceiptPreviewSheet
+                    open={showReceiptSheet}
+                    onOpenChange={setShowReceiptSheet}
+                    householdId={profile?.household_id || undefined}
+                    onSave={handleSaveReceipt}
+                    shoppingListItems={[]} // No shopping list matching in dashboard mode for now
                 />
             </div>
         </PullToRefreshWrapper>

@@ -47,5 +47,22 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Precisamos acesso à câmera para tirar fotos de documentos e recibos.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Precisamos acesso à galeria para selecionar documentos e recibos.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Precisamos acesso para salvar documentos na sua galeria.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.nossacasa.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.nossacasa.app</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

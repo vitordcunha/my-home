@@ -87,14 +87,20 @@ export const useCreateDocument = () => {
             if (!userProfile?.household_id) throw new Error("User has no household");
 
             // 2. Upload file
-            const fileExt = file.name.split('.').pop();
+            const fileExt = file.name ? file.name.split('.').pop() : 'bin';
             const fileName = `${user.id}/${Date.now()}.${fileExt}`;
 
             const { error: uploadError } = await supabase.storage
                 .from('documents')
-                .upload(fileName, file);
+                .upload(fileName, file, {
+                    contentType: file.type || undefined,
+                    upsert: false
+                });
 
-            if (uploadError) throw uploadError;
+            if (uploadError) {
+                console.error("Supabase Storage Upload Error:", uploadError);
+                throw new Error(`Erro no upload: ${uploadError.message}`);
+            }
 
             // 3. Create Record
             const { data, error } = await supabase
@@ -113,7 +119,10 @@ export const useCreateDocument = () => {
                 .select()
                 .single();
 
-            if (error) throw error;
+            if (error) {
+                console.error("Supabase Database Insert Error:", error);
+                throw new Error(`Erro ao salvar no banco: ${error.message}`);
+            }
             return data;
         },
         onSuccess: () => {

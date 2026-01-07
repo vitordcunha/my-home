@@ -3,6 +3,8 @@ import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Home } from "lucide-react";
+import { Capacitor } from "@capacitor/core";
+import { Browser } from "@capacitor/browser";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -64,9 +66,18 @@ export default function LoginScreen() {
     setLoading(true);
 
     try {
+      // Detecta se está rodando no Capacitor (mobile)
+      const isCapacitor = window.location.protocol === 'capacitor:' ||
+        window.location.protocol === 'ionic:';
+
+      const redirectUrl = isCapacitor
+        ? 'com.nossacasa.app://callback'
+        : window.location.origin;
+
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
+          emailRedirectTo: redirectUrl,
           data: {
             nome: nome || email.split("@")[0],
           },
@@ -99,14 +110,34 @@ export default function LoginScreen() {
   const handleGoogleLogin = async () => {
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signInWithOAuth({
+
+      const isCapacitor = Capacitor.isNativePlatform();
+
+      const redirectUrl = isCapacitor
+        ? 'com.nossacasa.app://callback'
+        : window.location.origin;
+
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: window.location.origin,
+          redirectTo: redirectUrl,
+          skipBrowserRedirect: true,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
         },
       });
 
       if (error) throw error;
+
+      if (data?.url) {
+        if (isCapacitor) {
+          await Browser.open({ url: data.url });
+        } else {
+          window.location.href = data.url;
+        }
+      }
     } catch (error) {
       const errorMessage =
         error instanceof Error

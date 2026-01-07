@@ -1,0 +1,114 @@
+{
+  "object" : {
+    "artifacts" : [
+      {
+        "kind" : "xcframework",
+        "packageRef" : {
+          "identity" : "capacitor-swift-pm",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/ionic-team/capacitor-swift-pm.git",
+          "name" : "capacitor-swift-pm"
+        },
+        "path" : "/Users/vitorcunha/Documents/dev/my-home/SourcePackages/artifacts/capacitor-swift-pm/Cordova/Cordova.xcframework",
+        "source" : {
+          "checksum" : "8677218618ed915b12fe7f5b09b96a994f58eb63477a2443f0ae44ce3e3c2aa7",
+          "type" : "remote",
+          "url" : "https://github.com/ionic-team/capacitor-swift-pm/releases/download/7.4.4/Cordova.xcframework.zip"
+        },
+        "targetName" : "Cordova"
+      },
+      {
+        "kind" : "xcframework",
+        "packageRef" : {
+          "identity" : "capacitor-swift-pm",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/ionic-team/capacitor-swift-pm.git",
+          "name" : "capacitor-swift-pm"
+        },
+        "path" : "/Users/vitorcunha/Documents/dev/my-home/SourcePackages/artifacts/capacitor-swift-pm/Capacitor/Capacitor.xcframework",
+        "source" : {
+          "checksum" : "be30c49e3bbb3306efdca60c7b1bb0d0cd5456d5324afa46c4e6271ade8749e1",
+          "type" : "remote",
+          "url" : "https://github.com/ionic-team/capacitor-swift-pm/releases/download/7.4.4/Capacitor.xcframework.zip"
+        },
+        "targetName" : "Capacitor"
+      }
+    ],
+    "dependencies" : [
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "app",
+          "kind" : "fileSystem",
+          "location" : "/Users/vitorcunha/Documents/dev/my-home/node_modules/.pnpm/@capacitor+app@7.1.1_@capacitor+core@7.4.4/node_modules/@capacitor/app",
+          "name" : "app"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/vitorcunha/Documents/dev/my-home/node_modules/.pnpm/@capacitor+app@7.1.1_@capacitor+core@7.4.4/node_modules/@capacitor/app"
+        },
+        "subpath" : "app"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "browser",
+          "kind" : "fileSystem",
+          "location" : "/Users/vitorcunha/Documents/dev/my-home/node_modules/.pnpm/@capacitor+browser@7.0.3_@capacitor+core@7.4.4/node_modules/@capacitor/browser",
+          "name" : "browser"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/vitorcunha/Documents/dev/my-home/node_modules/.pnpm/@capacitor+browser@7.0.3_@capacitor+core@7.4.4/node_modules/@capacitor/browser"
+        },
+        "subpath" : "browser"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "capacitor-swift-pm",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/ionic-team/capacitor-swift-pm.git",
+          "name" : "capacitor-swift-pm"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "145cf37b8e3b240efef3d2d8a7262e621f08bb6f",
+            "version" : "7.4.4"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "capacitor-swift-pm"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "capapp-spm",
+          "kind" : "fileSystem",
+          "location" : "/Users/vitorcunha/Documents/dev/my-home/ios/App/CapApp-SPM",
+          "name" : "CapApp-SPM"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/vitorcunha/Documents/dev/my-home/ios/App/CapApp-SPM"
+        },
+        "subpath" : "capapp-spm"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "haptics",
+          "kind" : "fileSystem",
+          "location" : "/Users/vitorcunha/Documents/dev/my-home/node_modules/.pnpm/@capacitor+haptics@7.0.3_@capacitor+core@7.4.4/node_modules/@capacitor/haptics",
+          "name" : "haptics"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/vitorcunha/Documents/dev/my-home/node_modules/.pnpm/@capacitor+haptics@7.0.3_@capacitor+core@7.4.4/node_modules/@capacitor/haptics"
+        },
+        "subpath" : "haptics"
+      }
+    ]
+  },
+  "version" : 6
+}

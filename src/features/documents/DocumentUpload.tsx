@@ -104,9 +104,11 @@ export function DocumentUpload({ onSuccess, onCancel }: Props) {
                 toast({ title: "Documento Salvo!" });
                 onSuccess();
             },
-            onError: () => {
+            onError: (error) => {
+                console.error("Save failed:", error);
                 toast({
                     title: "Erro ao salvar",
+                    description: error instanceof Error ? error.message : "Ocorreu um erro desconhecido",
                     variant: "destructive"
                 });
             }

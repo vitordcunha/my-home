@@ -19,6 +19,7 @@ import { ShoppingScreen } from "./features/shopping/ShoppingScreen";
 import { WeekViewScreen } from "./features/tasks/WeekViewScreen";
 import { FinancialDashboard } from "./features/expenses/FinancialDashboard";
 import { DocumentsScreen } from "./features/documents/DocumentsScreen";
+import { AnalyticsScreen } from "./features/analytics/AnalyticsScreen";
 // import { MaintenanceScreen } from "./features/maintenance/MaintenanceScreen";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -76,6 +77,7 @@ function AppRoutes() {
         <Route path="tasks/week" element={<WeekViewScreen />} />
         <Route path="history" element={<HistoryScreen />} />
         <Route path="ranking" element={<RankingScreen />} />
+        <Route path="analytics" element={<AnalyticsScreen />} />
         <Route path="rewards" element={<RewardsScreen />} />
         <Route path="rewards/manage" element={<RewardsManagementScreen />} />
         <Route path="members" element={<MembersManagementScreen />} />

@@ -4,7 +4,7 @@ import TaskList from "@/components/tasks/TaskList";
 import TaskFormDialog from "@/components/tasks/TaskFormDialog";
 import { Button } from "@/components/ui/button";
 import { FloatingActionButton } from "@/components/ui/floating-action-button";
-import { History, CalendarDays, Plus } from "lucide-react";
+import { History, CalendarDays, Plus, TrendingUp } from "lucide-react";
 import { useAuth } from "@/features/auth/useAuth";
 import { PullToRefreshWrapper } from "@/components/ui/pull-to-refresh";
 import { useQueryClient } from "@tanstack/react-query";
@@ -164,6 +164,19 @@ export default function TodayScreen() {
             shoppingData={dashboardData.shoppingData}
             rankingData={dashboardData.rankingData}
           />
+
+          {/* Link discreto para Analytics */}
+          <div className="flex justify-end">
+            <Button
+              onClick={() => navigate("/analytics")}
+              variant="ghost"
+              size="sm"
+              className="text-xs text-muted-foreground hover:text-foreground gap-1.5"
+            >
+              <TrendingUp className="h-3.5 w-3.5" />
+              Ver Analytics Detalhado
+            </Button>
+          </div>
 
           {/* Seção de Tarefas */}
           <div className="space-y-4">

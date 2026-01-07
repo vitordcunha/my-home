@@ -2,7 +2,6 @@ import {
     CheckSquare,
     CreditCard,
     ShoppingCart,
-    Plus,
     Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";

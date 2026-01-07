@@ -192,3 +192,5 @@ O app agora vibra para confirmar ações:
 **🎉 Aproveite as novas funcionalidades mobile!**
 
 
+
+

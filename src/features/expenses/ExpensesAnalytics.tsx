@@ -70,7 +70,9 @@ export function ExpensesAnalytics({
     const map = new Map<string, number>();
 
     expenses.forEach((exp) => {
-      const date = new Date(exp.paid_at || exp.created_at);
+      const dateStr = exp.paid_at || exp.created_at || "";
+      if (!dateStr) return;
+      const date = new Date(dateStr);
       const dayKey = date.toLocaleDateString("pt-BR", {
         day: "2-digit",
         month: "short",
@@ -171,12 +173,13 @@ export function ExpensesAnalytics({
                   label={({ name, percent }) =>
                     `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`
                   }
+                  stroke="hsl(var(--background))" // stroke separator
                 >
                   {categoryData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={COLORS[entry.category] || COLORS["outros"]}
-                      strokeWidth={0}
+                      strokeWidth={2}
                     />
                   ))}
                 </Pie>
@@ -184,9 +187,12 @@ export function ExpensesAnalytics({
                   formatter={(value) => formatCurrency(Number(value ?? 0))}
                   contentStyle={{
                     borderRadius: "8px",
-                    border: "none",
+                    border: "1px solid hsl(var(--border))",
+                    backgroundColor: "hsl(var(--popover))",
+                    color: "hsl(var(--popover-foreground))",
                     boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                   }}
+                  itemStyle={{ color: "hsl(var(--foreground))" }}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -208,19 +214,23 @@ export function ExpensesAnalytics({
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
+                  tick={{ fill: "hsl(var(--muted-foreground))" }}
                 />
                 <YAxis
                   hide
                   tickFormatter={(value) => formatCurrency(value)}
                 />
                 <Tooltip
-                  cursor={{ fill: "transparent" }}
+                  cursor={{ fill: "hsl(var(--muted))", opacity: 0.1 }}
                   formatter={(value) => formatCurrency(Number(value ?? 0))}
                   contentStyle={{
                     borderRadius: "8px",
-                    border: "none",
+                    border: "1px solid hsl(var(--border))",
+                    backgroundColor: "hsl(var(--popover))",
+                    color: "hsl(var(--popover-foreground))",
                     boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                   }}
+                  itemStyle={{ color: "hsl(var(--foreground))" }}
                 />
                 <Bar
                   dataKey="amount"

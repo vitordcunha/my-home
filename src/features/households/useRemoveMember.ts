@@ -19,7 +19,6 @@ export function useRemoveMember() {
 
   return useMutation({
     mutationFn: async ({ adminId, memberId }: RemoveMemberParams) => {
-      // @ts-expect-error - Supabase RPC type inference issue
       const { data, error } = await supabase.rpc("remove_household_member", {
         p_admin_id: adminId,
         p_member_id: memberId,
@@ -46,9 +45,9 @@ export function useRemoveMember() {
       ]);
       const previousHousehold = householdId
         ? queryClient.getQueryData<HouseholdWithMembers>([
-            "household",
-            householdId,
-          ])
+          "household",
+          householdId,
+        ])
         : undefined;
 
       // Optimistic update - remove member from profiles list

@@ -13,8 +13,8 @@ interface MaintenanceItemCardProps {
 }
 
 export function MaintenanceItemCard({ item }: MaintenanceItemCardProps) {
-  const priorityColor = PRIORITY_COLORS[item.priority];
-  const locationEmoji = LOCATION_EMOJIS[item.location] || "📍";
+  const priorityColor = PRIORITY_COLORS[item.priority as keyof typeof PRIORITY_COLORS];
+  const locationEmoji = LOCATION_EMOJIS[item.location as keyof typeof LOCATION_EMOJIS] || "📍";
 
   return (
     <div
@@ -34,7 +34,7 @@ export function MaintenanceItemCard({ item }: MaintenanceItemCardProps) {
               {locationEmoji} {item.location}
             </span>
             <span>•</span>
-            <span>{ACTION_TYPE_LABELS[item.action_type]}</span>
+            <span>{ACTION_TYPE_LABELS[item.action_type as keyof typeof ACTION_TYPE_LABELS]}</span>
             {item.estimated_cost && (
               <>
                 <span>•</span>
@@ -62,7 +62,7 @@ export function MaintenanceItemCard({ item }: MaintenanceItemCardProps) {
           Reportado{" "}
           {(() => {
             try {
-              const date = new Date(item.created_at);
+              const date = new Date(item.created_at || new Date());
               if (isNaN(date.getTime())) return "recentemente";
               return formatDistanceToNow(date, {
                 locale: ptBR,

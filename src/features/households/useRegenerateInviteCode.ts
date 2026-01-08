@@ -8,7 +8,6 @@ export function useRegenerateInviteCode() {
 
   return useMutation({
     mutationFn: async (householdId: string) => {
-      // @ts-expect-error - Supabase RPC type inference issue
       const { data, error } = await supabase.rpc("regenerate_invite_code", {
         p_household_id: householdId,
       });

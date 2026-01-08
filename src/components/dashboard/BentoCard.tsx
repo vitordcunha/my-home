@@ -13,9 +13,9 @@ export function BentoCard({ className, children, onClick, hover = true }: BentoC
     <div
       onClick={onClick}
       className={cn(
-        "relative overflow-hidden rounded-2xl bg-card border border-border p-4 md:p-6",
-        "shadow-soft transition-all duration-300",
-        hover && "hover:shadow-soft-lg hover:-translate-y-0.5 cursor-pointer",
+        "relative overflow-hidden rounded-2xl bg-card border p-5",
+        "transition-colors duration-200",
+        hover && "hover:bg-muted/50 cursor-pointer",
         onClick && "active:scale-[0.98]",
         className
       )}

@@ -17,6 +17,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { ProfileSelectSkeleton } from "@/components/skeletons/ProfileSelectSkeleton";
 import { useHaptic } from "@/hooks/useHaptic";
 import { Checkbox } from "@/components/ui/checkbox";
+import { User, RefreshCcw, Star } from "lucide-react";
 
 interface TaskFormDialogProps {
   open: boolean;
@@ -199,14 +200,13 @@ export default function TaskFormDialog({
                 <button
                   type="button"
                   onClick={() => setAssignedTo("")}
-                  className={`w-full py-3 px-4 rounded-md border-2 transition-all thumb-friendly flex items-center gap-3 ${
-                    assignedTo === ""
+                  className={`w-full py-3 px-4 rounded-md border-2 transition-all thumb-friendly flex items-center gap-3 ${assignedTo === ""
                       ? "border-primary bg-primary/10 text-primary font-semibold"
                       : "border-border hover:border-primary/50"
-                  }`}
+                    }`}
                 >
                   <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm">
-                    👤
+                    <User className="h-4 w-4" />
                   </div>
                   <span>Sem responsável</span>
                 </button>
@@ -215,11 +215,10 @@ export default function TaskFormDialog({
                     key={profile.id}
                     type="button"
                     onClick={() => setAssignedTo(profile.id)}
-                    className={`w-full py-3 px-4 rounded-md border-2 transition-all thumb-friendly flex items-center gap-3 ${
-                      assignedTo === profile.id
+                    className={`w-full py-3 px-4 rounded-md border-2 transition-all thumb-friendly flex items-center gap-3 ${assignedTo === profile.id
                         ? "border-primary bg-primary/10 text-primary font-semibold"
                         : "border-border hover:border-primary/50"
-                    }`}
+                      }`}
                   >
                     <Avatar className="w-8 h-8">
                       {profile.avatar ? (
@@ -253,7 +252,8 @@ export default function TaskFormDialog({
             <div className="flex items-center justify-between p-4 border border-border rounded-lg bg-muted/20">
               <div className="space-y-0.5 flex-1">
                 <label className="text-sm font-medium flex items-center gap-2 cursor-pointer">
-                  <span>🔄 Rodízio Automático</span>
+                  <RefreshCcw className="h-4 w-4 text-primary" />
+                  <span>Rodízio Automático</span>
                 </label>
                 <p className="text-xs text-muted-foreground">
                   Ao completar, a tarefa passa automaticamente para o próximo
@@ -289,8 +289,9 @@ export default function TaskFormDialog({
                 max="1000"
                 className="flex-1 px-4 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
               />
-              <Badge variant="secondary" className="text-base">
-                ⭐ {xpValue}
+              <Badge variant="secondary" className="text-base gap-1.5 py-1.5 px-3">
+                <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
+                {xpValue}
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
@@ -307,33 +308,30 @@ export default function TaskFormDialog({
               <button
                 type="button"
                 onClick={() => setRecurrenceType("daily")}
-                className={`py-3 px-4 rounded-md border-2 transition-all thumb-friendly ${
-                  recurrenceType === "daily"
+                className={`py-3 px-4 rounded-md border-2 transition-all thumb-friendly ${recurrenceType === "daily"
                     ? "border-primary bg-primary/10 text-primary font-semibold"
                     : "border-border hover:border-primary/50"
-                }`}
+                  }`}
               >
                 Diária
               </button>
               <button
                 type="button"
                 onClick={() => setRecurrenceType("weekly")}
-                className={`py-3 px-4 rounded-md border-2 transition-all thumb-friendly ${
-                  recurrenceType === "weekly"
+                className={`py-3 px-4 rounded-md border-2 transition-all thumb-friendly ${recurrenceType === "weekly"
                     ? "border-primary bg-primary/10 text-primary font-semibold"
                     : "border-border hover:border-primary/50"
-                }`}
+                  }`}
               >
                 Semanal
               </button>
               <button
                 type="button"
                 onClick={() => setRecurrenceType("once")}
-                className={`py-3 px-4 rounded-md border-2 transition-all thumb-friendly ${
-                  recurrenceType === "once"
+                className={`py-3 px-4 rounded-md border-2 transition-all thumb-friendly ${recurrenceType === "once"
                     ? "border-primary bg-primary/10 text-primary font-semibold"
                     : "border-border hover:border-primary/50"
-                }`}
+                  }`}
               >
                 Única
               </button>
@@ -352,11 +350,10 @@ export default function TaskFormDialog({
                     key={day.value}
                     type="button"
                     onClick={() => toggleDay(day.value)}
-                    className={`py-3 rounded-md border-2 transition-all text-sm font-medium thumb-friendly ${
-                      selectedDays.includes(day.value)
+                    className={`py-3 rounded-md border-2 transition-all text-sm font-medium thumb-friendly ${selectedDays.includes(day.value)
                         ? "border-primary bg-primary text-primary-foreground"
                         : "border-border hover:border-primary/50"
-                    }`}
+                      }`}
                   >
                     {day.label}
                   </button>

@@ -15,14 +15,14 @@ export function BalanceCard({ balance, monthBudget, totalSpent = 0 }: BalanceCar
   const isOverBudget = remaining !== null && remaining < 0;
 
   return (
-    <BentoCard 
-      className="bg-gradient-to-br from-emerald-500/10 via-background to-background h-full"
+    <BentoCard
+      className="h-full"
       onClick={() => navigate("/expenses")}
     >
       <div className="flex flex-col">
         <div className="flex items-center gap-2 mb-3">
-          <div className="p-2 rounded-xl bg-emerald-500/10">
-            <Wallet className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+          <div className="p-2 rounded-lg bg-muted">
+            <Wallet className="h-4 w-4" />
           </div>
           <h3 className="font-semibold text-sm">Saldo</h3>
         </div>
@@ -43,7 +43,7 @@ export function BalanceCard({ balance, monthBudget, totalSpent = 0 }: BalanceCar
           </div>
 
           {remaining !== null && (
-            <div className="pt-3 border-t border-border/50">
+            <div className="pt-2 mt-2 border-t">
               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                 <TrendingDown className="h-3 w-3" />
                 <span className={isOverBudget ? "text-destructive font-medium" : ""}>

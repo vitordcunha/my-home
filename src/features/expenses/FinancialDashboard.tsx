@@ -1,23 +1,20 @@
+import { Link } from "react-router-dom";
 import { useState, useMemo, useEffect } from "react";
 import { useAuth } from "@/features/auth/useAuth";
 import { useProfileQuery } from "@/features/auth/useProfileQuery";
 import { AnnualOverview } from "./AnnualOverview";
 
-import { CashFlowChart } from "./CashFlowChart";
-import { CashFlowSankey } from "./CashFlowSankey";
 import { useFinancialBalance, useFinancialTimeline, TimelineItem } from "./useFinancialBalance";
-import { motion, AnimatePresence } from "framer-motion";
+
 import { useExpensesQuery } from "./useExpensesQuery";
 import { useIncomesQuery } from "./useIncomesQuery";
 import { Expense } from "./types";
 import { Income } from "./useIncomesQuery";
+import { FinancialOverviewGrid } from "./FinancialOverviewGrid";
 
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
-
-    ChevronDown,
-    ChevronUp,
     TrendingUp,
     TrendingDown,
     FileText,
@@ -25,26 +22,28 @@ import {
     Download,
     Filter,
     Upload,
-    Repeat
+    Repeat,
+    CreditCard,
+    Settings,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FloatingActionButton } from "@/components/ui/floating-action-button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Sheets
 import { AddExpenseSheet } from "./AddExpenseSheet";
 import { IncomeFormSheet } from "./IncomeFormSheet";
 import { ImportStatementSheet } from "./ImportStatementSheet";
 import { BudgetManagementSheet } from "./BudgetManagementSheet";
+import { FinancialSettingsSheet } from "./FinancialSettingsSheet";
 import { ReceiptPreviewSheet } from "@/features/shopping/ReceiptPreviewSheet";
 import { useAddExpense } from "./useAddExpense";
 
 import { PullToRefreshWrapper } from "@/components/ui/pull-to-refresh";
 import { useQueryClient } from "@tanstack/react-query";
 import { PageHeader } from "@/components/ui/page-header";
-import { FinancialSummaryCard } from "./FinancialSummaryCard";
 
 type ViewMode = "me" | "household";
 const VIEW_MODE_STORAGE_KEY = "financial-dashboard-view-mode";
@@ -65,9 +64,10 @@ export function FinancialDashboard() {
         return (stored === "me" || stored === "household") ? stored : "me";
     });
 
+    const [activeTab, setActiveTab] = useState("overview");
+
     const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1);
     const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
-    const [isChartOpen, setIsChartOpen] = useState(true);
 
     // Sheets State
     const [showExpenseSheet, setShowExpenseSheet] = useState(false);
@@ -76,7 +76,7 @@ export function FinancialDashboard() {
     const [showReceiptSheet, setShowReceiptSheet] = useState(false);
 
     const [showBudgetSheet, setShowBudgetSheet] = useState(false);
-    const [chartMode, setChartMode] = useState<"bar" | "flow">("flow");
+    const [showSettingsSheet, setShowSettingsSheet] = useState(false);
 
     // Edit State
     const [expenseToEdit, setExpenseToEdit] = useState<Expense | null>(null);
@@ -206,6 +206,45 @@ export function FinancialDashboard() {
         setShowReceiptSheet(false);
     };
 
+    // --- Quick Attributes for Actions ---
+    const quickActions = [
+        {
+            label: "Despesa",
+            icon: TrendingDown,
+            color: "text-red-500",
+            bg: "bg-red-500/10",
+            onClick: () => { setExpenseToEdit(null); setShowExpenseSheet(true); }
+        },
+        {
+            label: "Receita",
+            icon: TrendingUp,
+            color: "text-emerald-500",
+            bg: "bg-emerald-500/10",
+            onClick: () => { setIncomeToEdit(null); setShowIncomeSheet(true); }
+        },
+        {
+            label: "Escanear",
+            icon: Upload,
+            color: "text-blue-500",
+            bg: "bg-blue-500/10",
+            onClick: () => setShowReceiptSheet(true)
+        },
+        {
+            label: "Importar",
+            icon: Download,
+            color: "text-purple-500",
+            bg: "bg-purple-500/10",
+            onClick: () => setShowImportSheet(true)
+        },
+        {
+            label: "Metas",
+            icon: Target,
+            color: "text-amber-500",
+            bg: "bg-amber-500/10",
+            onClick: () => setShowBudgetSheet(true)
+        },
+    ];
+
     return (
         <PullToRefreshWrapper onRefresh={handleRefresh}>
             <div className="space-y-6 pb-24">
@@ -213,319 +252,266 @@ export function FinancialDashboard() {
                 <div className="flex flex-col gap-4">
                     <PageHeader
                         title="Financeiro"
-                        description="Gestão de receitas e despesas"
+                        description="Gestão inteligente do seu dinheiro"
                         actions={
-                            <div className="flex bg-muted/50 rounded-lg p-0.5 backdrop-blur-sm border border-white/10">
-                                <button
-                                    onClick={() => setViewMode("me")}
-                                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${viewMode === "me"
-                                        ? "bg-background shadow-sm text-foreground"
-                                        : "text-muted-foreground hover:text-foreground"
-                                        }`}
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-9 w-9 rounded-full bg-muted/50 hover:bg-muted"
+                                    onClick={() => setShowSettingsSheet(true)}
                                 >
-                                    Minha Visão
-                                </button>
-                                <button
-                                    onClick={() => setViewMode("household")}
-                                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${viewMode === "household"
-                                        ? "bg-background shadow-sm text-foreground"
-                                        : "text-muted-foreground hover:text-foreground"
-                                        }`}
-                                >
-                                    Visão Casa
-                                </button>
+                                    <Settings className="h-4 w-4 text-muted-foreground" />
+                                </Button>
+
+                                <Link to="/expenses/debts">
+                                    <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full bg-muted/50 hover:bg-muted">
+                                        <CreditCard className="h-4 w-4 text-muted-foreground" />
+                                    </Button>
+                                </Link>
+                                <div className="flex bg-muted/50 rounded-full p-1 backdrop-blur-sm border border-white/5">
+                                    <button
+                                        onClick={() => setViewMode("me")}
+                                        className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full transition-all ${viewMode === "me"
+                                            ? "bg-background shadow-sm text-foreground"
+                                            : "text-muted-foreground hover:text-foreground"
+                                            }`}
+                                    >
+                                        Pessoal
+                                    </button>
+                                    <button
+                                        onClick={() => setViewMode("household")}
+                                        className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full transition-all ${viewMode === "household"
+                                            ? "bg-background shadow-sm text-foreground"
+                                            : "text-muted-foreground hover:text-foreground"
+                                            }`}
+                                    >
+                                        Casa
+                                    </button>
+                                </div>
                             </div>
                         }
                     />
-
-                    {/* --- Annual Overview --- */}
-                    <AnnualOverview
-                        selectedMonth={selectedMonth}
-                        selectedYear={selectedYear}
-                        onMonthChange={setSelectedMonth}
-                        onYearChange={setSelectedYear}
-                        // TODO: Passar dados reais de status anual
-                        financialData={{
-                            [selectedMonth]: {
-                                status: (balance?.projected_balance ?? 0) < 0 ? 'warning' : 'healthy',
-                                balance: balance?.projected_balance ?? 0
-                            }
-                        }}
-                    />
                 </div>
 
-                {/* --- Financial Summary (Unified) --- */}
-                <FinancialSummaryCard
-                    householdId={profile?.household_id || undefined}
-                    userId={user?.id}
-                    month={selectedMonth}
-                    year={selectedYear}
-                />
+                {/* --- Main Content Tabs --- */}
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                    <TabsList className="grid w-full grid-cols-3 bg-muted/30 p-1 rounded-2xl h-12">
+                        <TabsTrigger
+                            value="overview"
+                            className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-soft text-xs font-medium"
+                        >
+                            Visão Geral
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="statement"
+                            className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-soft text-xs font-medium"
+                        >
+                            Extrato
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="planning"
+                            className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-soft text-xs font-medium"
+                        >
+                            Planejamento
+                        </TabsTrigger>
+                    </TabsList>
 
-                {/* --- Analysis Section (Chart) --- */}
-                <Collapsible open={isChartOpen} onOpenChange={setIsChartOpen} className="space-y-2">
-                    <div className="flex items-center justify-between px-1">
-                        <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                            Análise Financeira
-                            <div className="flex bg-muted/50 p-0.5 rounded-lg">
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); setChartMode("bar"); }}
-                                    className={`px-2 py-0.5 text-[10px] rounded-md transition-all ${chartMode === 'bar' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-                                >
-                                    Barras
-                                </button>
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); setChartMode("flow"); }}
-                                    className={`px-2 py-0.5 text-[10px] rounded-md transition-all ${chartMode === 'flow' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-                                >
-                                    Fluxo
-                                </button>
+                    {/* === TAB 1: OVERVIEW === */}
+                    <TabsContent value="overview" className="space-y-6 mt-4">
+
+                        {/* 1. Quick Actions Bar */}
+                        <div className="w-full overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
+                            <div className="flex gap-3 min-w-max">
+                                {quickActions.map((action, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={action.onClick}
+                                        className="flex flex-col items-center gap-2 group"
+                                    >
+                                        <div className={`h-12 w-12 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-soft border border-transparent ${action.bg} group-hover:scale-105 group-active:scale-95`}>
+                                            <action.icon className={`h-5 w-5 ${action.color}`} />
+                                        </div>
+                                        <span className="text-[10px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                                            {action.label}
+                                        </span>
+                                    </button>
+                                ))}
                             </div>
-                        </h3>
-                        <CollapsibleTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                {isChartOpen ? (
-                                    <ChevronUp className="h-4 w-4" />
-                                ) : (
-                                    <ChevronDown className="h-4 w-4" />
-                                )}
-                            </Button>
-                        </CollapsibleTrigger>
-                    </div>
-
-                    <CollapsibleContent>
-                        <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="pt-2"
-                        >
-                            {timeline && timeline.length > 0 ? (
-                                chartMode === 'bar' ? (
-                                    <CashFlowChart
-                                        timeline={timeline}
-                                        month={selectedMonth}
-                                        year={selectedYear}
-                                        openingBalance={balance?.opening_balance || 0}
-                                    />
-                                ) : (
-                                    <CashFlowSankey
-                                        timeline={timeline}
-                                        month={selectedMonth}
-                                        year={selectedYear}
-                                    />
-                                )
-                            ) : (
-                                <div className="h-32 flex items-center justify-center bg-muted/20 rounded-lg border border-dashed">
-                                    <p className="text-sm text-muted-foreground">Sem dados para o gráfico</p>
-                                </div>
-                            )}
-                        </motion.div>
-                    </CollapsibleContent>
-                </Collapsible>
-
-                {/* --- Actions Bar --- */}
-                {viewMode === "me" && (
-                    <div className="grid grid-cols-4 gap-2">
-                        <Button
-                            variant="outline"
-                            className="flex flex-col items-center gap-1 h-auto py-3 px-0 border-dashed border-2 hover:border-solid hover:bg-accent/50 hover:text-accent-foreground"
-                            onClick={() => {
-                                setIncomeToEdit(null);
-                                setShowIncomeSheet(true);
-                            }}
-                        >
-                            <TrendingUp className="h-4 w-4 text-green-600" />
-                            <span className="text-[10px] uppercase font-bold tracking-wider">Receita</span>
-                        </Button>
-
-                        <Button
-                            variant="outline"
-                            className="flex flex-col items-center gap-1 h-auto py-3 px-0 border-dashed border-2 hover:border-solid hover:bg-accent/50"
-                            onClick={() => setShowImportSheet(true)}
-                        >
-                            <Download className="h-4 w-4 text-blue-600" />
-                            <span className="text-[10px] uppercase font-bold tracking-wider">Importar</span>
-                        </Button>
-
-                        <Button
-                            variant="outline"
-                            className="flex flex-col items-center gap-1 h-auto py-3 px-0 border-dashed border-2 hover:border-solid hover:bg-accent/50"
-                            onClick={() => setShowReceiptSheet(true)}
-                        >
-                            <Upload className="h-4 w-4 text-orange-600" />
-                            <span className="text-[10px] uppercase font-bold tracking-wider">Escanear</span>
-                        </Button>
-
-                        <Button
-                            variant="outline"
-                            className="flex flex-col items-center gap-1 h-auto py-3 px-0 border-dashed border-2 hover:border-solid hover:bg-accent/50"
-                            onClick={() => setShowBudgetSheet(true)}
-                        >
-                            <Target className="h-4 w-4 text-purple-600" />
-                            <span className="text-[10px] uppercase font-bold tracking-wider">Metas</span>
-                        </Button>
-
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    className={`flex flex-col items-center gap-1 h-auto py-3 px-0 border-dashed border-2 hover:border-solid hover:bg-accent/50 ${filterType !== 'all' ? 'bg-accent/20 border-primary/50' : ''}`}
-                                >
-                                    <Filter className="h-4 w-4 text-muted-foreground" />
-                                    <span className="text-[10px] uppercase font-bold tracking-wider">
-                                        {filterType === 'all' ? 'Filtros' : filterType === 'income' ? 'Receitas' : 'Despesas'}
-                                    </span>
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuLabel>Filtrar Visualização</DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => setFilterType("all")}>
-                                    {filterType === 'all' && <span className="mr-2">✓</span>}
-                                    Ver Tudo
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => setFilterType("expense")}>
-                                    {filterType === 'expense' && <span className="mr-2">✓</span>}
-                                    Apenas Despesas
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => setFilterType("income")}>
-                                    {filterType === 'income' && <span className="mr-2">✓</span>}
-                                    Apenas Receitas
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
-                )}
-
-                {/* --- Timeline / Transactions --- */}
-                {viewMode === 'me' && (
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between px-1">
-                            <h3 className="text-lg font-semibold">Extrato</h3>
-                            <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
-                                {timeline?.length || 0} movimentações
-                            </span>
                         </div>
 
-                        {groupedTimeline.length === 0 ? (
-                            <Card className="border-dashed bg-muted/10">
-                                <CardContent className="p-8 text-center space-y-2">
-                                    <FileText className="h-8 w-8 mx-auto text-muted-foreground/50" />
-                                    <p className="text-sm font-medium">Nenhuma movimentação neste mês</p>
-                                    <Button variant="link" size="sm" onClick={() => setShowExpenseSheet(true)}>
-                                        Adicionar primeira despesa
-                                    </Button>
-                                </CardContent>
-                            </Card>
-                        ) : (
-                            <div className="space-y-4 relative">
-                                {/* Linha vertical conectora (visual flair) */}
-                                <div className="absolute left-[19px] top-4 bottom-4 w-0.5 bg-gradient-to-b from-transparent via-border to-transparent z-0 md:left-6 transition-all opacity-50" />
+                        {/* 2. New Clean Bento Grid */}
+                        <FinancialOverviewGrid
+                            householdId={profile?.household_id || undefined}
+                            userId={user?.id}
+                            month={selectedMonth}
+                            year={selectedYear}
+                            timeline={timeline}
+                        />
 
-                                <AnimatePresence mode="popLayout">
-                                    {groupedTimeline.map((group, groupIndex) => (
-                                        <motion.div
-                                            key={group.date}
-                                            className="relative z-10"
-                                            initial={{ opacity: 0, y: 20 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: groupIndex * 0.1 }}
-                                        >
-                                            {/* Sticky Header por dia */}
-                                            <div className="flex items-center gap-3 mb-2 bg-background/80 backdrop-blur-md py-2 sticky top-0 z-20 rounded-lg">
-                                                <div className="h-2.5 w-2.5 rounded-full bg-primary ring-4 ring-background ml-[15px] md:ml-[20px] shadow-sm" />
-                                                <div className="flex-1 flex items-center justify-between border-b border-border/50 pb-1 mr-1">
-                                                    <span className="text-sm font-semibold capitalize text-foreground/90">
-                                                        {group.dateLabel}
-                                                    </span>
-                                                    <div className="text-right">
-                                                        <div className={`text-xs font-mono font-medium ${group.total > 0 ? "text-green-600" : "text-red-500"}`}>
-                                                            {group.total > 0 ? "+" : ""}
-                                                            {formatCurrency(group.total)}
+                    </TabsContent>
+
+                    {/* === TAB 2: EXTRATO === */}
+                    <TabsContent value="statement" className="space-y-4 mt-2">
+                        {/* Header Filtros Compacto */}
+                        <div className="flex items-center justify-between px-1 mb-2">
+                            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                {format(new Date(selectedYear, selectedMonth - 1), "MMMM yyyy", { locale: ptBR })}
+                            </span>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs font-medium text-muted-foreground hover:text-foreground">
+                                        <Filter className="h-3.5 w-3.5" />
+                                        {filterType === 'all' ? 'Todos' : filterType === 'income' ? 'Entradas' : 'Despesas'}
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => setFilterType("all")}>Todos</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setFilterType("income")}>Receitas</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setFilterType("expense")}>Despesas</DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+
+                        {/* Lista Super Clean */}
+                        {groupedTimeline.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-12 text-center space-y-3">
+                                <div className="p-4 rounded-full bg-muted/30">
+                                    <FileText className="h-6 w-6 text-muted-foreground/50" />
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-sm font-medium">Nenhum lançamento</p>
+                                    <p className="text-xs text-muted-foreground max-w-[200px] mx-auto">
+                                        Toque no botão + para adicionar sua primeira despesa ou receita.
+                                    </p>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="relative space-y-6">
+                                {/* Linha conectora vertical sutil */}
+                                <div className="absolute left-[14px] top-2 bottom-2 w-[1px] bg-border/40 z-0" />
+
+                                {groupedTimeline.map((group) => (
+                                    <div key={group.date} className="relative z-10">
+                                        {/* Sticky Date Header */}
+                                        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md py-2 mb-2 flex items-center gap-3 border-b border-border/30">
+                                            <div className="w-2 h-2 rounded-full bg-primary ring-4 ring-background ml-[11px]" />
+                                            <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                                                {group.dateLabel}
+                                            </span>
+                                            <div className={`ml-auto text-xs font-medium font-mono ${group.total >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                                                {group.total > 0 ? "+" : ""}{formatCurrency(group.total)}
+                                            </div>
+                                        </div>
+
+                                        {/* Transactions List */}
+                                        <div className="pl-8 pr-1 space-y-1">
+                                            {group.items.map((item) => {
+                                                const isRecurring = item.type === 'expense'
+                                                    ? allExpenses?.find(e => e.id === item.item_id)?.is_recurring
+                                                    : allIncomes?.find(i => i.id === item.item_id)?.is_recurring;
+
+                                                const isProjected = item.is_projected;
+
+                                                return (
+                                                    <div
+                                                        key={item.item_id}
+                                                        onClick={() => handleEditItem(item)}
+                                                        className="group flex items-center gap-3 py-2.5 px-2 rounded-xl hover:bg-muted/40 active:bg-muted/60 transition-colors cursor-pointer"
+                                                    >
+                                                        {/* Icon Circle */}
+                                                        <div className={`
+                                                            w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0
+                                                            ${item.type === 'income'
+                                                                ? 'bg-emerald-500/10 text-emerald-600'
+                                                                : 'bg-red-500/10 text-red-600'}
+                                                            ${isProjected ? 'opacity-60 border border-dashed border-current bg-transparent' : ''}
+                                                        `}>
+                                                            {item.type === 'income'
+                                                                ? <TrendingUp className="w-4 h-4" />
+                                                                : <TrendingDown className="w-4 h-4" />
+                                                            }
                                                         </div>
-                                                        <div className="text-[10px] text-muted-foreground mt-0.5">
-                                                            Saldo: <span className={group.runningBalance >= 0 ? "text-green-600/70" : "text-red-600/70"}>
-                                                                {formatCurrency(group.runningBalance)}
-                                                            </span>
+
+                                                        {/* Content */}
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex items-center justify-between mb-0.5">
+                                                                <span className={`text-sm font-medium truncate ${isProjected ? 'text-muted-foreground italic' : 'text-foreground'}`}>
+                                                                    {item.description}
+                                                                </span>
+                                                                <span className={`text-sm font-semibold whitespace-nowrap ${item.type === 'income' ? 'text-emerald-600' : 'text-foreground'}`}>
+                                                                    {formatCurrency(Math.abs(item.amount))}
+                                                                </span>
+                                                            </div>
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-[10px] text-muted-foreground capitalize">
+                                                                    {item.category || "Sem categoria"}
+                                                                </span>
+                                                                {isRecurring && (
+                                                                    <div className="flex items-center gap-0.5 text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600">
+                                                                        <Repeat className="w-2.5 h-2.5" />
+                                                                        Recorrente
+                                                                    </div>
+                                                                )}
+                                                                {isProjected && (
+                                                                    <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 font-medium">
+                                                                        Projetado
+                                                                    </span>
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Lista de itens do dia */}
-                                            <div className="pl-10 space-y-2 pr-1">
-                                                {group.items.map((item, itemIndex) => {
-                                                    const isRecurring = item.type === 'expense'
-                                                        ? allExpenses?.find(e => e.id === item.item_id)?.is_recurring
-                                                        : allIncomes?.find(i => i.id === item.item_id)?.is_recurring;
-
-                                                    return (
-                                                        <motion.div
-                                                            key={item.item_id}
-                                                            whileHover={{ scale: 1.02 }}
-                                                            whileTap={{ scale: 0.98 }}
-                                                            initial={{ opacity: 0, x: -10 }}
-                                                            animate={{ opacity: 1, x: 0 }}
-                                                            transition={{ delay: itemIndex * 0.05 }}
-                                                        >
-                                                            <Card
-                                                                className="overflow-hidden border-0 shadow-sm glass-card hover:bg-white/60 dark:hover:bg-black/40 transition-all group cursor-pointer"
-                                                                onClick={() => handleEditItem(item)}
-                                                            >
-                                                                <div className="flex items-center p-3 gap-3">
-                                                                    <div className={`p-2 rounded-xl flex-shrink-0 ${item.type === 'income'
-                                                                        ? 'bg-green-100/50 text-green-700 dark:bg-green-900/20 dark:text-green-400'
-                                                                        : 'bg-red-100/50 text-red-700 dark:bg-red-900/20 dark:text-red-400'
-                                                                        }`}>
-                                                                        {item.type === 'income' ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
-                                                                    </div>
-
-                                                                    <div className="flex-1 min-w-0">
-                                                                        <div className="flex items-center justify-between mb-0.5">
-                                                                            <p className="font-medium text-sm truncate pr-2">{item.description}</p>
-                                                                            <span className={`font-semibold text-sm whitespace-nowrap ${item.type === 'income'
-                                                                                ? 'text-green-600 dark:text-green-400'
-                                                                                : 'text-red-600 dark:text-red-400'
-                                                                                }`}>
-                                                                                {item.type === 'income' ? "+" : "-"}
-                                                                                {formatCurrency(Math.abs(item.amount))}
-                                                                            </span>
-                                                                        </div>
-
-                                                                        <div className="flex items-center justify-between text-xs text-muted-foreground">
-                                                                            <span className="flex items-center gap-1.5 flex-wrap">
-                                                                                {item.category || "Sem categoria"}
-
-                                                                                {isRecurring && (
-                                                                                    <span className="flex items-center gap-0.5 text-[10px] bg-blue-500/10 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded-sm">
-                                                                                        <Repeat className="w-3 h-3" />
-                                                                                        <span className="hidden sm:inline">Recorrente</span>
-                                                                                    </span>
-                                                                                )}
-
-                                                                                {item.is_projected && (
-                                                                                    <span className="px-1.5 py-0.5 rounded-[4px] bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 font-medium text-[10px] uppercase">
-                                                                                        Projetado
-                                                                                    </span>
-                                                                                )}
-                                                                            </span>
-
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </Card>
-                                                        </motion.div>
-                                                    );
-                                                })}
-                                            </div>
-                                        </motion.div>
-                                    ))}
-                                </AnimatePresence>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         )}
-                    </div>
-                )}
+                    </TabsContent>
+
+                    {/* === TAB 3: PLANEJAMENTO === */}
+                    <TabsContent value="planning" className="space-y-6 mt-4">
+                        <AnnualOverview
+                            selectedMonth={selectedMonth}
+                            selectedYear={selectedYear}
+                            onMonthChange={setSelectedMonth}
+                            onYearChange={setSelectedYear}
+                            financialData={{
+                                [selectedMonth]: {
+                                    status: (balance?.projected_balance ?? 0) < 0 ? 'warning' : 'healthy',
+                                    balance: balance?.projected_balance ?? 0
+                                }
+                            }}
+                        />
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <Card className="hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => setShowBudgetSheet(true)}>
+                                <CardContent className="p-4 flex flex-col items-center text-center gap-3">
+                                    <div className="p-3 bg-purple-500/10 text-purple-600 rounded-full">
+                                        <Target className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold text-sm">Metas de Gastos</h4>
+                                        <p className="text-[10px] text-muted-foreground mt-1">Defina limites por categoria</p>
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            <Card className="hover:bg-muted/30 transition-colors cursor-pointer opacity-50">
+                                <CardContent className="p-4 flex flex-col items-center text-center gap-3">
+                                    <div className="p-3 bg-amber-500/10 text-amber-600 rounded-full">
+                                        <Target className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold text-sm">Objetivos</h4>
+                                        <p className="text-[10px] text-muted-foreground mt-1">Economia e Sonhos (Em breve)</p>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+                    </TabsContent>
+                </Tabs>
 
                 {/* --- Floating Action Button (FAB) --- */}
                 <FloatingActionButton
@@ -536,6 +522,7 @@ export function FinancialDashboard() {
                     ariaLabel="Adicionar Despesa"
                     variant="blue"
                     size="sm"
+                    mobileOnly={true}
                 />
 
                 {/* --- Sheets & Modals --- */}
@@ -569,6 +556,12 @@ export function FinancialDashboard() {
                     onOpenChange={setShowBudgetSheet}
                     householdId={profile?.household_id || ""}
                     userId={user?.id || ""}
+                />
+
+                <FinancialSettingsSheet
+                    open={showSettingsSheet}
+                    onOpenChange={setShowSettingsSheet}
+                    householdId={profile?.household_id || ""}
                 />
 
                 <ReceiptPreviewSheet

@@ -14,16 +14,16 @@ export function TasksSummaryCard({ totalTasks, completedTasks, myTasks }: TasksS
   const completionRate = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
 
   return (
-    <BentoCard 
-      className="col-span-2 bg-gradient-to-br from-primary/10 via-background to-background"
+    <BentoCard
+      className="col-span-2"
       onClick={() => navigate("/")}
     >
       <div className="flex flex-col">
         <div className="flex items-center gap-2 mb-4">
-          <div className="p-2 rounded-xl bg-primary/10">
-            <CheckCircle2 className="h-5 w-5 text-primary" />
+          <div className="p-2 rounded-lg bg-muted">
+            <CheckCircle2 className="h-4 w-4" />
           </div>
-          <h3 className="font-semibold text-lg">Tarefas de Hoje</h3>
+          <h3 className="font-semibold">Tarefas de Hoje</h3>
         </div>
 
         <div className="flex-1 space-y-4">
@@ -34,7 +34,7 @@ export function TasksSummaryCard({ totalTasks, completedTasks, myTasks }: TasksS
                 {pendingTasks === 1 ? "tarefa pendente" : "tarefas pendentes"}
               </span>
             </div>
-            
+
             {myTasks > 0 && (
               <p className="text-sm text-muted-foreground flex items-center gap-1">
                 <Circle className="h-3 w-3" />
@@ -50,8 +50,8 @@ export function TasksSummaryCard({ totalTasks, completedTasks, myTasks }: TasksS
               <span className="font-medium">{Math.round(completionRate)}%</span>
             </div>
             <div className="h-2 bg-muted rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-gradient-to-r from-primary to-primary/80 transition-all duration-500 ease-out rounded-full"
+              <div
+                className="h-full bg-primary transition-all duration-500 ease-out rounded-full"
                 style={{ width: `${completionRate}%` }}
               />
             </div>

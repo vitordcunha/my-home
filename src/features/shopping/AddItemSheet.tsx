@@ -7,7 +7,16 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { X, Plus, CheckCircle2 } from "lucide-react";
+import {
+  X,
+  Plus,
+  CheckCircle2,
+  Apple,
+  Sparkles,
+  ShowerHead,
+  Box,
+  ShoppingCart,
+} from "lucide-react";
 import { ShoppingCategory } from "./types";
 import { useHaptic } from "@/hooks/useHaptic";
 
@@ -51,6 +60,21 @@ const categoryEmojis: Record<ShoppingCategory, string> = {
   limpeza: "🧹",
   higiene: "🧼",
   outros: "📦",
+};
+
+const getCategoryIcon = (category: ShoppingCategory) => {
+  switch (category) {
+    case "alimentos":
+      return <Apple className="h-6 w-6" />;
+    case "limpeza":
+      return <Sparkles className="h-6 w-6" />;
+    case "higiene":
+      return <ShowerHead className="h-6 w-6" />;
+    case "outros":
+      return <Box className="h-6 w-6" />;
+    default:
+      return <ShoppingCart className="h-6 w-6" />;
+  }
 };
 
 export function AddItemSheet({
@@ -130,7 +154,7 @@ export function AddItemSheet({
                   disabled={isPending}
                   className="flex flex-col items-center gap-3 p-4 rounded-2xl border-2 bg-card hover:bg-accent hover:border-primary transition-all thumb-friendly active:scale-95 disabled:opacity-50"
                 >
-                  <span className="text-5xl">{item.emoji}</span>
+                  <div className="text-primary">{getCategoryIcon(item.category)}</div>
                   <span className="font-semibold text-sm text-center leading-tight">
                     {item.name}
                   </span>
@@ -158,8 +182,8 @@ export function AddItemSheet({
                 Nome do Item *
               </label>
               <div className="flex items-center gap-2">
-                <span className="text-3xl">
-                  {emoji || categoryEmojis[category]}
+                <span className="text-primary">
+                  {getCategoryIcon(category)}
                 </span>
                 <input
                   id="name"
@@ -188,13 +212,12 @@ export function AddItemSheet({
                         setCategory(cat);
                         setEmoji(categoryEmojis[cat]);
                       }}
-                      className={`flex items-center gap-2 px-4 py-3 rounded-xl border-2 transition-all thumb-friendly ${
-                        category === cat
-                          ? "border-primary bg-primary/10 font-semibold"
+                      className={`flex items-center gap-2 px-4 py-3 rounded-xl border-2 transition-all thumb-friendly ${category === cat
+                          ? "border-primary bg-primary/10 font-semibold text-primary"
                           : "border-border bg-card hover:bg-accent"
-                      }`}
+                        }`}
                     >
-                      <span className="text-xl">{categoryEmojis[cat]}</span>
+                      {getCategoryIcon(cat)}
                       <span className="capitalize text-sm">{cat}</span>
                     </button>
                   )

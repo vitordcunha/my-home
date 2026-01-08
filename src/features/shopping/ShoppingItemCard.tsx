@@ -1,10 +1,10 @@
-import { useState } from "react";
+
 import { ShoppingItem } from "./types";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Trash2, User, Clock } from "lucide-react";
 import { formatDistanceToNow } from "@/lib/utils";
-import { useSwipeable } from "react-swipeable";
+import { motion, useMotionValue, useTransform, PanInfo } from "framer-motion";
 import { useHaptic } from "@/hooks/useHaptic";
 
 interface ShoppingItemCardProps {
@@ -29,124 +29,68 @@ export function ShoppingItemCard({
   onDelete,
   profiles,
 }: ShoppingItemCardProps) {
-  const [swipeProgress, setSwipeProgress] = useState(0);
-  const [swipeDirection, setSwipeDirection] = useState<"left" | "right" | null>(null);
-  const [hapticFired, setHapticFired] = useState(false);
+  const x = useMotionValue(0);
   const { trigger } = useHaptic();
-  
+
+  // Opacity/Color logic based on drag
+  const opacity = useTransform(x, [-100, 0], [1, 0]);
+  const deleteIconScale = useTransform(x, [-100, -50], [1.2, 0.8]);
+
   const addedByProfile = profiles?.find((p) => p.id === item.added_by);
   const addedByName = addedByProfile?.nome || "Alguém";
 
-  // Swipe handlers
-  const swipeHandlers = useSwipeable({
-    onSwipedLeft: (e) => {
-      const minSwipeDistance = 100;
-      const swipeDistance = Math.abs(e.deltaX);
-      const isHorizontal = Math.abs(e.deltaX) > Math.abs(e.deltaY);
-      const isSignificant = swipeDistance >= minSwipeDistance * 0.6;
-
-      if (isHorizontal && isSignificant) {
-        // Swipe esquerda = remover
-        onDelete(item.id);
-      }
-      setSwipeProgress(0);
-      setSwipeDirection(null);
-      setHapticFired(false);
-    },
-    onSwiping: (e) => {
-      // Ignora swipe se o movimento vertical for maior que o horizontal (scroll)
-      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-        setSwipeProgress(0);
-        setSwipeDirection(null);
-        return;
-      }
-
-      // Apenas swipe para esquerda (deletar)
-      if (e.deltaX > 0) {
-        setSwipeProgress(0);
-        setSwipeDirection(null);
-        return;
-      }
-
-      const swipeDistance = 200;
-      const progress = Math.abs(e.deltaX) / swipeDistance;
-      const clampedProgress = Math.min(progress, 1);
-      setSwipeProgress(clampedProgress);
-      setSwipeDirection("left");
-
-      // Haptic feedback ao atingir threshold (70%)
-      if (clampedProgress > 0.7 && !hapticFired) {
-        trigger("medium");
-        setHapticFired(true);
-      }
-    },
-    onSwiped: () => {
-      setSwipeProgress(0);
-      setSwipeDirection(null);
-      setHapticFired(false);
-    },
-    trackTouch: true,
-    trackMouse: false,
-    preventScrollOnSwipe: false,
-    delta: 40,
-    touchEventOptions: { passive: false },
-  });
-
-  // Estilo dinâmico para swipe
-  const swipeStyle = {
-    transform: `translateX(${swipeProgress * -100}px)`,
-    transition: swipeProgress === 0 ? "transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1)" : "none",
-    willChange: swipeProgress > 0 ? "transform" : "auto",
+  const handleDragEnd = (_: any, info: PanInfo) => {
+    if (info.offset.x < -100) {
+      trigger("success");
+      onDelete(item.id);
+    }
   };
 
-  const showDeleteIndicator = swipeDirection === "left" && swipeProgress > 0.4;
-  const thresholdReached = swipeProgress > 0.7;
-
   return (
-    <div className="relative overflow-hidden">
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, x: -100 }}
+      whileTap={{ scale: 0.98 }}
+      className="relative mb-3 group"
+    >
       {/* Background delete indicator */}
-      {showDeleteIndicator && (
-        <div
-          className="absolute inset-0 bg-destructive/10 flex items-center justify-end pr-6 z-0"
-          style={{
-            opacity: swipeProgress,
-          }}
-        >
-          <div
-            className={`flex items-center gap-2 text-destructive transition-all ${
-              thresholdReached ? "scale-110" : "scale-100"
-            }`}
-          >
-            <Trash2 className="h-5 w-5" />
-            <span className="font-semibold text-sm">Remover</span>
-          </div>
-        </div>
-      )}
+      <motion.div
+        style={{ opacity }}
+        className="absolute inset-0 bg-destructive/10 rounded-2xl flex items-center justify-end pr-6 pointer-events-none"
+      >
+        <motion.div style={{ scale: deleteIconScale }} className="text-destructive flex items-center gap-2">
+          <span className="font-semibold text-sm">Remover</span>
+          <Trash2 className="h-5 w-5" />
+        </motion.div>
+      </motion.div>
 
       {/* Card content */}
-      <div
-        {...swipeHandlers}
-        style={swipeStyle}
-        className={`relative bg-card border-2 rounded-2xl p-4 flex items-center gap-4 transition-all z-10 ${
-          isSelected
-            ? "border-primary bg-primary/5 shadow-sm"
-            : "border-border hover:border-primary/30"
-        } animate-in`}
+      <motion.div
+        drag="x"
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={{ left: 0.5, right: 0.05 }}
+        onDragEnd={handleDragEnd}
+        style={{ x }}
+        className={`relative bg-card rounded-2xl p-4 flex items-center gap-4 transition-colors z-10 
+          ${isSelected
+            ? "ring-1 ring-primary/20 bg-primary/5"
+            : "border border-border/40 shadow-sm hover:border-primary/20"
+          }`}
       >
         <Checkbox
           checked={isSelected}
-          onCheckedChange={() => {
-            onToggle(item.id);
-          }}
-          className="h-6 w-6 rounded-lg shrink-0"
+          onCheckedChange={() => onToggle(item.id)}
+          className="h-5 w-5 rounded-full border-2 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
         />
 
         {/* Item image/emoji */}
-        <div className="flex items-center justify-center h-16 w-16 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 shrink-0 overflow-hidden">
+        <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-muted/50 shrink-0 overflow-hidden text-2xl">
           {item.emoji ? (
             <span className="text-3xl">{item.emoji}</span>
           ) : (
-            <div className="h-full w-full bg-gradient-to-br from-primary/20 to-primary/10" />
+            <div className="h-full w-full bg-muted" />
           )}
         </div>
 
@@ -175,9 +119,9 @@ export function ShoppingItemCard({
           <div className="flex items-center gap-2 mt-2.5 pt-2 border-t border-border/50">
             {addedByProfile ? (
               <div className="flex items-center gap-1.5">
-                <Avatar className="h-5 w-5 border border-border/50 shrink-0">
+                <Avatar className="h-5 w-5 border border-border shrink-0">
                   <AvatarImage src={addedByProfile.avatar || undefined} />
-                  <AvatarFallback className="text-[9px] bg-primary/10 text-primary">
+                  <AvatarFallback className="text-[9px] bg-muted text-foreground">
                     {addedByProfile.nome[0].toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
@@ -202,8 +146,8 @@ export function ShoppingItemCard({
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 

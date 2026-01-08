@@ -17,9 +17,11 @@ import { TasksTrashScreen } from "./features/tasks/TasksTrashScreen";
 import { OnboardingScreen } from "./features/households/OnboardingScreen";
 import { ShoppingScreen } from "./features/shopping/ShoppingScreen";
 import { WeekViewScreen } from "./features/tasks/WeekViewScreen";
+import TasksScreen from "./features/tasks/TasksScreen";
 import { FinancialDashboard } from "./features/expenses/FinancialDashboard";
 import { DocumentsScreen } from "./features/documents/DocumentsScreen";
 import { AnalyticsScreen } from "./features/analytics/AnalyticsScreen";
+import { DebtsScreen } from "./features/debts/DebtsScreen";
 // import { MaintenanceScreen } from "./features/maintenance/MaintenanceScreen";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -68,12 +70,15 @@ function AppRoutes() {
         }
       >
         <Route index element={<TodayScreen />} />
+
         <Route path="expenses" element={<FinancialDashboard />} />
+        <Route path="expenses/debts" element={<DebtsScreen />} />
         {/* Rota legada redirecionando para o novo dashboard */}
         <Route path="expenses/planning" element={<Navigate to="/expenses" replace />} />
         <Route path="shopping" element={<ShoppingScreen />} />
         <Route path="documents" element={<DocumentsScreen />} />
         {/* <Route path="maintenance" element={<MaintenanceScreen />} /> */}
+        <Route path="tasks" element={<TasksScreen />} />
         <Route path="tasks/week" element={<WeekViewScreen />} />
         <Route path="history" element={<HistoryScreen />} />
         <Route path="ranking" element={<RankingScreen />} />

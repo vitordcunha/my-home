@@ -33,8 +33,8 @@ export function useFinancialBalance(
 
       const { data, error } = await supabase.rpc("get_financial_balance", {
         p_household_id: householdId,
-        p_month: month || null,
-        p_year: year || null,
+        p_month: month,
+        p_year: year,
       });
 
       if (error) throw error;
@@ -78,8 +78,8 @@ export function useFinancialTimeline(
 
       const { data, error } = await supabase.rpc("get_financial_timeline", {
         p_household_id: householdId,
-        p_month: month || null,
-        p_year: year || null,
+        p_month: month,
+        p_year: year,
       });
 
       if (error) throw error;

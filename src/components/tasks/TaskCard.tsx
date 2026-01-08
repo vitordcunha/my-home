@@ -53,7 +53,6 @@ export default function TaskCard({ task }: TaskCardProps) {
     null
   );
   const [hapticFired, setHapticFired] = useState(false);
-  const [isCompleting, setIsCompleting] = useState(false);
   const { trigger } = useHaptic();
 
   const { data: profiles = [] } = useQuery({
@@ -70,19 +69,14 @@ export default function TaskCard({ task }: TaskCardProps) {
   });
 
   const handleComplete = (userId: string) => {
-    setIsCompleting(true);
     trigger("success");
-
-    // Pequeno delay para mostrar a animação
-    setTimeout(() => {
-      completeTask.mutate({
-        taskId: task.id,
-        userId,
-        xpValue: task.xp_value,
-        taskName: task.nome,
-      });
-      setShowPeopleSheet(false);
-    }, 300);
+    completeTask.mutate({
+      taskId: task.id,
+      userId,
+      xpValue: task.xp_value,
+      taskName: task.nome,
+    });
+    setShowPeopleSheet(false);
   };
 
   const handleDelete = () => {
@@ -171,9 +165,8 @@ export default function TaskCard({ task }: TaskCardProps) {
 
   // Estilo dinâmico para swipe
   const swipeStyle = {
-    transform: `translateX(${
-      swipeProgress * (swipeDirection === "right" ? 100 : -100)
-    }px)`,
+    transform: `translateX(${swipeProgress * (swipeDirection === "right" ? 100 : -100)
+      }px)`,
     transition:
       swipeProgress === 0
         ? "transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1)"
@@ -192,17 +185,15 @@ export default function TaskCard({ task }: TaskCardProps) {
         {/* Background indicators */}
         {showRightIndicator && (
           <div
-            className={`absolute inset-0 flex items-center justify-start pl-6 rounded-2xl transition-all ${
-              thresholdReached
-                ? "bg-success/20 border-2 border-success/50"
-                : "bg-success/10 border border-success/30"
-            }`}
+            className={`absolute inset-0 flex items-center justify-start pl-6 rounded-2xl transition-all ${thresholdReached
+              ? "bg-success/20 border-2 border-success/50"
+              : "bg-success/10 border border-success/30"
+              }`}
           >
             <div className="flex items-center gap-2">
               <Check
-                className={`h-6 w-6 text-success ${
-                  thresholdReached ? "animate-bounce" : ""
-                }`}
+                className={`h-6 w-6 text-success ${thresholdReached ? "animate-bounce" : ""
+                  }`}
               />
               <span className="font-semibold text-success">Eu fiz</span>
             </div>
@@ -210,18 +201,16 @@ export default function TaskCard({ task }: TaskCardProps) {
         )}
         {showLeftIndicator && (
           <div
-            className={`absolute inset-0 flex items-center justify-end pr-6 rounded-2xl transition-all ${
-              thresholdReached
-                ? "bg-primary/20 border-2 border-primary/50"
-                : "bg-primary/10 border border-primary/30"
-            }`}
+            className={`absolute inset-0 flex items-center justify-end pr-6 rounded-2xl transition-all ${thresholdReached
+              ? "bg-primary/20 border-2 border-primary/50"
+              : "bg-primary/10 border border-primary/30"
+              }`}
           >
             <div className="flex items-center gap-2">
               <span className="font-semibold text-primary">Outra pessoa</span>
               <Users
-                className={`h-6 w-6 text-primary ${
-                  thresholdReached ? "animate-bounce" : ""
-                }`}
+                className={`h-6 w-6 text-primary ${thresholdReached ? "animate-bounce" : ""
+                  }`}
               />
             </div>
           </div>
@@ -231,11 +220,7 @@ export default function TaskCard({ task }: TaskCardProps) {
         <div
           {...swipeHandlers}
           style={swipeStyle}
-          className={`group bg-card border rounded-2xl p-5 space-y-4 shadow-soft hover-lift animate-in relative z-10 transition-all ${
-            isCompleting
-              ? "animate-confetti scale-105 bg-success/10 border-success/50"
-              : ""
-          }`}
+          className="group bg-card border rounded-2xl p-5 space-y-4 hover-lift animate-in relative z-10 transition-all"
         >
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 space-y-2">
@@ -254,14 +239,14 @@ export default function TaskCard({ task }: TaskCardProps) {
                     return assignedProfile ? (
                       <div className="flex items-center gap-1.5 shrink-0">
                         {assignedProfile.avatar ? (
-                          <Avatar className="h-8 w-8 shrink-0 border-2 border-border/50">
+                          <Avatar className="h-8 w-8 shrink-0 border border-border">
                             <AvatarImage src={assignedProfile.avatar} />
-                            <AvatarFallback className="bg-gradient-to-br from-primary/10 to-primary/5 text-primary font-semibold text-xs">
+                            <AvatarFallback className="bg-muted text-foreground font-semibold text-xs">
                               {assignedProfile.nome[0].toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
                         ) : (
-                          <div className="h-8 w-8 shrink-0 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 border-2 border-border/50 flex items-center justify-center text-primary font-semibold text-xs">
+                          <div className="h-8 w-8 shrink-0 rounded-full bg-muted border border-border flex items-center justify-center text-foreground font-semibold text-xs">
                             {assignedProfile.nome[0].toUpperCase()}
                           </div>
                         )}
@@ -287,15 +272,15 @@ export default function TaskCard({ task }: TaskCardProps) {
               )}
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200/50 dark:border-amber-800/30">
-                <Star className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 fill-amber-500 dark:fill-amber-400" />
-                <span className="text-sm font-semibold text-amber-900 dark:text-amber-100">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/50">
+                <Star className="h-3.5 w-3.5 text-warning fill-warning" />
+                <span className="text-sm font-semibold">
                   {task.xp_value}
                 </span>
               </div>
               <button
                 onClick={() => setShowActionsSheet(true)}
-                className="p-2 hover:bg-accent rounded-xl transition-all opacity-60 group-hover:opacity-100"
+                className="p-2 hover:bg-accent rounded-lg transition-colors opacity-60 group-hover:opacity-100"
                 aria-label="Mais opções"
               >
                 <MoreVertical className="h-4 w-4" />
@@ -305,7 +290,7 @@ export default function TaskCard({ task }: TaskCardProps) {
 
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center px-3 py-1 bg-secondary/60 rounded-full text-xs font-medium text-secondary-foreground">
-              {recurrenceLabels[task.recurrence_type]}
+              {recurrenceLabels[task.recurrence_type as keyof typeof recurrenceLabels]}
             </span>
             {task.recurrence_type === "weekly" && task.days_of_week && (
               <span className="inline-flex items-center px-3 py-1 bg-secondary/60 rounded-full text-xs font-medium text-secondary-foreground">
@@ -317,7 +302,7 @@ export default function TaskCard({ task }: TaskCardProps) {
 
           <div className="flex gap-3 pt-2">
             <Button
-              className="flex-1 thumb-friendly rounded-xl font-medium shadow-sm hover:shadow transition-all"
+              className="flex-1"
               onClick={() => handleComplete(user!.id)}
               disabled={completeTask.isPending}
             >
@@ -326,7 +311,7 @@ export default function TaskCard({ task }: TaskCardProps) {
             </Button>
             <Button
               variant="outline"
-              className="flex-1 thumb-friendly rounded-xl font-medium"
+              className="flex-1"
               onClick={() => setShowPeopleSheet(true)}
               disabled={completeTask.isPending}
             >
@@ -357,9 +342,9 @@ export default function TaskCard({ task }: TaskCardProps) {
                 onClick={() => handleComplete(profile.id)}
                 className="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-accent transition-all thumb-friendly hover-lift"
               >
-                <Avatar className="h-12 w-12 border-2 border-border/50">
+                <Avatar className="h-12 w-12 border border-border">
                   <AvatarImage src={profile.avatar || undefined} />
-                  <AvatarFallback className="bg-gradient-to-br from-primary/10 to-primary/5 text-primary font-semibold">
+                  <AvatarFallback className="bg-muted text-foreground font-semibold">
                     {profile.nome[0].toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
@@ -371,7 +356,7 @@ export default function TaskCard({ task }: TaskCardProps) {
                     {profile.nome}
                   </p>
                   <div className="flex items-center gap-1.5 mt-0.5">
-                    <Sparkles className="h-3 w-3 text-amber-600 dark:text-amber-400" />
+                    <Sparkles className="h-3 w-3 text-warning" />
                     <p className="text-sm text-muted-foreground font-medium">
                       {profile.total_points} pontos
                     </p>
@@ -398,7 +383,7 @@ export default function TaskCard({ task }: TaskCardProps) {
               onClick={handleEdit}
               className="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-accent transition-all thumb-friendly hover-lift"
             >
-              <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+              <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center">
                 <Edit2 className="h-5 w-5 text-primary" />
               </div>
               <div className="flex-1 text-left">
@@ -413,7 +398,7 @@ export default function TaskCard({ task }: TaskCardProps) {
               onClick={handleDelete}
               className="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-destructive/10 transition-all thumb-friendly hover-lift"
             >
-              <div className="h-12 w-12 rounded-2xl bg-destructive/10 flex items-center justify-center">
+              <div className="h-12 w-12 rounded-xl bg-destructive/10 flex items-center justify-center">
                 <Trash2 className="h-5 w-5 text-destructive" />
               </div>
               <div className="flex-1 text-left">
@@ -433,7 +418,7 @@ export default function TaskCard({ task }: TaskCardProps) {
       <TaskFormDialog
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
-        task={task}
+        task={task as any}
       />
     </>
   );

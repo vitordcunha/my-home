@@ -28,12 +28,12 @@ export function FinancialHealthCard({ householdId, userId }: FinancialHealthCard
     if (!health) return <div className="h-48 w-full animate-pulse bg-muted/20 rounded-2xl" />;
 
     const {
-        safeDailyBudget,
-        weekendSafeDailyBudget,
+        dailyBudget: safeDailyBudget,
+        weekendDailyBudget: weekendSafeDailyBudget,
         status,
         projectedEndBalance,
         averageDailySpend,
-        accumulatedBalance,
+        currentBalance: accumulatedBalance,
     } = health;
 
     // Configuração de cores e estilos baseados no status

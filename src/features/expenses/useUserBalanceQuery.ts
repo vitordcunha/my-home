@@ -21,7 +21,9 @@ export function useUserBalanceQuery(userId?: string, householdId?: string) {
 
       if (error) throw error;
 
-      return data || {
+      const balanceData = Array.isArray(data) ? data[0] : data;
+
+      return (balanceData as UserBalance) || {
         owed_by_user: 0,
         owed_to_user: 0,
         net_balance: 0,

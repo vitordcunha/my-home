@@ -71,7 +71,7 @@ export function PurchaseSimulatorModal({ open, onOpenChange, currentHealth }: Pu
                                 <div className="space-y-2 text-sm">
                                     <div className="flex justify-between">
                                         <span className="text-muted-foreground">Meta Diária Atual:</span>
-                                        <span className="font-medium">{currentHealth.safeDailyBudget.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</span>
+                                        <span className="font-medium">{currentHealth.dailyBudget.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-muted-foreground">Nova Meta Diária:</span>

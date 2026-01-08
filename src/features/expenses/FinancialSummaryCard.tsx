@@ -57,9 +57,9 @@ export function FinancialSummaryCard({
     } = balance;
 
     const {
-        accumulatedBalance,
-        safeDailyBudget,
-        weekendSafeDailyBudget,
+        currentBalance: accumulatedBalance,
+        dailyBudget: safeDailyBudget,
+        weekendDailyBudget: weekendSafeDailyBudget,
         realizedIncome,
         projectedIncome,
         realizedExpenses,

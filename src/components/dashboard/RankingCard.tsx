@@ -9,24 +9,24 @@ interface RankingCardProps {
   currentUserPoints?: number;
 }
 
-export function RankingCard({ 
-  topUserName, 
-  topUserPoints, 
+export function RankingCard({
+  topUserName,
+  topUserPoints,
   currentUserPosition,
-  currentUserPoints 
+  currentUserPoints
 }: RankingCardProps) {
   const navigate = useNavigate();
   const isCurrentUserTop = currentUserPosition === 1;
 
   return (
-    <BentoCard 
-      className="bg-gradient-to-br from-amber-500/10 via-background to-background h-full"
+    <BentoCard
+      className="h-full"
       onClick={() => navigate("/ranking")}
     >
       <div className="flex flex-col">
         <div className="flex items-center gap-2 mb-3">
-          <div className="p-2 rounded-xl bg-amber-500/10">
-            <Trophy className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+          <div className="p-2 rounded-lg bg-muted">
+            <Trophy className="h-4 w-4" />
           </div>
           <h3 className="font-semibold text-sm">Ranking</h3>
         </div>
@@ -34,7 +34,7 @@ export function RankingCard({
         <div className="flex flex-col gap-2">
           <div>
             <div className="flex items-center gap-1 mb-1">
-              <Crown className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              <Crown className="h-4 w-4 text-warning" />
               <span className="text-sm font-semibold truncate">{topUserName}</span>
             </div>
             <p className="text-xs text-muted-foreground">
@@ -43,7 +43,7 @@ export function RankingCard({
           </div>
 
           {currentUserPosition && !isCurrentUserTop && (
-            <div className="pt-3 border-t border-border/50">
+            <div className="pt-2 mt-2 border-t">
               <div className="flex items-center gap-1 text-xs">
                 <TrendingUp className="h-3 w-3 text-muted-foreground" />
                 <span className="text-muted-foreground">
@@ -59,8 +59,8 @@ export function RankingCard({
           )}
 
           {isCurrentUserTop && (
-            <div className="pt-3 border-t border-border/50">
-              <p className="text-xs text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1">
+            <div className="pt-2 mt-2 border-t">
+              <p className="text-xs text-warning font-medium flex items-center gap-1">
                 <Crown className="h-3 w-3" />
                 Você está em 1º lugar!
               </p>

@@ -37,7 +37,7 @@ export function ExpenseCard({ expense }: ExpenseCardProps) {
   const emoji =
     expense.category === "custom" && expense.custom_category
       ? "✏️"
-      : EXPENSE_CATEGORY_EMOJIS[expense.category] || "📦";
+      : EXPENSE_CATEGORY_EMOJIS[expense.category as keyof typeof EXPENSE_CATEGORY_EMOJIS] || "📦";
 
   const IconComponent = getIconFromEmoji(emoji) || Package;
 

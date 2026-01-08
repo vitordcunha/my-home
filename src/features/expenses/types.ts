@@ -1,8 +1,8 @@
 import { Database } from "@/types/database";
 
-export type Expense = Database["public"]["Tables"]["expenses"]["Row"];
-export type ExpenseInsert = Database["public"]["Tables"]["expenses"]["Insert"];
-export type ExpenseUpdate = Database["public"]["Tables"]["expenses"]["Update"];
+export type Expense = Database["public"]["Tables"]["expenses"]["Row"] & { debt_id?: string | null };
+export type ExpenseInsert = Database["public"]["Tables"]["expenses"]["Insert"] & { debt_id?: string | null };
+export type ExpenseUpdate = Database["public"]["Tables"]["expenses"]["Update"] & { debt_id?: string | null };
 
 export type ExpenseSplit = Database["public"]["Tables"]["expense_splits"]["Row"];
 export type ExpenseSplitInsert = Database["public"]["Tables"]["expense_splits"]["Insert"];
@@ -25,6 +25,38 @@ export type ExpenseSplitStatus =
   | "waiting_confirmation"
   | "confirmed"
   | "overdue";
+
+export type ExpensePriority = "P1" | "P2" | "P3" | "P4";
+
+// Labels para prioridades
+export const EXPENSE_PRIORITY_LABELS: Record<ExpensePriority, string> = {
+  P1: "Essencial",
+  P2: "Importante",
+  P3: "Desejável",
+  P4: "Opcional",
+};
+
+// Descrições para prioridades
+export const EXPENSE_PRIORITY_DESCRIPTIONS: Record<ExpensePriority, string> = {
+  P1: "Aluguel, contas básicas (luz, água, internet)",
+  P2: "Mercado, transporte, saúde",
+  P3: "Lazer, assinaturas, delivery",
+  P4: "Compras não-essenciais",
+};
+
+// Configurações financeiras
+export interface FinancialSettings {
+  id: string;
+  household_id: string;
+  minimum_reserve_type: "fixed" | "percentage";
+  minimum_reserve_value: number;
+  weekend_weight: number;
+  default_expense_priority: ExpensePriority;
+  receive_daily_alert?: boolean;
+  alert_low_balance_threshold?: number;
+  created_at?: string;
+  updated_at?: string;
+}
 
 // Helper type para quando queremos expense com informações do pagador
 export type ExpenseWithPaidBy = Expense & {

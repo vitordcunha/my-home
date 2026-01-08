@@ -1,6 +1,7 @@
 import * as React from "react"
 import { Popover, PopoverContent, PopoverTrigger } from "./popover"
 import { cn } from "@/lib/utils"
+import { useHaptic } from "@/hooks/useHaptic"
 
 const DropdownMenu = Popover
 const DropdownMenuTrigger = PopoverTrigger
@@ -21,17 +22,27 @@ DropdownMenuContent.displayName = "DropdownMenuContent"
 const DropdownMenuItem = React.forwardRef<
     HTMLDivElement,
     React.HTMLAttributes<HTMLDivElement> & { inset?: boolean }
->(({ className, inset, ...props }, ref) => (
-    <div
-        ref={ref}
-        className={cn(
-            "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 cursor-pointer",
-            inset && "pl-8",
-            className
-        )}
-        {...props}
-    />
-))
+>(({ className, inset, onClick, ...props }, ref) => {
+    const { trigger } = useHaptic();
+
+    const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+        trigger("light");
+        onClick?.(e);
+    };
+
+    return (
+        <div
+            ref={ref}
+            className={cn(
+                "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 cursor-pointer",
+                inset && "pl-8",
+                className
+            )}
+            onClick={handleClick}
+            {...props}
+        />
+    );
+})
 DropdownMenuItem.displayName = "DropdownMenuItem"
 
 const DropdownMenuLabel = React.forwardRef<

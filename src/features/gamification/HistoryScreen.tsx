@@ -262,7 +262,7 @@ export default function HistoryScreen() {
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <span className="inline-flex items-center px-3 py-1.5 bg-secondary/60 rounded-full text-sm font-medium text-secondary-foreground">
-                        {recurrenceLabels[selectedItem.task.recurrence_type]}
+                        {recurrenceLabels[selectedItem.task.recurrence_type as keyof typeof recurrenceLabels]}
                       </span>
                       {selectedItem.task.recurrence_type === "weekly" &&
                         selectedItem.task.days_of_week &&

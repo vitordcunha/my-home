@@ -81,7 +81,7 @@ export function ImportStatementSheet({
 
     // Filter existing transactions for the selected month/year
     const monthIncomes = existingIncomes?.filter((i) => {
-      const date = new Date(i.received_at || i.created_at);
+      const date = new Date(i.received_at || i.created_at || new Date());
       return date.getMonth() + 1 === month && date.getFullYear() === year;
     });
 
@@ -99,7 +99,7 @@ export function ImportStatementSheet({
         id: i.id,
         description: i.description,
         amount: i.amount,
-        received_at: i.received_at || i.created_at,
+        received_at: i.received_at || i.created_at || new Date().toISOString(),
       })),
       existing_expenses: monthExpenses?.map((e) => ({
         id: e.id,
@@ -373,8 +373,8 @@ Exemplo:
                   <Card
                     key={index}
                     className={`transition-all ${transaction.selected
-                        ? "border-primary"
-                        : "opacity-50 border-dashed"
+                      ? "border-primary"
+                      : "opacity-50 border-dashed"
                       } ${transaction.match_type !== "none"
                         ? "border-amber-500/50 bg-amber-500/5"
                         : ""
@@ -402,8 +402,8 @@ Exemplo:
                             </div>
                             <p
                               className={`font-bold text-lg flex-shrink-0 ${transaction.type === "income"
-                                  ? "text-green-600 dark:text-green-400"
-                                  : "text-red-600 dark:text-red-400"
+                                ? "text-green-600 dark:text-green-400"
+                                : "text-red-600 dark:text-red-400"
                                 }`}
                             >
                               {transaction.type === "income" ? "+" : "-"}

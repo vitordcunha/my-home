@@ -4,7 +4,14 @@ import { Button } from "@/components/ui/button";
 import { ConfirmButton } from "@/components/ui/confirm-button";
 import { useAddExpense } from "./useAddExpense";
 import { useUpdateExpense, useDeleteExpense } from "./useExpenseMutations";
-import { EXPENSE_QUICK_ACTIONS, ExpenseCategory, Expense } from "./types";
+import {
+  EXPENSE_QUICK_ACTIONS,
+  ExpenseCategory,
+  Expense,
+  ExpensePriority,
+  EXPENSE_PRIORITY_LABELS,
+  EXPENSE_PRIORITY_DESCRIPTIONS,
+} from "./types";
 import { useHouseholdQuery } from "@/features/households/useHouseholdQuery";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -16,8 +23,19 @@ import {
   Trash2,
   Calendar,
   Repeat,
+  CreditCard,
+  Zap,
+  Droplets,
+  Wifi,
+  Flame,
+  ShoppingCart,
+  Utensils,
+  Lightbulb,
+  AlertCircle,
 } from "lucide-react";
 import { useHaptic } from "@/hooks/useHaptic";
+import { DebtsService, Debt } from "@/features/debts/DebtsService";
+import { PaymentSimulator } from "@/features/debts/components/PaymentSimulator";
 
 interface AddExpenseSheetProps {
   open: boolean;
@@ -26,6 +44,25 @@ interface AddExpenseSheetProps {
   userId: string;
   expenseToEdit?: Expense | null;
 }
+
+const getQuickActionIcon = (label: string) => {
+  switch (label) {
+    case "Luz":
+      return <Zap className="h-8 w-8 text-yellow-500" />;
+    case "Água":
+      return <Droplets className="h-8 w-8 text-blue-500" />;
+    case "Internet":
+      return <Wifi className="h-8 w-8 text-cyan-500" />;
+    case "Gás":
+      return <Flame className="h-8 w-8 text-orange-500" />;
+    case "Mercado":
+      return <ShoppingCart className="h-8 w-8 text-green-500" />;
+    case "Delivery":
+      return <Utensils className="h-8 w-8 text-red-500" />;
+    default:
+      return <Rocket className="h-8 w-8" />;
+  }
+};
 
 export function AddExpenseSheet({
   open,
@@ -49,6 +86,12 @@ export function AddExpenseSheet({
     "monthly" | "weekly" | null
   >(null);
   const [recurrenceDay, setRecurrenceDay] = useState<string>("");
+  const [priority, setPriority] = useState<ExpensePriority>("P3");
+
+  // Debt Integration
+  const [debts, setDebts] = useState<Debt[]>([]);
+  const [selectedDebtId, setSelectedDebtId] = useState<string | null>(null);
+
 
   const { data: household } = useHouseholdQuery(householdId);
   const addExpense = useAddExpense();
@@ -58,6 +101,13 @@ export function AddExpenseSheet({
 
   const isEditMode = !!expenseToEdit;
 
+  // Fetch debts
+  useEffect(() => {
+    if (open && householdId) {
+      DebtsService.list(householdId).then(setDebts).catch(console.error);
+    }
+  }, [open, householdId]);
+
   // Preencher formulário quando estiver editando
   useEffect(() => {
     if (expenseToEdit && open) {
@@ -65,7 +115,7 @@ export function AddExpenseSheet({
       setAmount(expenseToEdit.amount.toString());
       setDescription(expenseToEdit.description);
       setCustomCategory(expenseToEdit.custom_category || "");
-      setIsSplit(expenseToEdit.is_split);
+      setIsSplit(expenseToEdit.is_split || false);
       setSelectedMembers(expenseToEdit.split_with || []);
       setCompetenceDate(
         (expenseToEdit as any).competence_date
@@ -77,9 +127,11 @@ export function AddExpenseSheet({
           ? new Date(expenseToEdit.paid_at).toISOString().slice(0, 16)
           : ""
       );
-      setIsRecurring(expenseToEdit.is_recurring);
+      setIsRecurring(expenseToEdit.is_recurring || false);
       setRecurrenceFrequency(expenseToEdit.recurrence_frequency as any);
       setRecurrenceDay(expenseToEdit.recurrence_day?.toString() || "");
+      setPriority((expenseToEdit.priority as ExpensePriority) || "P3");
+      setSelectedDebtId(expenseToEdit.debt_id || null);
     } else if (open) {
       if (!paidAt) {
         setPaidAt(new Date().toISOString().slice(0, 16));
@@ -97,6 +149,25 @@ export function AddExpenseSheet({
     trigger("light");
     setSelectedCategory(category);
     setDescription(label);
+    // Auto-sugerir prioridade baseada na categoria
+    const suggestedPriority = getSuggestedPriority(category);
+    setPriority(suggestedPriority);
+  };
+
+  const getSuggestedPriority = (category: ExpenseCategory): ExpensePriority => {
+    switch (category) {
+      case "casa":
+      case "contas":
+        return "P1";
+      case "mercado":
+      case "manutencao":
+      case "limpeza":
+        return "P2";
+      case "delivery":
+        return "P3";
+      default:
+        return "P3";
+    }
   };
 
   const handleCustomCategory = () => {
@@ -174,6 +245,8 @@ export function AddExpenseSheet({
           recurrence_frequency: recurrenceFrequency || null,
           recurrence_day: recurrenceDay ? parseInt(recurrenceDay) : null,
           next_occurrence_date: nextOccurrenceDate,
+          priority: priority,
+          debt_id: selectedDebtId,
         } as any,
         {
           onSuccess: () => {
@@ -207,6 +280,8 @@ export function AddExpenseSheet({
           recurrence_frequency: recurrenceFrequency || null,
           recurrence_day: recurrenceDay ? parseInt(recurrenceDay) : null,
           next_occurrence_date: nextOccurrenceDate,
+          priority: priority,
+          debt_id: selectedDebtId,
         } as any,
         {
           onSuccess: () => {
@@ -239,6 +314,8 @@ export function AddExpenseSheet({
     setIsRecurring(false);
     setRecurrenceFrequency(null);
     setRecurrenceDay("");
+    setPriority("P3");
+    setSelectedDebtId(null);
   };
 
   return (
@@ -272,7 +349,7 @@ export function AddExpenseSheet({
                       }
                       className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 border-border hover:border-primary hover:bg-primary/5 transition-colors thumb-friendly"
                     >
-                      <span className="text-3xl">{action.emoji}</span>
+                      {getQuickActionIcon(action.label)}
                       <span className="text-xs font-medium">
                         {action.label}
                       </span>
@@ -283,7 +360,10 @@ export function AddExpenseSheet({
 
               <div className="pt-4">
                 <button
-                  onClick={handleCustomCategory}
+                  onClick={() => {
+                    trigger("light");
+                    handleCustomCategory();
+                  }}
                   className="w-full flex items-center justify-between p-4 rounded-xl border-2 border-dashed border-border hover:border-primary hover:bg-primary/5 transition-colors"
                 >
                   <div className="flex items-center gap-3">
@@ -403,6 +483,94 @@ export function AddExpenseSheet({
                 />
               </div>
 
+              {/* Debt Linkage */}
+              {debts.length > 0 && (
+                <div>
+                  <label className="text-sm font-medium flex items-center gap-2 mb-2">
+                    <CreditCard className="h-4 w-4" />
+                    Vincular a Cartão/Dívida
+                  </label>
+
+                  <div className="flex gap-2 overflow-x-auto pb-2">
+                    <button
+                      onClick={() => {
+                        trigger("light");
+                        setSelectedDebtId(null);
+                      }}
+                      className={`px-3 py-2 rounded-lg border text-sm whitespace-nowrap transition-colors ${!selectedDebtId ? 'bg-primary text-primary-foreground border-primary' : 'border-border hover:bg-accent'}`}
+                    >
+                      Nenhum
+                    </button>
+                    {debts.map(debt => (
+                      <button
+                        key={debt.id}
+                        onClick={() => {
+                          trigger("light");
+                          setSelectedDebtId(debt.id);
+                        }}
+                        className={`px-3 py-2 rounded-lg border text-sm whitespace-nowrap transition-colors ${selectedDebtId === debt.id ? 'bg-primary text-primary-foreground border-primary' : 'border-border hover:bg-accent'}`}
+                      >
+                        {debt.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Payment Simulator */}
+              {selectedDebtId && (
+                <PaymentSimulator
+                  expense={{
+                    amount: parseFloat(amount.replace(",", ".")) || 0,
+                    description: description || customCategory,
+                    paid_at: paidAt
+                  }}
+                  debtId={selectedDebtId}
+                  householdId={householdId}
+                />
+              )}
+
+              {/* Seletor de Prioridade */}
+              <div>
+                <label className="text-sm font-medium flex items-center gap-2 mb-2">
+                  <AlertCircle className="h-4 w-4" />
+                  Prioridade da Despesa
+                </label>
+                <p className="text-xs text-muted-foreground mb-3">
+                  Ajuda a calcular seu orçamento diário saudável
+                </p>
+
+                <div className="grid grid-cols-2 gap-2">
+                  {(["P1", "P2", "P3", "P4"] as ExpensePriority[]).map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => {
+                        trigger("light");
+                        setPriority(p);
+                      }}
+                      className={`px-3 py-3 rounded-lg border text-left transition-all ${priority === p
+                        ? "border-primary bg-primary/10 ring-2 ring-primary/20"
+                        : "border-border hover:bg-accent"
+                        }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-semibold">
+                          {EXPENSE_PRIORITY_LABELS[p]}
+                        </span>
+                        <span className={`text-xs px-1.5 py-0.5 rounded ${priority === p ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                          }`}>
+                          {p}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-tight">
+                        {EXPENSE_PRIORITY_DESCRIPTIONS[p]}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+
               <div>
                 <label className="text-sm font-medium flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
@@ -426,7 +594,8 @@ export function AddExpenseSheet({
                   className="w-full mt-1.5 px-4 h-12 rounded-xl border border-border bg-background text-base text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  💡 Use para contabilizar em outro mês do orçamento
+                  <Lightbulb className="h-3 w-3 inline mr-1 text-yellow-500" />
+                  Use para contabilizar em outro mês do orçamento
                 </p>
               </div>
 
@@ -451,7 +620,10 @@ export function AddExpenseSheet({
                       <label className="text-sm font-medium">Frequência</label>
                       <div className="flex gap-2 mt-1.5">
                         <button
-                          onClick={() => setRecurrenceFrequency("monthly")}
+                          onClick={() => {
+                            trigger("light");
+                            setRecurrenceFrequency("monthly");
+                          }}
                           className={`flex-1 px-4 py-2 rounded-lg border transition-colors ${recurrenceFrequency === "monthly"
                             ? "border-primary bg-primary/10"
                             : "border-border"
@@ -460,7 +632,10 @@ export function AddExpenseSheet({
                           Mensal
                         </button>
                         <button
-                          onClick={() => setRecurrenceFrequency("weekly")}
+                          onClick={() => {
+                            trigger("light");
+                            setRecurrenceFrequency("weekly");
+                          }}
                           className={`flex-1 px-4 py-2 rounded-lg border transition-colors ${recurrenceFrequency === "weekly"
                             ? "border-primary bg-primary/10"
                             : "border-border"

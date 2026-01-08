@@ -70,8 +70,8 @@ export function useMonthlyIncomesQuery(householdId?: string) {
       const date = income.received_at
         ? new Date(income.received_at)
         : income.next_occurrence_date
-        ? new Date(income.next_occurrence_date)
-        : new Date(income.created_at);
+          ? new Date(income.next_occurrence_date)
+          : new Date(income.created_at || new Date());
       const monthKey = format(date, "yyyy-MM");
 
       if (!acc[monthKey]) {

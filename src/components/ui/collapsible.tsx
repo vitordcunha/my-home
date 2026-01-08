@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { useHaptic } from "@/hooks/useHaptic"
 
 const CollapsibleContext = React.createContext<{
     open: boolean
@@ -39,12 +40,14 @@ const CollapsibleTrigger = React.forwardRef<
     React.ButtonHTMLAttributes<HTMLButtonElement> & { asChild?: boolean }
 >(({ className, onClick, children, ...props }, ref) => {
     const { open, onOpenChange } = React.useContext(CollapsibleContext)
+    const { trigger } = useHaptic();
 
     return (
         <button
             ref={ref}
             type="button"
             onClick={(e) => {
+                trigger("light");
                 onOpenChange(!open)
                 onClick?.(e)
             }}

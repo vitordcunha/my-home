@@ -1,4 +1,5 @@
 import { useTasksQuery } from "@/features/tasks/useTasksQuery";
+import { AnimatePresence, motion } from "framer-motion";
 import TaskCard from "./TaskCard";
 import { PartyPopper, AlertTriangle } from "lucide-react";
 import { TaskListSkeleton } from "@/components/skeletons/TaskSkeleton";
@@ -48,10 +49,22 @@ export default function TaskList({ onlyMyTasks = true, userId }: TaskListProps) 
   }
 
   return (
-    <div className="space-y-4">
-      {tasks.map((task) => (
-        <TaskCard key={task.id} task={task} />
-      ))}
+    <div className="relative space-y-4">
+      <AnimatePresence initial={false} mode="popLayout">
+        {tasks.map((task) => (
+          <motion.div
+            key={task.id}
+            layout
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            className="w-full"
+          >
+            <TaskCard task={task} />
+          </motion.div>
+        ))}
+      </AnimatePresence>
     </div>
   );
 }

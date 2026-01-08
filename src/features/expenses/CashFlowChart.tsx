@@ -2,132 +2,105 @@ import { useMemo } from "react";
 import {
   AreaChart,
   Area,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip,
   ResponsiveContainer,
   ReferenceLine,
+  ComposedChart,
+  Line,
 } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingUp, AlertTriangle } from "lucide-react";
+
+interface DailyProjection {
+  dateLabel: string;
+  projectedBalance: number;
+  budgetedBalance?: number;
+  incomeAmount?: number;
+  expenseAmount?: number;
+}
 
 interface TimelineItem {
   date: string;
   type: "income" | "expense";
-  description: string;
   amount: number;
-  category: string;
-  is_projected: boolean;
-  item_id: string;
 }
 
 interface CustomTooltipProps {
   active?: boolean;
   payload?: Array<{
-    payload: {
-      day: number;
-      balance: number;
-      incomes: number;
-      expenses: number;
-      hasTransaction: boolean;
-    };
+    value: number;
+    dataKey: string;
+    payload: any;
   }>;
 }
 
 interface CashFlowChartProps {
-  timeline: TimelineItem[];
-  month: number;
-  year: number;
+  // Legacy props
+  timeline?: TimelineItem[];
+  month?: number;
+  year?: number;
   openingBalance?: number;
+  currentDayBalance?: number;
+  safeDailyBudget?: number;
+
+  // New props
+  dailyProjections?: DailyProjection[];
+  variant?: "area" | "bar-balance" | "bar-flow" | "composed-projection";
 }
 
 export function CashFlowChart({
   timeline,
-  month,
-  year,
+  month = new Date().getMonth() + 1,
+  year = new Date().getFullYear(),
   openingBalance = 0,
+  variant = "area",
+  dailyProjections,
 }: CashFlowChartProps) {
+
+  // Se temos dailyProjections, usamos direto (adaptando para formato do gráfico)
   const chartData = useMemo(() => {
+    if (dailyProjections) {
+      return dailyProjections.map(d => ({
+        day: d.dateLabel,
+        balance: d.projectedBalance,
+        budgeted: d.budgetedBalance,
+        incomes: d.incomeAmount || 0,
+        expenses: d.expenseAmount || 0,
+      }));
+    }
+
+    // Lógica antiga (fallback)
     if (!timeline || timeline.length === 0) return [];
 
-    // Obter número de dias no mês
     const daysInMonth = new Date(year, month, 0).getDate();
-
-    // Criar array com todos os dias do mês
-    const dailyData: Record<
-      number,
-      {
-        day: number;
-        balance: number;
-        incomes: number;
-        expenses: number;
-        hasTransaction: boolean;
-      }
-    > = {};
-
-    for (let day = 1; day <= daysInMonth; day++) {
-      dailyData[day] = {
-        day,
-        balance: 0,
-        incomes: 0,
-        expenses: 0,
-        hasTransaction: false,
-      };
-    }
-
-    // Processar timeline e calcular saldo acumulado
-    // Começa com o saldo inicial (opening balance) do mês anterior
+    const data = [];
     let runningBalance = openingBalance;
 
-    timeline.forEach((item) => {
-      const date = new Date(item.date);
-      const day = date.getDate();
-
-      if (day >= 1 && day <= daysInMonth) {
-        if (item.type === "income") {
-          dailyData[day].incomes += item.amount;
-        } else {
-          dailyData[day].expenses += Math.abs(item.amount);
-        }
-        dailyData[day].hasTransaction = true;
-      }
+    // Criar mapa de transações por dia
+    const transactionsByDay: Record<number, { incomes: number; expenses: number }> = {};
+    timeline.forEach(item => {
+      const day = new Date(item.date).getDate();
+      if (!transactionsByDay[day]) transactionsByDay[day] = { incomes: 0, expenses: 0 };
+      if (item.type === 'income') transactionsByDay[day].incomes += item.amount;
+      else transactionsByDay[day].expenses += Math.abs(item.amount);
     });
 
-    // Calcular saldo acumulado dia a dia
     for (let day = 1; day <= daysInMonth; day++) {
-      runningBalance += dailyData[day].incomes - dailyData[day].expenses;
-      dailyData[day].balance = runningBalance;
+      const t = transactionsByDay[day] || { incomes: 0, expenses: 0 };
+      runningBalance += t.incomes - t.expenses;
+
+      data.push({
+        day: day.toString(),
+        balance: runningBalance,
+        incomes: t.incomes,
+        expenses: t.expenses,
+      });
     }
 
-    return Object.values(dailyData);
-  }, [timeline, month, year, openingBalance]);
-
-  const stats = useMemo(() => {
-    if (chartData.length === 0)
-      return {
-        minBalance: 0,
-        maxBalance: 0,
-        hasNegative: false,
-        negativeDay: null,
-      };
-
-    let minBalance = Infinity;
-    let maxBalance = -Infinity;
-    let hasNegative = false;
-    let negativeDay: number | null = null;
-
-    chartData.forEach((data) => {
-      if (data.balance < minBalance) minBalance = data.balance;
-      if (data.balance > maxBalance) maxBalance = data.balance;
-      if (data.balance < 0 && !hasNegative) {
-        hasNegative = true;
-        negativeDay = data.day;
-      }
-    });
-
-    return { minBalance, maxBalance, hasNegative, negativeDay };
-  }, [chartData]);
+    return data;
+  }, [timeline, month, year, openingBalance, dailyProjections]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -142,40 +115,40 @@ export function CashFlowChart({
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-background border border-border rounded-lg shadow-lg p-3">
-          <p className="text-sm font-semibold mb-2">Dia {data.day}</p>
-          <div className="space-y-1 text-xs">
+        <div className="bg-background/95 backdrop-blur-sm border border-border/50 rounded-lg shadow-xl p-3 text-xs">
+          <p className="font-bold mb-2 text-muted-foreground uppercase tracking-wider">Dia {data.day}</p>
+          <div className="space-y-1.5 ">
             <div className="flex items-center justify-between gap-4">
-              <span className="text-muted-foreground">Saldo:</span>
-              <span
-                className={`font-semibold ${
-                  data.balance >= 0
-                    ? "text-green-600 dark:text-green-400"
-                    : "text-red-600 dark:text-red-400"
-                }`}
-              >
+              <span className="text-muted-foreground">Saldo Real:</span>
+              <span className={`font-semibold ${data.balance >= 0 ? "text-primary" : "text-destructive"}`}>
                 {formatCurrency(data.balance)}
               </span>
             </div>
-            {data.hasTransaction && (
-              <>
+
+            {data.budgeted !== undefined && (
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-muted-foreground">Se seguir meta:</span>
+                <span className="text-blue-500 font-medium">
+                  {formatCurrency(data.budgeted)}
+                </span>
+              </div>
+            )}
+
+            {(data.incomes > 0 || data.expenses > 0) && (
+              <div className="pt-1.5 mt-1.5 border-t border-border/50 space-y-1">
                 {data.incomes > 0 && (
                   <div className="flex items-center justify-between gap-4">
-                    <span className="text-muted-foreground">Receitas:</span>
-                    <span className="text-green-600 dark:text-green-400 font-medium">
-                      +{formatCurrency(data.incomes)}
-                    </span>
+                    <span className="text-muted-foreground">Entradas:</span>
+                    <span className="text-emerald-500 font-medium">+{formatCurrency(data.incomes)}</span>
                   </div>
                 )}
                 {data.expenses > 0 && (
                   <div className="flex items-center justify-between gap-4">
-                    <span className="text-muted-foreground">Despesas:</span>
-                    <span className="text-red-600 dark:text-red-400 font-medium">
-                      -{formatCurrency(data.expenses)}
-                    </span>
+                    <span className="text-muted-foreground">Saídas:</span>
+                    <span className="text-red-500 font-medium">-{formatCurrency(data.expenses)}</span>
                   </div>
                 )}
-              </>
+              </div>
             )}
           </div>
         </div>
@@ -184,125 +157,108 @@ export function CashFlowChart({
     return null;
   };
 
-  if (chartData.length === 0) {
-    return null;
-  }
+  if (chartData.length === 0) return null;
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
-            Fluxo de Caixa
-          </CardTitle>
-          {stats.hasNegative && (
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/10 text-red-600 dark:text-red-400">
-              <AlertTriangle className="h-3.5 w-3.5" />
-              <span className="text-xs font-semibold">
-                Negativo no dia {stats.negativeDay}
-              </span>
-            </div>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
-          {/* Alerta de Saldo Negativo */}
-          {stats.hasNegative && (
-            <div className="bg-red-500/5 border border-red-500/20 rounded-lg p-3">
-              <p className="text-sm text-red-900 dark:text-red-100">
-                <span className="font-semibold">Atenção:</span> Seu saldo ficará
-                negativo antes do final do mês. Considere postergar despesas ou
-                antecipar receitas.
-              </p>
-            </div>
-          )}
+    <div className="w-full h-full min-h-[100px] flex flex-col">
+      <ResponsiveContainer width="100%" height="100%">
+        {variant === "composed-projection" ? (
+          <ComposedChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+            <defs>
+              <linearGradient id="balanceGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.0} />
+              </linearGradient>
+            </defs>
+            <XAxis
+              dataKey="day"
+              tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+              axisLine={false}
+              tickLine={false}
+            />
+            <YAxis
+              tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+              axisLine={false}
+              tickLine={false}
+              tickFormatter={formatCurrency}
+            />
+            <Tooltip content={<CustomTooltip />} />
+            <ReferenceLine y={0} stroke="hsl(var(--border))" strokeDasharray="3 3" />
 
-          {/* Gráfico */}
-          <div className="w-full h-[280px] mt-4">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart
-                data={chartData}
-                margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-              >
-                <defs>
-                  <linearGradient
-                    id="colorPositive"
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient
-                    id="colorNegative"
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
-                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  className="stroke-muted"
-                  opacity={0.3}
-                />
-                <XAxis
-                  dataKey="day"
-                  className="text-xs"
-                  tick={{ fill: "currentColor", fontSize: 12 }}
-                  tickFormatter={(value) =>
-                    value % 5 === 0 || value === 1 ? value : ""
-                  }
-                />
-                <YAxis
-                  className="text-xs"
-                  tick={{ fill: "currentColor", fontSize: 12 }}
-                  tickFormatter={(value) => formatCurrency(value)}
-                  width={70}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <ReferenceLine
-                  y={0}
-                  stroke="currentColor"
-                  strokeDasharray="3 3"
-                  className="stroke-muted-foreground"
-                  opacity={0.5}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="balance"
-                  stroke="#10b981"
-                  strokeWidth={2.5}
-                  fill="url(#colorPositive)"
-                  fillOpacity={1}
-                  className="drop-shadow-sm"
-                  isAnimationActive={true}
-                  animationDuration={800}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+            {/* Saldo Real (Area) */}
+            <Area
+              type="monotone"
+              dataKey="balance"
+              name="Saldo Real"
+              stroke="hsl(var(--primary))"
+              fill="url(#balanceGradient)"
+              strokeWidth={2}
+            />
+
+            {/* Saldo Orçado (Line Dashed) */}
+            <Line
+              type="monotone"
+              dataKey="budgeted"
+              name="Meta"
+              stroke="hsl(var(--blue-500))"
+              strokeDasharray="5 5"
+              strokeWidth={2}
+              dot={false}
+              activeDot={{ r: 4 }}
+            />
+          </ComposedChart>
+        ) : variant === "bar-flow" ? (
+          <BarChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+            <XAxis
+              dataKey="day"
+              tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+              axisLine={false}
+              tickLine={false}
+            />
+            <YAxis
+              tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+              axisLine={false}
+              tickLine={false}
+              tickFormatter={formatCurrency}
+            />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted))', opacity: 0.1 }} />
+            <ReferenceLine y={0} stroke="hsl(var(--border))" strokeDasharray="3 3" />
+            <Bar
+              dataKey="incomes"
+              name="Entradas"
+              fill="hsl(var(--success))"
+              radius={[2, 2, 0, 0]}
+            />
+            <Bar
+              dataKey="expenses"
+              name="Saídas"
+              fill="hsl(var(--destructive))"
+              radius={[2, 2, 0, 0]}
+            />
+          </BarChart>
+        ) : (
+          <AreaChart data={chartData} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
+            <XAxis dataKey="day" hide />
+            <YAxis hide domain={['auto', 'auto']} />
+            <Tooltip content={<CustomTooltip />} />
+            <Area type="monotone" dataKey="balance" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.1} />
+          </AreaChart>
+        )}
+      </ResponsiveContainer>
+
+      {/* Legenda manual para melhor controle em modo dark/light */}
+      {variant === "bar-flow" && (
+        <div className="flex items-center justify-center gap-4 mt-2 mb-1">
+          <div className="flex items-center gap-1.5">
+            <div className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Entradas</span>
           </div>
-
-          {/* Legenda Personalizada */}
-          <div className="flex items-center justify-center gap-6 pt-2 text-xs text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-green-500"></div>
-              <span>Saldo Positivo</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-red-500"></div>
-              <span>Saldo Negativo</span>
-            </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-2 h-2 rounded-full bg-red-500" />
+            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Saídas</span>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      )}
+    </div>
   );
 }

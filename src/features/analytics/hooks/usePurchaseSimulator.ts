@@ -14,7 +14,7 @@ export function usePurchaseSimulator(
     const simulatePurchase = (amount: number): PurchaseSimulationResult | null => {
         if (!currentHealth) return null;
 
-        const { freeBalance, effectiveDaysRemaining, safeDailyBudget } = currentHealth;
+        const { availableBalance: freeBalance, effectiveDaysRemaining, dailyBudget: safeDailyBudget } = currentHealth;
 
         // New Balance after purchase
         const newFreeBalance = freeBalance - amount;

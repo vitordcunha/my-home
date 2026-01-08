@@ -14,9 +14,10 @@ import { ReceiptPreviewSheet } from "./ReceiptPreviewSheet";
 import { ShoppingItemCard } from "./ShoppingItemCard";
 import { Button } from "@/components/ui/button";
 import { FloatingActionButton } from "@/components/ui/floating-action-button";
-import { ShoppingCart, Sparkles, Upload, X } from "lucide-react";
+import { Sparkles, ScanLine, X, Check } from "lucide-react";
 import { ShoppingCategory } from "./types";
 import { ShoppingListSkeleton } from "@/components/skeletons/ShoppingSkeleton";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { PullToRefreshWrapper } from "@/components/ui/pull-to-refresh";
 import { useQueryClient } from "@tanstack/react-query";
@@ -223,48 +224,22 @@ export function ShoppingScreen() {
             }
             actions={
               <Button
-                variant="outline"
+                variant="ghost"
                 size="icon"
                 onClick={() => setShowReceiptSheet(true)}
-                className="rounded-full h-10 w-10 border-dashed border-2 hover:bg-muted"
+                className="rounded-full h-10 w-10 hover:bg-muted"
                 aria-label="Escanear Nota"
               >
-                <Upload className="h-5 w-5 text-muted-foreground" />
+                <ScanLine className="h-5 w-5 text-muted-foreground" />
               </Button>
             }
           />
 
-          {/* Complete trip button (shows when items are selected) */}
-          {hasSelection && (
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="lg"
-                className="h-12 w-12 p-0 rounded-xl border-dashed border-2 hover:bg-muted shrink-0"
-                onClick={() => setSelectedItems(new Set())}
-                aria-label="Limpar seleção"
-              >
-                <X className="h-5 w-5 text-muted-foreground" />
-              </Button>
-              <Button
-                onClick={handleOpenCompleteSheet}
-                size="lg"
-                className="flex-1 rounded-xl shadow-md hover:shadow-lg transition-all gap-2 thumb-friendly bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-                disabled={completeTrip.isPending}
-              >
-                <ShoppingCart className="h-5 w-5" />
-                <span className="font-semibold">
-                  Finalizar ({selectedItems.size}) • +{50 + selectedItems.size * 5} pts
-                </span>
-              </Button>
-            </div>
-          )}
-
           {/* Empty state */}
           {!hasItems && (
             <div className="text-center py-16 space-y-6 animate-in">
-              <div className="inline-flex items-center justify-center h-24 w-24 rounded-3xl bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30">
-                <Sparkles className="h-12 w-12 text-emerald-600 dark:text-emerald-400" />
+              <div className="inline-flex items-center justify-center h-24 w-24 rounded-2xl bg-muted">
+                <Sparkles className="h-12 w-12 text-success" />
               </div>
               <div className="space-y-2">
                 <h3 className="text-xl font-semibold">Lista vazia!</h3>
@@ -277,22 +252,24 @@ export function ShoppingScreen() {
 
           {/* Shopping list */}
           {hasItems && (
-            <div className="space-y-3">
-              {items.map((item) => (
-                <ShoppingItemCard
-                  key={item.id}
-                  item={item}
-                  isSelected={selectedItems.has(item.id)}
-                  onToggle={handleToggleItem}
-                  onDelete={handleDeleteItem}
-                  profiles={profiles}
-                />
-              ))}
+            <div className="space-y-3 pb-24">
+              <AnimatePresence mode="popLayout">
+                {items.map((item) => (
+                  <ShoppingItemCard
+                    key={item.id}
+                    item={item}
+                    isSelected={selectedItems.has(item.id)}
+                    onToggle={handleToggleItem}
+                    onDelete={handleDeleteItem}
+                    profiles={profiles}
+                  />
+                ))}
+              </AnimatePresence>
             </div>
           )}
 
           {/* Info box */}
-          <div className="bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 rounded-2xl p-5 space-y-2">
+          <div className="bg-muted border rounded-2xl p-5 space-y-2">
             <h4 className="font-semibold text-sm flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-primary" />
               Como funciona?
@@ -316,12 +293,51 @@ export function ShoppingScreen() {
 
 
       {/* Floating Action Button - Super fast access */}
+      {/* Floating Action Button - Always visible */}
       <FloatingActionButton
         onClick={() => setShowAddSheet(true)}
         ariaLabel="Reportar item faltando"
-        variant="blue"
+        variant="primary"
         size="sm"
       />
+
+      {/* Selection Action Bar - Side by side with FAB */}
+      <AnimatePresence>
+        {hasSelection && (
+          <motion.div
+            initial={{ x: 20, opacity: 0, scale: 0.9 }}
+            animate={{ x: 0, opacity: 1, scale: 1 }}
+            exit={{ x: 20, opacity: 0, scale: 0.9 }}
+            className="fixed bottom-24 right-20 z-40 max-w-[calc(100vw-6rem)]"
+          >
+            <div className="bg-card/95 backdrop-blur-md text-card-foreground h-12 pl-1 pr-1 rounded-full shadow-2xl flex items-center gap-3 border border-border">
+              <button
+                onClick={() => setSelectedItems(new Set())}
+                className="bg-muted hover:bg-muted/80 text-muted-foreground h-10 w-10 flex items-center justify-center rounded-full transition-colors shrink-0"
+              >
+                <X className="h-4 w-4" />
+              </button>
+
+              <div className="flex flex-col shrink-0 min-w-0">
+                <span className="font-bold text-xs leading-none whitespace-nowrap">{selectedItems.size} itens</span>
+                <span className="text-[10px] text-muted-foreground font-medium leading-none mt-0.5 whitespace-nowrap">+{50 + selectedItems.size * 5} XP</span>
+              </div>
+
+              <div className="h-4 w-px bg-border mx-1 shrink-0" />
+
+              <Button
+                onClick={handleOpenCompleteSheet}
+                disabled={completeTrip.isPending}
+                size="sm"
+                className="h-10 rounded-full px-4 font-semibold bg-primary text-primary-foreground hover:bg-primary/90"
+              >
+                Concluir
+                <Check className="ml-1.5 h-3.5 w-3.5" />
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Add item sheet */}
       <AddItemSheet

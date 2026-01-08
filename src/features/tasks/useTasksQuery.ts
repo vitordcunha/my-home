@@ -87,3 +87,47 @@ export function useTasksQuery(options?: UseTasksQueryOptions) {
     },
   });
 }
+
+export function useAllActiveTasksQuery(options?: UseTasksQueryOptions) {
+  const { onlyMyTasks = false, userId } = options || {};
+
+  return useQuery({
+    queryKey: ["tasks", "all", onlyMyTasks, userId],
+    queryFn: async () => {
+      let query = supabase
+        .from("tasks_master")
+        .select("*")
+        .eq("is_active", true);
+
+      if (onlyMyTasks && userId) {
+        query = query.or(`assigned_to.eq.${userId},assigned_to.is.null`);
+      }
+
+      const { data: tasks, error: tasksError } = await query.order("nome");
+      if (tasksError) throw tasksError;
+
+      // Get today's completion history to check what's done
+      const startOfToday = startOfDay(new Date());
+      const { data: history, error: historyError } = await supabase
+        .from("tasks_history")
+        .select("task_id, completed_at")
+        .gte("completed_at", startOfToday.toISOString());
+
+      if (historyError) throw historyError;
+
+      return (tasks as TaskMaster[]).map((task) => {
+        const isCompleted = (history as { task_id: string; completed_at: string }[]).some(
+          (h) => h.task_id === task.id && isCompletedToday(h.completed_at)
+        );
+
+        return {
+          ...task,
+          is_completed_today: isCompleted,
+          // For the timeline, we might want to know if it was done *this week* if we showed past days,
+          // but for now we focus on Today's status. 
+          // Future tasks (tomorrow+) are obviously not done yet (unless we check future logs? unlikely).
+        } as TaskWithStatus;
+      });
+    },
+  });
+}

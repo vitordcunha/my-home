@@ -13,7 +13,6 @@ export function useCreateHousehold() {
 
   return useMutation({
     mutationFn: async ({ name, userId }: CreateHouseholdParams) => {
-      // @ts-expect-error - Supabase RPC type inference issue
       const { data, error } = await supabase.rpc("create_household_for_user", {
         p_user_id: userId,
         p_household_name: name,
@@ -28,21 +27,21 @@ export function useCreateHousehold() {
         queryKey: ["profile", variables.userId],
         refetchType: "active",
       });
-      queryClient.invalidateQueries({ 
+      queryClient.invalidateQueries({
         queryKey: ["profiles"],
         refetchType: "active",
       });
-      queryClient.invalidateQueries({ 
+      queryClient.invalidateQueries({
         queryKey: ["household"],
         refetchType: "active",
       });
-      
+
       // Force refetch to ensure immediate update
       await queryClient.refetchQueries({
         queryKey: ["profile", variables.userId],
         type: "active",
       });
-      
+
       toast({
         title: "Casa criada!",
         description: "Sua casa foi criada com sucesso.",

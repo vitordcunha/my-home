@@ -133,7 +133,7 @@ export function BudgetManagementSheet({
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
                         <p className="font-semibold">
-                          {EXPENSE_CATEGORY_LABELS[budget.category]}
+                          {EXPENSE_CATEGORY_LABELS[budget.category as keyof typeof EXPENSE_CATEGORY_LABELS]}
                         </p>
                         {editingBudget === budget.id ? (
                           <div className="mt-2 flex items-center gap-2">
@@ -204,7 +204,7 @@ export function BudgetManagementSheet({
                 <CardContent className="p-4 space-y-3">
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">
-                      Categoria: {EXPENSE_CATEGORY_LABELS[newBudgetCategory]}
+                      Categoria: {EXPENSE_CATEGORY_LABELS[newBudgetCategory as keyof typeof EXPENSE_CATEGORY_LABELS]}
                     </p>
                     <input
                       type="number"
@@ -253,7 +253,7 @@ export function BudgetManagementSheet({
                       className="h-auto py-3 flex flex-col items-center gap-1"
                     >
                       <span className="text-xs text-muted-foreground">
-                        {EXPENSE_CATEGORY_LABELS[category]}
+                        {EXPENSE_CATEGORY_LABELS[category as keyof typeof EXPENSE_CATEGORY_LABELS]}
                       </span>
                     </Button>
                   ))}

@@ -13,7 +13,6 @@ export function useJoinHousehold() {
 
   return useMutation({
     mutationFn: async ({ inviteCode, userId }: JoinHouseholdParams) => {
-      // @ts-expect-error - Supabase RPC type inference issue
       const { data, error } = await supabase.rpc("join_household_by_code", {
         p_user_id: userId,
         p_invite_code: inviteCode.toUpperCase(),
@@ -28,21 +27,21 @@ export function useJoinHousehold() {
         queryKey: ["profile", variables.userId],
         refetchType: "active",
       });
-      queryClient.invalidateQueries({ 
+      queryClient.invalidateQueries({
         queryKey: ["profiles"],
         refetchType: "active",
       });
-      queryClient.invalidateQueries({ 
+      queryClient.invalidateQueries({
         queryKey: ["household"],
         refetchType: "active",
       });
-      
+
       // Force refetch to ensure immediate update
       await queryClient.refetchQueries({
         queryKey: ["profile", variables.userId],
         type: "active",
       });
-      
+
       toast({
         title: "Bem-vindo!",
         description: "Você entrou na casa com sucesso.",

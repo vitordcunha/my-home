@@ -79,7 +79,7 @@ export function IncomeFormSheet({
           ? new Date(incomeToEdit.received_at).toISOString().slice(0, 16)
           : ""
       );
-      setIsRecurring(incomeToEdit.is_recurring);
+      setIsRecurring(incomeToEdit.is_recurring || false);
       setRecurrenceFrequency(
         incomeToEdit.recurrence_frequency as "monthly" | "weekly" | null
       );

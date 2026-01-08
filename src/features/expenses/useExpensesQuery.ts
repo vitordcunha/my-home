@@ -71,7 +71,7 @@ export function useMonthlyExpensesQuery(householdId?: string) {
     if (!expenses) return [];
 
     const grouped = expenses.reduce((acc, expense) => {
-      const date = new Date(expense.paid_at || expense.created_at);
+      const date = new Date(expense.paid_at || expense.created_at || new Date());
       const monthKey = format(date, "yyyy-MM");
 
       if (!acc[monthKey]) {

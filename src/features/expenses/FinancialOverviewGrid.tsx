@@ -324,7 +324,7 @@ export function FinancialOverviewGrid({
                                             <div className="space-y-1.5">
                                                 <h4 className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">Sobrevivência Financeira</h4>
                                                 <p className="text-xs leading-relaxed">
-                                                    Quantos dias seu dinheiro dura com base na sua média de gastos dos últimos 7 dias.
+                                                    Quantos dias seu dinheiro dura com base na sua média de gastos variáveis (não recorrentes) dos últimos 7 dias.
                                                 </p>
                                             </div>
                                         </PopoverContent>
@@ -338,7 +338,7 @@ export function FinancialOverviewGrid({
                         </div>
                         <div className="text-right">
                             <span className="text-[10px] text-muted-foreground block">
-                                Se manter média de
+                                Se manter média variável de
                             </span>
                             <span className="text-xs font-medium">
                                 {formatCurrency(health.averageDailySpend)}/dia
@@ -393,6 +393,51 @@ export function FinancialOverviewGrid({
                         <CashFlowChart
                             dailyProjections={dailyProjections}
                             variant="composed-projection"
+                        />
+                    </div>
+                </Card>
+            </motion.div>
+
+            {/* 4. CHART: DAILY POTENTIAL (New) */}
+            <motion.div
+                custom={4.5}
+                initial="hidden"
+                animate="visible"
+                variants={cardVariants}
+            >
+                <Card className="border-none shadow-soft h-[240px] flex flex-col pt-4 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-4 opacity-10">
+                        <Coins className="w-24 h-24 text-primary" />
+                    </div>
+                    <div className="px-5 mb-1 flex items-start justify-between relative z-10">
+                        <div>
+                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block">
+                                Poder de Compra Diário
+                            </span>
+                            <span className="text-[10px] text-muted-foreground flex items-center gap-1.5">
+                                Evolução do seu orçamento se você economizar
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <button className="focus:outline-none">
+                                            <Info className="w-3 h-3 text-muted-foreground/30 hover:text-muted-foreground transition-colors" />
+                                        </button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-64 p-3" align="start">
+                                        <div className="space-y-1.5">
+                                            <h4 className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">Recompensa por Economia</h4>
+                                            <p className="text-xs leading-relaxed">
+                                                Este gráfico simula o futuro: se você pagar todas as contas agendadas e <strong>não gastar nada extra</strong> até um certo dia, quanto seu orçamento diário aumentará?
+                                            </p>
+                                        </div>
+                                    </PopoverContent>
+                                </Popover>
+                            </span>
+                        </div>
+                    </div>
+                    <div className="flex-1 w-full min-h-0 px-1 pb-1 relative z-10">
+                        <CashFlowChart
+                            dailyProjections={dailyProjections}
+                            variant="potential-daily"
                         />
                     </div>
                 </Card>

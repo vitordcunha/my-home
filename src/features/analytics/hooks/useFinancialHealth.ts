@@ -28,6 +28,7 @@ export interface DailyProjection {
     hasExpense: boolean;
     incomeAmount: number;
     expenseAmount: number;
+    potentialDailyBudget?: number;
 }
 
 export interface FinancialAlert {
@@ -264,6 +265,9 @@ export function useFinancialHealth({ householdId, weekendWeight: overrideWeekend
 
         // --- 5. CALCULAR AUTONOMIA (QUANTOS DIAS O DINHEIRO DURA) ---
         const last7DaysExpenses = expenses.filter((e) => {
+            // Excluir recorrentes para pegar apenas o gasto variável/discricionário
+            if (e.is_recurring) return false;
+
             const d = new Date(e.paid_at || e.created_at || new Date());
             const sevenDaysAgo = new Date(todayStart);
             sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
@@ -328,6 +332,113 @@ export function useFinancialHealth({ householdId, weekendWeight: overrideWeekend
         // --- 7. CALCULAR STATUS E ALERTAS ---
         const alerts: FinancialAlert[] = [];
         let status: FinancialHealthStatus = "HEALTHY";
+
+        // Segunda passada: Calcular "Potencial de Gasto Diário" para cada dia futuro
+        // "Se eu não gastar nada até o dia X, quanto poderei gastar?"
+        dailyProjections.forEach((dayProj) => {
+            // Se já for passado, ignorar (ou manter 0)
+            if (isBefore(dayProj.date, todayStart)) {
+                (dayProj as any).potentialDailyBudget = 0;
+                return;
+            }
+
+
+
+
+            // --- CÁLCULO RIGOROSO DO POTENCIAL DIÁRIO ---
+            // Para cada dia, rodamos uma simulação "Mini-Bottleneck" idêntica à principal.
+
+            // Recriar lista de transações futuras para a simulação
+            const simTransactions = [
+                ...futureIncomes.map(i => ({ date: new Date(i.received_at || '2000-01-01'), amount: Number(i.amount), type: 'income' })),
+                ...futureExpenses.map(e => ({ date: new Date(e.paid_at || '2000-01-01'), amount: Number(e.amount), type: 'expense' }))
+            ].sort((a, b) => a.date.getTime() - b.date.getTime());
+
+            // 1. Estado inicial da simulação neste dia futuro (D)
+            // O saldo inicial em D é o saldo projetado do dia anterior (ou atual)
+            // Assumindo que seguimos o plano até aqui (sem gastar extra).
+            const startBalance = dayProj.projectedBalance;
+
+            // Precisamos simular de D até o fim do mês para achar o gargalo DESTE ponto de vista
+            let simRunBalance = startBalance;
+            let lowestPoint = Infinity;
+            let daysToBottleneck = 0;
+            let weightAccumulator = 0;
+
+            const dayDate = startOfDay(dayProj.date);
+
+            // Iterar dia a dia a partir de D
+            for (let d = new Date(dayDate); d <= monthEnd; d.setDate(d.getDate() + 1)) {
+                // Contar peso
+                const dw = getDay(d);
+                const w = (dw === 0 || dw === 6) ? weekendWeight : 1;
+                weightAccumulator += w;
+
+                // Achar transações deste dia simulado
+                // Cuidado: As transações já foram contabilizadas em 'startBalance' se forem do dia D?
+                // 'dayProj.projectedBalance' é o saldo ao FINAL do dia D.
+                // Então nossa simulação deve começar checando o FINAL do dia D?
+                // Sim, o dia D já "aconteceu" na projeção. Estamos olhando para o futuro a partir do saldo final de D.
+                // MAS, o budget diário é para ser gasto DURANTE o dia D.
+                // Então, se estou na manhã do dia D, devo considerar o saldo INICIAL do dia D?
+
+                // Ajuste: Vamos usar a lógica de "Daqui para frente".
+                // Se estou calculando potencial para o dia D, quero saber:
+                // Com o saldo que tenho no fim do dia D (após pagar contas fixas de D), quanto sobra?
+
+                // Mas espere: se a conta fixa vence no dia D, ela compete com meu almoço? Sim.
+                // O 'startBalance' (projectedBalance) já subtraiu a conta fixa do dia D.
+                // Então estamos seguros.
+
+                // Se d == dayDate (hoje da simulação), não aplicamos transações de novo, pois startBalance já as tem.
+                // Se d > dayDate, aplicamos transações.
+
+                if (d.getTime() > dayDate.getTime()) {
+                    const dayTx = simTransactions.filter(t => isSameMonth(t.date, d) && t.date.getDate() === d.getDate());
+                    const flow = dayTx.reduce((acc, t) => t.type === 'income' ? acc + t.amount : acc - t.amount, 0);
+                    simRunBalance += flow;
+                }
+
+                const liquid = simRunBalance - minimumReserve;
+
+                // Achar o vale final (<=)
+                if (liquid <= lowestPoint) {
+                    lowestPoint = liquid;
+                    daysToBottleneck = weightAccumulator;
+                }
+            }
+
+            // 2. Budget pelo Gargalo
+            const safeLiquidity = Math.max(0, lowestPoint);
+            const bottleneckBudget = safeLiquidity / Math.max(1, daysToBottleneck);
+
+            // 3. Trava Global (Standard)
+            // Deve ser consistente com a lógica "Conservadora" do card principal (sem contar renda futura incerta?)
+            // O card principal usa: (Available - FutureCommitments) / Days.
+            // Aqui, (StartBalance - FutureExpensesFromHere) / DaysFromHere.
+
+            // Calcular despesas futuras a partir de amanhã
+            // Calcular despesas futuras a partir de AMANHÃ (para não duplicar o que já saiu do startBalance)
+            const tomorrowStart = new Date(dayDate);
+            tomorrowStart.setDate(tomorrowStart.getDate() + 1);
+
+            const futureCommitmentsFromTomorrow = simTransactions
+                .filter(t => t.type === 'expense' && t.date >= tomorrowStart)
+                .reduce((acc, t) => acc + t.amount, 0);
+
+            const globalLiquid = Math.max(0, startBalance - minimumReserve - futureCommitmentsFromTomorrow);
+
+            // Total de dias restantes (peso)
+            // daysToBottleneck pega até o gargalo. Precisamos até o fim do mês.
+            // Podemos usar o ultimo 'weightAccumulator' do loop acima? Sim.
+            // Vamos recalcular rapidinho ou extrair do loop.
+            // O loop vai até monthEnd, então weightAccumulator final é o total.
+
+            const standardBudget = globalLiquid / Math.max(1, weightAccumulator);
+
+            // 4. Resultado Final
+            (dayProj as any).potentialDailyBudget = Math.min(bottleneckBudget, standardBudget);
+        });
 
         // Alerta 1: Saldo insuficiente para compromissos obrigatórios
         if (availableBalance < futureCommitments) {

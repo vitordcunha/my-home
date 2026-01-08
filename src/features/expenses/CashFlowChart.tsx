@@ -19,6 +19,7 @@ interface DailyProjection {
   budgetedBalance?: number;
   incomeAmount?: number;
   expenseAmount?: number;
+  potentialDailyBudget?: number;
 }
 
 interface TimelineItem {
@@ -47,7 +48,7 @@ interface CashFlowChartProps {
 
   // New props
   dailyProjections?: DailyProjection[];
-  variant?: "area" | "bar-balance" | "bar-flow" | "composed-projection";
+  variant?: "area" | "bar-balance" | "bar-flow" | "composed-projection" | "potential-daily";
 }
 
 export function CashFlowChart({
@@ -68,6 +69,7 @@ export function CashFlowChart({
         budgeted: d.budgetedBalance,
         incomes: d.incomeAmount || 0,
         expenses: d.expenseAmount || 0,
+        potential: d.potentialDailyBudget || 0,
       }));
     }
 
@@ -150,6 +152,18 @@ export function CashFlowChart({
                 )}
               </div>
             )}
+
+            {/* Potencial de gasto (novo) */}
+            {data.potential !== undefined && data.potential > 0 && (
+              <div className="pt-1.5 mt-1.5 border-t border-border/50">
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-muted-foreground">Poder de Gasto:</span>
+                  <span className="text-primary font-bold">
+                    {formatCurrency(data.potential)}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       );
@@ -160,7 +174,7 @@ export function CashFlowChart({
   if (chartData.length === 0) return null;
 
   return (
-    <div className="w-full h-full min-h-[100px] flex flex-col">
+    <div className="w-full h-full min-h-[100px] flex flex-col touch-none">
       <ResponsiveContainer width="100%" height="100%">
         {variant === "composed-projection" ? (
           <ComposedChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
@@ -236,6 +250,39 @@ export function CashFlowChart({
               radius={[2, 2, 0, 0]}
             />
           </BarChart>
+
+        ) : variant === "potential-daily" ? (
+          <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <defs>
+              <linearGradient id="potentialGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.4} />
+                <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.0} />
+              </linearGradient>
+            </defs>
+            <XAxis
+              dataKey="day"
+              tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+              axisLine={false}
+              tickLine={false}
+            />
+            <YAxis
+              tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+              axisLine={false}
+              tickLine={false}
+              tickFormatter={formatCurrency}
+            />
+            <Tooltip content={<CustomTooltip />} />
+            <ReferenceLine y={0} stroke="hsl(var(--border))" strokeDasharray="3 3" />
+
+            <Area
+              type="monotone"
+              dataKey="potential" // Mapped below
+              name="Poder de Gasto"
+              stroke="hsl(var(--primary))"
+              fill="url(#potentialGradient)"
+              strokeWidth={3}
+            />
+          </AreaChart>
         ) : (
           <AreaChart data={chartData} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
             <XAxis dataKey="day" hide />
@@ -247,18 +294,20 @@ export function CashFlowChart({
       </ResponsiveContainer>
 
       {/* Legenda manual para melhor controle em modo dark/light */}
-      {variant === "bar-flow" && (
-        <div className="flex items-center justify-center gap-4 mt-2 mb-1">
-          <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Entradas</span>
+      {
+        variant === "bar-flow" && (
+          <div className="flex items-center justify-center gap-4 mt-2 mb-1">
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Entradas</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-red-500" />
+              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Saídas</span>
+            </div>
           </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-red-500" />
-            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Saídas</span>
-          </div>
-        </div>
-      )}
-    </div>
+        )
+      }
+    </div >
   );
 }

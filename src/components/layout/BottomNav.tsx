@@ -42,10 +42,14 @@ export default function BottomNav() {
       : location.pathname.startsWith(item.to)
   );
 
+  const isCapacitor =
+    window.location.protocol === "capacitor:" ||
+    window.location.protocol === "ionic:";
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 safe-area-inset-bottom">
       {/* Ilha flutuante com glassmorphism premium */}
-      <div className="mx-4 mb-2 relative">
+      <div className={cn(`${isCapacitor ? "mb-0" : "mb-4"} mx-4 relative`)}>
         {/* Container principal com glass effect */}
         <div className="relative bg-background/70 backdrop-blur-2xl border border-border/30 rounded-full shadow-2xl overflow-hidden">
           {/* Indicador pill animado - posicionado absolutamente */}

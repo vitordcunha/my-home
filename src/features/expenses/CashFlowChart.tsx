@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import {
   AreaChart,
   Area,
@@ -12,6 +12,7 @@ import {
   ComposedChart,
   Line,
 } from "recharts";
+import { useHaptic } from "@/hooks/useHaptic";
 
 interface DailyProjection {
   dateLabel: string;
@@ -59,6 +60,9 @@ export function CashFlowChart({
   variant = "area",
   dailyProjections,
 }: CashFlowChartProps) {
+  const { trigger } = useHaptic();
+  const lastHapticTime = useRef(0);
+  const lastActiveDay = useRef<string | null>(null);
 
   // Se temos dailyProjections, usamos direto (adaptando para formato do gráfico)
   const chartData = useMemo(() => {
@@ -114,8 +118,21 @@ export function CashFlowChart({
   };
 
   const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
+    // Dispara haptic quando o tooltip aparece
     if (active && payload && payload.length) {
       const data = payload[0].payload;
+      const currentDay = data.day;
+
+      // Só dispara se mudou de dia e passou tempo suficiente (debounce)
+      const now = Date.now();
+      const timeSinceLastHaptic = now - lastHapticTime.current;
+
+      if (currentDay !== lastActiveDay.current && timeSinceLastHaptic > 150) {
+        trigger("light");
+        lastHapticTime.current = now;
+        lastActiveDay.current = currentDay;
+      }
+
       return (
         <div className="bg-background/95 backdrop-blur-sm border border-border/50 rounded-lg shadow-xl p-3 text-xs">
           <p className="font-bold mb-2 text-muted-foreground uppercase tracking-wider">Dia {data.day}</p>
@@ -168,6 +185,12 @@ export function CashFlowChart({
         </div>
       );
     }
+
+    // Reseta o estado quando o tooltip fecha
+    if (!active) {
+      lastActiveDay.current = null;
+    }
+
     return null;
   };
 
@@ -177,7 +200,7 @@ export function CashFlowChart({
     <div className="w-full h-full min-h-[100px] flex flex-col touch-none">
       <ResponsiveContainer width="100%" height="100%">
         {variant === "composed-projection" ? (
-          <ComposedChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+          <ComposedChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }} onMouseLeave={() => { }}>
             <defs>
               <linearGradient id="balanceGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
@@ -222,7 +245,7 @@ export function CashFlowChart({
             />
           </ComposedChart>
         ) : variant === "bar-flow" ? (
-          <BarChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+          <BarChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }} onMouseLeave={() => { }}>
             <XAxis
               dataKey="day"
               tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
@@ -252,7 +275,7 @@ export function CashFlowChart({
           </BarChart>
 
         ) : variant === "potential-daily" ? (
-          <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+          <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }} onMouseLeave={() => { }}>
             <defs>
               <linearGradient id="potentialGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.4} />
@@ -284,7 +307,7 @@ export function CashFlowChart({
             />
           </AreaChart>
         ) : (
-          <AreaChart data={chartData} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
+          <AreaChart data={chartData} margin={{ top: 5, right: 0, left: 0, bottom: 0 }} onMouseLeave={() => { }}>
             <XAxis dataKey="day" hide />
             <YAxis hide domain={['auto', 'auto']} />
             <Tooltip content={<CustomTooltip />} />

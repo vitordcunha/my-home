@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import {
     Wallet,
@@ -7,20 +7,23 @@ import {
     ShieldCheck,
     AlertCircle,
     Coins,
-    Info
+    Info,
+    Sparkles,
 } from "lucide-react";
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
+import { Card } from "@/components/ui/card";
 import { useFinancialHealth } from "@/features/analytics/hooks/useFinancialHealth";
+import { useFinancialInsight } from "@/features/analytics/hooks/useFinancialInsight";
+import { FinancialInsightSheet } from "@/features/analytics/components/FinancialInsightSheet";
 import { TimelineItem } from "./useFinancialBalance";
 import { CashFlowChart } from "./CashFlowChart";
-
+import { useHaptic } from "@/hooks/useHaptic";
 import { TopCategoriesCard } from "./TopCategoriesCard";
 import { LargestExpenseCard } from "./LargestExpenseCard";
-import { Card } from "@/components/ui/card";
 
 
 interface FinancialOverviewGridProps {
@@ -53,6 +56,11 @@ export function FinancialOverviewGrid({
     timeline = [],
 }: FinancialOverviewGridProps) {
     const health = useFinancialHealth({ householdId, userId });
+    const { generateInsight, isLoading: isLoadingInsight, error: insightError } = useFinancialInsight();
+    const { trigger: triggerHaptic } = useHaptic();
+
+    const [isInsightSheetOpen, setIsInsightSheetOpen] = useState(false);
+    const [currentInsight, setCurrentInsight] = useState<import("@/features/analytics/hooks/useFinancialInsight").FinancialInsight | null>(null);
 
     // Preparar dados para o donut e top categorias
     const expensesForCategories = useMemo(() => {
@@ -76,6 +84,116 @@ export function FinancialOverviewGrid({
                 paid_at: t.date
             }));
     }, [timeline]);
+
+    const handleOpenInsight = async () => {
+        if (!health) return;
+
+        triggerHaptic("light");
+        setIsInsightSheetOpen(true);
+
+        // Preparar dados para a IA
+        const upcomingExpenses = health.dailyProjections
+            .filter(p => p.hasExpense)
+            .slice(0, 5)
+            .map(p => ({
+                amount: p.expenseAmount,
+                date: p.date.toISOString(),
+                description: `Despesa do dia ${p.dateLabel}`,
+            }));
+
+        const upcomingIncomes = health.dailyProjections
+            .filter(p => p.hasIncome)
+            .slice(0, 5)
+            .map(p => ({
+                amount: p.incomeAmount,
+                date: p.date.toISOString(),
+                description: `Entrada do dia ${p.dateLabel}`,
+            }));
+
+        const insight = await generateInsight({
+            currentBalance: health.currentBalance,
+            dailyBudget: health.dailyBudget,
+            minimumReserve: health.minimumReserve,
+            bottleneckInfo: health.bottleneckInfo ? {
+                hasBottleneck: health.bottleneckInfo.hasBottleneck,
+                bottleneckDate: health.bottleneckInfo.bottleneckDate?.toISOString(),
+                daysUntilBottleneck: health.bottleneckInfo.daysUntilBottleneck,
+                dailyBudgetWithBottleneck: health.dailyBudget,
+                bottleneckCause: health.bottleneckInfo.nextLargeExpense?.description,
+            } : undefined,
+            upcomingExpenses,
+            upcomingIncomes,
+            status: health.status,
+            today: new Date().toISOString(),
+            daysRemainingInMonth: health.daysRemaining,
+        });
+
+        if (insight) {
+            setCurrentInsight(insight);
+        }
+    };
+
+    const handleOpenChartInsight = async () => {
+        if (!health) return;
+
+        triggerHaptic("light");
+        setIsInsightSheetOpen(true);
+
+        // Analisar tendência do gráfico de Poder de Compra
+        const chartData = health.dailyProjections.filter(p => p.potentialDailyBudget);
+        const currentPotential = chartData[0]?.potentialDailyBudget || 0;
+        const futurePotentials = chartData.slice(1, 6);
+
+        const avgFuturePotential = futurePotentials.length > 0
+            ? futurePotentials.reduce((sum, p) => sum + (p.potentialDailyBudget || 0), 0) / futurePotentials.length
+            : currentPotential;
+
+        const trend = avgFuturePotential > currentPotential * 1.2 ? "crescente" :
+            avgFuturePotential < currentPotential * 0.8 ? "decrescente" : "estável";
+
+        const upcomingExpenses = health.dailyProjections
+            .filter(p => p.hasExpense)
+            .slice(0, 3)
+            .map(p => ({
+                amount: p.expenseAmount,
+                date: p.date.toISOString(),
+                description: `Despesa do dia ${p.dateLabel}`,
+            }));
+
+        const upcomingIncomes = health.dailyProjections
+            .filter(p => p.hasIncome)
+            .slice(0, 3)
+            .map(p => ({
+                amount: p.incomeAmount,
+                date: p.date.toISOString(),
+                description: `Entrada do dia ${p.dateLabel}`,
+            }));
+
+        const insight = await generateInsight({
+            insightType: "chart", // ← Tipo diferente para explicação de gráfico
+            currentBalance: health.currentBalance,
+            dailyBudget: health.dailyBudget,
+            minimumReserve: health.minimumReserve,
+            upcomingExpenses,
+            upcomingIncomes,
+            status: health.status,
+            today: new Date().toISOString(),
+            daysRemainingInMonth: health.daysRemaining,
+            // Dados específicos do gráfico
+            chartData: {
+                chartType: "daily_potential" as const,
+                currentValue: currentPotential,
+                futureAverage: avgFuturePotential,
+                trend: trend as "crescente" | "decrescente" | "estável",
+                peakDay: chartData[0]?.date ? new Date(chartData[0].date).getDate() : undefined,
+                lowestDay: chartData[chartData.length - 1]?.date ? new Date(chartData[chartData.length - 1].date).getDate() : undefined,
+            },
+        });
+
+        if (insight) {
+            setCurrentInsight(insight);
+        }
+    };
 
     if (!health) {
         return <div className="h-64 animate-pulse bg-muted/20 rounded-3xl" />;
@@ -164,14 +282,28 @@ export function FinancialOverviewGrid({
                                             </button>
                                         </PopoverTrigger>
                                         <PopoverContent className="w-72 p-3" align="start">
-                                            <div className="space-y-2">
-                                                <h4 className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">Lógica de Proteção (Gargalo)</h4>
-                                                <p className="text-xs leading-relaxed">
-                                                    Para sua segurança, o sistema identifica o dia futuro com <strong>menor saldo previsto</strong>.
-                                                </p>
-                                                <p className="text-xs leading-relaxed text-muted-foreground">
-                                                    Se houver um momento de aperto no futuro (ex: antes de receber), o orçamento de hoje é reduzido para garantir que você não fique no negativo nesse dia.
-                                                </p>
+                                            <div className="space-y-3">
+                                                <div className="space-y-2">
+                                                    <h4 className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">Lógica de Proteção (Gargalo)</h4>
+                                                    <p className="text-xs leading-relaxed">
+                                                        Para sua segurança, o sistema identifica o dia futuro com <strong>menor saldo previsto</strong>.
+                                                    </p>
+                                                    <p className="text-xs leading-relaxed text-muted-foreground">
+                                                        Se houver um momento de aperto no futuro (ex: antes de receber), o orçamento de hoje é reduzido para garantir que você não fique no negativo nesse dia.
+                                                    </p>
+                                                </div>
+
+                                                {/* Botão Entenda */}
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleOpenInsight();
+                                                    }}
+                                                    className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-all active:scale-95 border border-primary/20"
+                                                >
+                                                    <Sparkles className="w-3.5 h-3.5 text-primary" />
+                                                    <span className="text-xs font-semibold text-primary">Entenda Esta Situação</span>
+                                                </button>
                                             </div>
                                         </PopoverContent>
                                     </Popover>
@@ -180,6 +312,7 @@ export function FinancialOverviewGrid({
                                     {status === 'HEALTHY' ? 'Saudável' : status === 'CAUTION' ? 'Atenção' : 'Crítico'}
                                 </span>
                             </div>
+
 
                             <div className="flex items-baseline gap-2 mt-2">
                                 <span className="text-3xl font-bold tracking-tight">
@@ -422,12 +555,26 @@ export function FinancialOverviewGrid({
                                             <Info className="w-3 h-3 text-muted-foreground/30 hover:text-muted-foreground transition-colors" />
                                         </button>
                                     </PopoverTrigger>
-                                    <PopoverContent className="w-64 p-3" align="start">
-                                        <div className="space-y-1.5">
-                                            <h4 className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">Recompensa por Economia</h4>
-                                            <p className="text-xs leading-relaxed">
-                                                Este gráfico simula o futuro: se você pagar todas as contas agendadas e <strong>não gastar nada extra</strong> até um certo dia, quanto seu orçamento diário aumentará?
-                                            </p>
+                                    <PopoverContent className="w-72 p-3" align="start">
+                                        <div className="space-y-3">
+                                            <div className="space-y-1.5">
+                                                <h4 className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">Recompensa por Economia</h4>
+                                                <p className="text-xs leading-relaxed">
+                                                    Este gráfico simula o futuro: se você pagar todas as contas agendadas e <strong>não gastar nada extra</strong> até um certo dia, quanto seu orçamento diário aumentará?
+                                                </p>
+                                            </div>
+
+                                            {/* Botão Entenda o Gráfico */}
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleOpenChartInsight();
+                                                }}
+                                                className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-all active:scale-95 border border-primary/20"
+                                            >
+                                                <Sparkles className="w-3.5 h-3.5 text-primary" />
+                                                <span className="text-xs font-semibold text-primary">Entenda Este Gráfico</span>
+                                            </button>
                                         </div>
                                     </PopoverContent>
                                 </Popover>
@@ -509,6 +656,15 @@ export function FinancialOverviewGrid({
                     </motion.div>
                 )}
             </div>
+
+            {/* Financial Insight Sheet */}
+            <FinancialInsightSheet
+                isOpen={isInsightSheetOpen}
+                onClose={() => setIsInsightSheetOpen(false)}
+                insight={currentInsight}
+                isLoading={isLoadingInsight}
+                error={insightError}
+            />
 
         </div>
     );

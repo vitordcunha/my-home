@@ -1,6 +1,7 @@
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { Expense } from "./types";
+import { useHaptic } from "@/hooks/useHaptic";
 
 interface SpendingCategoryChartProps {
     expenses: Expense[];
@@ -20,6 +21,10 @@ const COLORS = [
 ];
 
 export function SpendingCategoryChart({ expenses, month, year }: SpendingCategoryChartProps) {
+    const { trigger } = useHaptic();
+    const lastHapticTime = useRef(0);
+    const lastActiveCategory = useRef<string | null>(null);
+
     const data = useMemo(() => {
         if (!expenses) return [];
 
@@ -63,6 +68,45 @@ export function SpendingCategoryChart({ expenses, month, year }: SpendingCategor
             maximumFractionDigits: 0
         }).format(value);
 
+    // Tooltip customizado com haptic feedback
+    const CustomTooltip = ({ active, payload }: any) => {
+        if (active && payload && payload.length) {
+            const category = payload[0].name;
+
+            // Dispara haptic quando muda de categoria
+            const now = Date.now();
+            const timeSinceLastHaptic = now - lastHapticTime.current;
+
+            if (category !== lastActiveCategory.current && timeSinceLastHaptic > 150) {
+                trigger("light");
+                lastHapticTime.current = now;
+                lastActiveCategory.current = category;
+            }
+
+            return (
+                <div style={{
+                    borderRadius: '8px',
+                    border: '1px solid hsl(var(--border))',
+                    background: 'hsl(var(--background))',
+                    color: 'hsl(var(--foreground))',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                    fontSize: '12px',
+                    padding: '8px 12px'
+                }}>
+                    <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>{category}</div>
+                    <div style={{ color: 'hsl(var(--primary))' }}>{formatCurrency(payload[0].value)}</div>
+                </div>
+            );
+        }
+
+        // Reseta quando tooltip fecha
+        if (!active) {
+            lastActiveCategory.current = null;
+        }
+
+        return null;
+    };
+
     // Se não tiver dados, não mostrar nada (ou mostrar vazio)
     if (data.length === 0) {
         return (
@@ -75,7 +119,7 @@ export function SpendingCategoryChart({ expenses, month, year }: SpendingCategor
     return (
         <div className="w-full h-full relative flex items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
+                <PieChart onMouseLeave={() => { }}>
                     <Pie
                         data={data}
                         cx="50%"
@@ -90,18 +134,7 @@ export function SpendingCategoryChart({ expenses, month, year }: SpendingCategor
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                     </Pie>
-                    <Tooltip
-                        formatter={(value: any) => formatCurrency(Number(value || 0))}
-                        contentStyle={{
-                            borderRadius: '8px',
-                            border: '1px solid hsl(var(--border))',
-                            background: 'hsl(var(--background))', // Theme aware
-                            color: 'hsl(var(--foreground))',
-                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                            fontSize: '12px'
-                        }}
-                        itemStyle={{ color: 'hsl(var(--foreground))' }}
-                    />
+                    <Tooltip content={<CustomTooltip />} />
                 </PieChart>
             </ResponsiveContainer>
 

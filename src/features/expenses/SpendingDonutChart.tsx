@@ -1,6 +1,7 @@
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { EXPENSE_CATEGORY_LABELS, EXPENSE_CATEGORY_EMOJIS, ExpenseCategory } from "./types";
+import { useHaptic } from "@/hooks/useHaptic";
 
 interface SpendingData {
     category: string;
@@ -27,6 +28,10 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 export function SpendingDonutChart({ expenses }: SpendingDonutChartProps) {
+    const { trigger } = useHaptic();
+    const lastHapticTime = useRef(0);
+    const lastActiveCategory = useRef<string | null>(null);
+
     const chartData = useMemo(() => {
         if (!expenses || expenses.length === 0) return [];
 
@@ -66,6 +71,18 @@ export function SpendingDonutChart({ expenses }: SpendingDonutChartProps) {
     const CustomTooltip = ({ active, payload }: any) => {
         if (active && payload && payload.length) {
             const data = payload[0].payload as SpendingData;
+            const category = data.category;
+
+            // Dispara haptic quando muda de categoria
+            const now = Date.now();
+            const timeSinceLastHaptic = now - lastHapticTime.current;
+
+            if (category !== lastActiveCategory.current && timeSinceLastHaptic > 150) {
+                trigger("light");
+                lastHapticTime.current = now;
+                lastActiveCategory.current = category;
+            }
+
             return (
                 <div className="bg-background/95 backdrop-blur-sm border border-border/50 rounded-lg shadow-xl p-3 text-xs">
                     <p className="font-bold mb-2 text-muted-foreground uppercase tracking-wider">
@@ -88,6 +105,12 @@ export function SpendingDonutChart({ expenses }: SpendingDonutChartProps) {
                 </div>
             );
         }
+
+        // Reseta quando tooltip fecha
+        if (!active) {
+            lastActiveCategory.current = null;
+        }
+
         return null;
     };
 
@@ -102,7 +125,7 @@ export function SpendingDonutChart({ expenses }: SpendingDonutChartProps) {
     return (
         <div className="w-full h-full min-h-[180px]">
             <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
+                <PieChart onMouseLeave={() => { }}>
                     <Pie
                         data={chartData}
                         cx="50%"
@@ -116,7 +139,7 @@ export function SpendingDonutChart({ expenses }: SpendingDonutChartProps) {
                     >
                         {chartData.map((entry, index) => (
                             <Cell
-                                key={`cell-${index}`}
+                                key={`cell - ${index} `}
                                 fill={
                                     CATEGORY_COLORS[
                                     Object.keys(EXPENSE_CATEGORY_LABELS).find(

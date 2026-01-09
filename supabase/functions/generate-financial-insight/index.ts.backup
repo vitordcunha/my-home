@@ -1,0 +1,325 @@
+// Supabase Edge Function to generate contextual financial insights
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+const corsHeaders = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers":
+        "authorization, x-client-info, apikey, content-type",
+};
+
+interface FinancialInsightRequest {
+    // Tipo de insight
+    insightType?: "general" | "chart"; // Default: "general"
+
+    // Estado Atual
+    currentBalance: number;
+    dailyBudget: number;
+    minimumReserve: number;
+
+    // Gargalos
+    bottleneckInfo?: {
+        hasBottleneck: boolean;
+        bottleneckDate?: string;
+        daysUntilBottleneck?: number;
+        dailyBudgetWithBottleneck?: number;
+        bottleneckCause?: string;
+    };
+
+    // Próximos Eventos (primeiros 3 de cada)
+    upcomingExpenses: Array<{ amount: number; date: string; description: string }>;
+    upcomingIncomes: Array<{ amount: number; date: string; description: string }>;
+
+    // Métricas de Saúde
+    healthScore?: number;
+    daysUntilZero?: number;
+    status: "HEALTHY" | "CAUTION" | "DANGER";
+
+    // Contexto Temporal
+    today: string;
+    daysRemainingInMonth: number;
+
+    // Dados específicos do gráfico (para insightType = "chart")
+    chartData?: {
+        chartType: "daily_potential" | "cash_flow" | "spending_category";
+        currentValue: number;
+        futureAverage: number;
+        trend: "crescente" | "decrescente" | "estável";
+        peakDay?: number;
+        lowestDay?: number;
+    };
+}
+
+interface InsightResponse {
+    emoji: string;
+    title: string;
+    explanation: string;
+    whenImproves?: string;
+    tip: string;
+    tone: "celebratory" | "motivational" | "cautious" | "critical";
+}
+
+serve(async (req) => {
+    if (req.method === "OPTIONS") {
+        return new Response("ok", { headers: corsHeaders });
+    }
+
+    try {
+        // 1. Validate Auth
+        const authHeader = req.headers.get("Authorization");
+        if (!authHeader) {
+            throw new Error("No Authorization Header");
+        }
+
+        // 2. Parse Request
+        const body = (await req.json()) as FinancialInsightRequest;
+
+        if (!body.currentBalance && body.currentBalance !== 0) {
+            throw new Error("Missing required field: currentBalance");
+        }
+
+        // 3. Get OpenAI Key
+        const openaiApiKey = Deno.env.get("OPENAI_API_KEY");
+
+        if (!openaiApiKey) {
+            // Fallback without AI
+            return new Response(JSON.stringify({
+                emoji: "💡",
+                title: "Insights Indisponíveis",
+                explanation: "O sistema de insights personalizados está temporariamente indisponível.",
+                tip: "Continue monitorando seus gastos diários.",
+                tone: "cautious"
+            } as InsightResponse), {
+                headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+        }
+
+        // 4. Build Context-Aware Prompt
+        const insightType = body.insightType || "general";
+
+        const upcomingExpensesText = body.upcomingExpenses
+            .slice(0, 3)
+            .map(e => `  - R$ ${e.amount.toFixed(2)} (${e.description}) no dia ${new Date(e.date).getDate()}`)
+            .join("\n") || "  Nenhuma despesa grande agendada";
+
+        const upcomingIncomesText = body.upcomingIncomes
+            .slice(0, 3)
+            .map(i => `  - R$ ${i.amount.toFixed(2)} (${i.description}) no dia ${new Date(i.date).getDate()}`)
+            .join("\n") || "  Nenhuma entrada prevista este mês";
+
+        const bottleneckText = body.bottleneckInfo?.hasBottleneck
+            ? `
+SIM - Há um gargalo detectado:
+  - Data crítica: Dia ${body.bottleneckInfo.bottleneckDate ? new Date(body.bottleneckInfo.bottleneckDate).getDate() : 'N/A'}
+  - Dias até o gargalo: ${body.bottleneckInfo.daysUntilBottleneck || 'N/A'}
+  - Orçamento limitado a: R$ ${body.bottleneckInfo.dailyBudgetWithBottleneck?.toFixed(2) || '0,00'}/dia
+  - Causa: ${body.bottleneckInfo.bottleneckCause || 'Compromisso financeiro futuro'}
+`
+            : "NÃO - Fluxo de caixa estável até o fim do mês";
+
+        let prompt: string;
+
+        if (insightType === "chart") {
+            // Prompt específico para explicar gráficos
+            const chartInfo = body.chartData;
+            prompt = `
+Você é um educador financeiro do app "Nossa Casa AI".
+Sua função é EXPLICAR COMO INTERPRETAR O GRÁFICO de forma didática e clara.
+
+GRÁFICO: Poder de Compra Diário
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 Dados do Gráfico:
+  - Valor Atual (hoje): R$ ${chartInfo?.currentValue.toFixed(2) || '0,00'}/dia
+  - Média Futura (próximos dias): R$ ${chartInfo?.futureAverage.toFixed(2) || '0,00'}/dia
+  - Tendência: ${chartInfo?.trend || 'estável'}
+  ${chartInfo?.peakDay ? `- Pico (dia com maior valor): Dia ${chartInfo.peakDay}` : ''}
+  ${chartInfo?.lowestDay ? `- Vale (dia com menor valor): Dia ${chartInfo.lowestDay}` : ''}
+
+💰 Contexto Financeiro:
+  - Saldo Atual: R$ ${body.currentBalance.toFixed(2)}
+  - Orçamento Diário Seguro: R$ ${body.dailyBudget.toFixed(2)}
+
+🔮 Próximas Movimentações:
+${upcomingExpensesText}
+${upcomingIncomesText}
+
+SUA MISSÃO:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Explique O QUE O GRÁFICO SIGNIFICA e COMO LER ELE:
+
+1. **O que cada coisa representa**:
+   - O eixo horizontal (dias do mês)
+   - O eixo vertical (quanto dinheiro por dia)
+   - O que a linha mostra (evolução do poder de compra)
+
+2. **Por que sobe ou desce**:
+   - Se a linha sobe: por que? (entrada de dinheiro, contas pagas, economia acumulada?)
+   - Se a linha desce: por que? (despesas grandes chegando, gargalo?)
+   - Se tem picos: o que causou?
+
+3. **Como usar isso para tomar decisões**:
+   - "Se você economizar hoje, no dia X terá mais liberdade"
+   - "O gráfico mostra que vale a pena segurar até o dia Y"
+   - "Veja que depois do dia Z melhora porque..."
+
+REGRAS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Não fale sobre a situação financeira geral (foque NO GRÁFICO)
+2. Use linguagem didática, como se ensinasse alguém a ler um mapa
+3. Seja breve mas completo (máximo 4-5 frases)
+4. Use analogias se ajudar (ex: "é como um mapa do tesouro")
+5. Termine com UMA ação prática baseada no que o gráfico mostra
+
+FORMATO DE RESPOSTA:
+{
+  "emoji": "📈" (use 📈 para crescente, 📉 para decrescente, 📊 para estável),
+  "title": "Como Ler Este Gráfico" (ou similar educativo),
+  "explanation": "Explicação de O QUE o gráfico mostra e COMO interpretar (2-3 frases)",
+  "whenImproves": "Aponte o DIA específico onde melhora e POR QUE (baseado no gráfico)",
+  "tip": "Ação prática baseada na leitura do gráfico",
+  "tone": "motivational"
+}
+
+RETORNE APENAS UM JSON VÁLIDO (sem markdown):
+`;
+        } else {
+            // Prompt original para insight geral
+            prompt = `
+Você é o assistente financeiro pessoal do app "Nossa Casa AI".
+Sua função é explicar a situação financeira do usuário de forma clara, empática e motivadora.
+
+CONTEXTO FINANCEIRO ATUAL:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 Estado Atual:
+  - Saldo Atual: R$ ${body.currentBalance.toFixed(2)}
+  - Orçamento Diário Seguro: R$ ${body.dailyBudget.toFixed(2)}
+  - Reserva Mínima (Intocável): R$ ${body.minimumReserve.toFixed(2)}
+  - Status de Saúde: ${body.status === 'HEALTHY' ? 'Saudável ✅' : body.status === 'CAUTION' ? 'Atenção ⚠️' : 'Crítico 🚨'}
+  - Dias Restantes no Mês: ${body.daysRemainingInMonth}
+
+🔮 Próximas Despesas:
+${upcomingExpensesText}
+
+💰 Próximas Entradas:
+${upcomingIncomesText}
+
+🛡️ Gargalo Detectado?
+${bottleneckText}
+
+REGRAS IMPORTANTES:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Nunca seja alarmista ou culpabilizador
+2. Sempre aponte a CAUSA específica da situação (ex: "por causa do aluguel no dia 10")
+3. Sempre aponte a LUZ NO FIM DO TÚNEL (quando vai melhorar, qual entrada está chegando)
+4. Seja breve: máximo 3 frases + 1 dica prática
+5. Use emojis com moderação (1-2 por resposta)
+6. Se a situação é boa, celebre e sugira economia/investimento
+7. Fale diretamente com o usuário, como um amigo próximo
+8. Use números apenas quando essencial para entendimento
+
+FORMATOS DE RESPOSTA POR CENÁRIO:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Cenário 1: CRÍTICO (dailyBudget < 5 reais OU status = DANGER)
+{
+  "emoji": "🛡️",
+  "title": "Modo de Sobrevivência Ativado",
+  "explanation": "Explicação clara do PORQUÊ está apertado (mencione a despesa específica)",
+  "whenImproves": "Quando e por que vai melhorar (mencione entrada futura se houver)",
+  "tip": "Dica prática e motivadora (não genérica)",
+  "tone": "motivational"
+}
+
+Cenário 2: ATENÇÃO (dailyBudget entre 5-20 reais OU status = CAUTION)
+{
+  "emoji": "⚠️",
+  "title": "Semana de Aperto",
+  "explanation": "Contexto do gargalo ou despesa que está limitando",
+  "whenImproves": "Quando a situação melhora",
+  "tip": "Sugestão para segurar gastos ou priorizar",
+  "tone": "cautious"
+}
+
+Cenário 3: BOM (dailyBudget entre 20-100 reais E status = HEALTHY)
+{
+  "emoji": "✨",
+  "title": "Situação Estável",
+  "explanation": "Reconhecimento da situação positiva",
+  "tip": "Sugestão para aproveitar o momento para economizar ou investir",
+  "tone": "motivational"
+}
+
+Cenário 4: EXCELENTE (dailyBudget > 100 reais E status = HEALTHY)
+{
+  "emoji": "🚀",
+  "title": "Momento de Prosperidade",
+  "explanation": "Celebração da fase boa",
+  "tip": "Sugestão concreta para construir reserva ou realizar sonho",
+  "tone": "celebratory"
+}
+
+RETORNE APENAS UM JSON VÁLIDO (sem markdown, sem \`\`\`json):
+`;
+        }
+
+        // 5. Call OpenAI
+        const response = await fetch("https://api.openai.com/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${openaiApiKey}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                model: "gpt-4o-mini",
+                messages: [
+                    {
+                        role: "system",
+                        content: "Você é um assistente financeiro empático e motivador. Sempre retorne JSON válido sem markdown."
+                    },
+                    { role: "user", content: prompt }
+                ],
+                temperature: 0.3,
+                response_format: { type: "json_object" }
+            }),
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`OpenAI API Error: ${response.status} - ${errorText}`);
+        }
+
+        const data = await response.json();
+        const content = data.choices[0].message.content;
+
+        // 6. Parse AI Response
+        let aiResult: InsightResponse;
+        try {
+            // Remove potential markdown code blocks
+            const jsonStr = content.replace(/```json/g, "").replace(/```/g, "").trim();
+            aiResult = JSON.parse(jsonStr);
+        } catch (e) {
+            console.error("AI Parse Error:", content);
+            // Fallback response
+            aiResult = {
+                emoji: "💡",
+                title: "Análise Financeira",
+                explanation: "Continue monitorando seus gastos e respeitando seu orçamento diário.",
+                tip: "Acompanhe seu fluxo de caixa regularmente.",
+                tone: "cautious"
+            };
+        }
+
+        // 7. Return Response
+        return new Response(JSON.stringify(aiResult), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+
+    } catch (error) {
+        console.error("Function Error:", error);
+        return new Response(JSON.stringify({
+            error: (error as Error).message || "Internal server error"
+        }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+    }
+});

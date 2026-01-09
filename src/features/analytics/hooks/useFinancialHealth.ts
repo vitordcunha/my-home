@@ -39,6 +39,15 @@ export interface FinancialAlert {
     affectedDate?: Date;
 }
 
+export interface BottleneckInfo {
+    hasBottleneck: boolean;
+    bottleneckDate?: Date;
+    daysUntilBottleneck?: number;
+    bottleneckAmount?: number;
+    nextLargeExpense?: { amount: number; date: Date; description: string };
+    nextIncome?: { amount: number; date: Date; description: string };
+}
+
 export interface FinancialHealth {
     // Saldo e orçamento
     currentBalance: number; // Dinheiro disponível agora
@@ -77,6 +86,9 @@ export interface FinancialHealth {
         P3: number;
         P4: number;
     };
+
+    // Informações de gargalo (para IA)
+    bottleneckInfo: BottleneckInfo;
 }
 
 interface UseFinancialHealthProps {
@@ -507,7 +519,38 @@ export function useFinancialHealth({ householdId, weekendWeight: overrideWeekend
             });
         }
 
-        // --- 8. RETORNAR RESULTADO ---
+        // --- 8. PREPARAR INFORMAÇÕES DE GARGALO PARA IA ---
+        const hasBottleneck = dailyBudget < standardDailyBudget * 0.9; // Se budget foi reduzido em 10%+
+
+        // Encontrar a próxima despesa grande (>= R$ 100)
+        const nextLargeExpense = futureExpenses
+            .filter(e => Number(e.amount) >= 100)
+            .sort((a, b) => new Date(a.paid_at || a.created_at || new Date()).getTime() - new Date(b.paid_at || b.created_at || new Date()).getTime())
+        [0];
+
+        // Encontrar a próxima receita
+        const nextIncome = futureIncomes
+            .sort((a, b) => new Date(a.received_at || a.created_at || new Date()).getTime() - new Date(b.received_at || b.created_at || new Date()).getTime())
+        [0];
+
+        const bottleneckInfo: BottleneckInfo = {
+            hasBottleneck,
+            bottleneckDate: hasBottleneck ? tempDate : undefined,
+            daysUntilBottleneck: hasBottleneck ? daysUntilBottleneck : undefined,
+            bottleneckAmount: hasBottleneck ? lowestBalancePoint : undefined,
+            nextLargeExpense: nextLargeExpense ? {
+                amount: Number(nextLargeExpense.amount),
+                date: new Date(nextLargeExpense.paid_at || nextLargeExpense.created_at || new Date()),
+                description: nextLargeExpense.description || 'Despesa'
+            } : undefined,
+            nextIncome: nextIncome ? {
+                amount: Number(nextIncome.amount),
+                date: new Date(nextIncome.received_at || nextIncome.created_at || new Date()),
+                description: nextIncome.description || 'Receita'
+            } : undefined,
+        };
+
+        // --- 9. RETORNAR RESULTADO ---
         return {
             currentBalance,
             minimumReserve,
@@ -530,6 +573,7 @@ export function useFinancialHealth({ householdId, weekendWeight: overrideWeekend
             monthProgress,
             dailyProjections,
             commitmentsByPriority,
+            bottleneckInfo,
         } as FinancialHealth;
     }, [balanceData, expenses, incomes, settings, today]);
 }

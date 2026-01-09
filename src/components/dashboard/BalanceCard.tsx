@@ -1,60 +1,42 @@
-import { Wallet, TrendingDown, AlertCircle } from "lucide-react";
+import { Wallet } from "lucide-react";
 import { BentoCard } from "./BentoCard";
 import { useNavigate } from "react-router-dom";
 
-interface BalanceCardProps {
-  balance: number;
-  monthBudget?: number;
-  totalSpent?: number;
-}
 
-export function BalanceCard({ balance, monthBudget, totalSpent = 0 }: BalanceCardProps) {
+
+export function BalanceCard({ availableBalance, dailySpendingPower }: { availableBalance: number; dailySpendingPower: number }) {
   const navigate = useNavigate();
-  const isNegative = balance < 0;
-  const remaining = monthBudget ? monthBudget - totalSpent : null;
-  const isOverBudget = remaining !== null && remaining < 0;
+  const isNegative = availableBalance < 0;
 
   return (
     <BentoCard
       className="h-full"
       onClick={() => navigate("/expenses")}
     >
-      <div className="flex flex-col">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="p-2 rounded-lg bg-muted">
+      <div className="flex flex-col h-full justify-between">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600">
             <Wallet className="h-4 w-4" />
           </div>
-          <h3 className="font-semibold text-sm">Saldo</h3>
+          <h3 className="font-semibold text-xs text-muted-foreground uppercase tracking-wider">Finanças</h3>
         </div>
 
-        <div className="flex flex-col gap-2">
+        <div className="space-y-3">
           <div>
-            <div className="flex items-baseline gap-1 mb-1">
-              <span className={`text-2xl font-bold ${isNegative ? 'text-destructive' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                R$ {typeof balance === 'number' && !isNaN(balance) ? Math.abs(balance).toFixed(2) : '0,00'}
-              </span>
-            </div>
-            {isNegative && (
-              <p className="text-xs text-destructive flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" />
-                Saldo negativo
-              </p>
-            )}
+            <span className="text-[10px] text-muted-foreground block mb-0.5">Disponível</span>
+            <span className={`text-lg font-bold leading-none ${isNegative ? 'text-destructive' : 'text-foreground'}`}>
+              R$ {Math.abs(availableBalance).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            </span>
           </div>
 
-          {remaining !== null && (
-            <div className="pt-2 mt-2 border-t">
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <TrendingDown className="h-3 w-3" />
-                <span className={isOverBudget ? "text-destructive font-medium" : ""}>
-                  {isOverBudget ? "Acima" : "Faltam"} R$ {Math.abs(remaining).toFixed(2)}
-                </span>
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {isOverBudget ? "do orçamento" : "p/ bater orçamento"}
-              </p>
+          <div className="pt-2 border-t border-border/50">
+            <span className="text-[10px] text-muted-foreground block mb-0.5">Pode gastar hoje</span>
+            <div className="flex items-baseline gap-1">
+              <span className="text-sm font-semibold text-emerald-600">
+                R$ {dailySpendingPower.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </span>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </BentoCard>

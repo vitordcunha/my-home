@@ -12,6 +12,7 @@ import { Expense } from "./types";
 import { Income } from "./useIncomesQuery";
 import { FinancialOverviewGrid } from "./FinancialOverviewGrid";
 
+
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
@@ -25,6 +26,8 @@ import {
     Repeat,
     CreditCard,
     Settings,
+    ChevronLeft,
+    ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FloatingActionButton } from "@/components/ui/floating-action-button";
@@ -44,6 +47,7 @@ import { useAddExpense } from "./useAddExpense";
 import { PullToRefreshWrapper } from "@/components/ui/pull-to-refresh";
 import { useQueryClient } from "@tanstack/react-query";
 import { PageHeader } from "@/components/ui/page-header";
+import { useHaptic } from "@/hooks/useHaptic";
 
 type ViewMode = "me" | "household";
 const VIEW_MODE_STORAGE_KEY = "financial-dashboard-view-mode";
@@ -52,6 +56,7 @@ export function FinancialDashboard() {
     const { user } = useAuth();
     const queryClient = useQueryClient();
     const { data: profile } = useProfileQuery(user?.id);
+    const { trigger: triggerHaptic } = useHaptic();
 
     // --- Data Queries for Editing ---
     const { data: allExpenses } = useExpensesQuery(profile?.household_id || undefined);
@@ -59,7 +64,7 @@ export function FinancialDashboard() {
     const { data: allIncomes } = useIncomesQuery(profile?.household_id || undefined);
 
     // --- State ---
-    const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    const [viewMode] = useState<ViewMode>(() => {
         const stored = localStorage.getItem(VIEW_MODE_STORAGE_KEY);
         return (stored === "me" || stored === "household") ? stored : "me";
     });
@@ -84,6 +89,27 @@ export function FinancialDashboard() {
 
     // Filter State
     const [filterType, setFilterType] = useState<"all" | "income" | "expense">("all");
+
+    // --- Month Navigation ---
+    const handlePreviousMonth = () => {
+        triggerHaptic("light");
+        if (selectedMonth === 1) {
+            setSelectedMonth(12);
+            setSelectedYear(selectedYear - 1);
+        } else {
+            setSelectedMonth(selectedMonth - 1);
+        }
+    };
+
+    const handleNextMonth = () => {
+        triggerHaptic("light");
+        if (selectedMonth === 12) {
+            setSelectedMonth(1);
+            setSelectedYear(selectedYear + 1);
+        } else {
+            setSelectedMonth(selectedMonth + 1);
+        }
+    };
 
     // --- Effects ---
     useEffect(() => {
@@ -269,26 +295,6 @@ export function FinancialDashboard() {
                                         <CreditCard className="h-4 w-4 text-muted-foreground" />
                                     </Button>
                                 </Link>
-                                <div className="flex bg-muted/50 rounded-full p-1 backdrop-blur-sm border border-white/5">
-                                    <button
-                                        onClick={() => setViewMode("me")}
-                                        className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full transition-all ${viewMode === "me"
-                                            ? "bg-background shadow-sm text-foreground"
-                                            : "text-muted-foreground hover:text-foreground"
-                                            }`}
-                                    >
-                                        Pessoal
-                                    </button>
-                                    <button
-                                        onClick={() => setViewMode("household")}
-                                        className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full transition-all ${viewMode === "household"
-                                            ? "bg-background shadow-sm text-foreground"
-                                            : "text-muted-foreground hover:text-foreground"
-                                            }`}
-                                    >
-                                        Casa
-                                    </button>
-                                </div>
                             </div>
                         }
                     />
@@ -296,7 +302,7 @@ export function FinancialDashboard() {
 
                 {/* --- Main Content Tabs --- */}
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <TabsList className="grid w-full grid-cols-3 bg-muted/30 p-1 rounded-2xl h-12">
+                    <TabsList className="grid w-full grid-cols-3 bg-muted/30 p-1 rounded-2xl">
                         <TabsTrigger
                             value="overview"
                             className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-soft text-xs font-medium"
@@ -340,7 +346,9 @@ export function FinancialDashboard() {
                             </div>
                         </div>
 
-                        {/* 2. New Clean Bento Grid */}
+
+
+                        {/* 3. New Clean Bento Grid */}
                         <FinancialOverviewGrid
                             householdId={profile?.household_id || undefined}
                             userId={user?.id}
@@ -353,14 +361,39 @@ export function FinancialDashboard() {
 
                     {/* === TAB 2: EXTRATO === */}
                     <TabsContent value="statement" className="space-y-4 mt-2">
-                        {/* Header Filtros Compacto */}
+                        {/* Header com Navegação de Mês */}
                         <div className="flex items-center justify-between px-1 mb-2">
-                            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                                {format(new Date(selectedYear, selectedMonth - 1), "MMMM yyyy", { locale: ptBR })}
-                            </span>
+                            <div className="flex items-center gap-3 flex-1">
+                                {/* Botão Anterior */}
+                                <button
+                                    onClick={handlePreviousMonth}
+                                    className="h-9 w-9 rounded-full bg-muted/50 hover:bg-muted active:bg-muted/80 flex items-center justify-center transition-all group"
+                                    aria-label="Mês anterior"
+                                >
+                                    <ChevronLeft className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                                </button>
+
+                                {/* Mês e Ano - Centralizado */}
+                                <div className="flex-1 text-center">
+                                    <h3 className="text-sm font-semibold text-foreground capitalize">
+                                        {format(new Date(selectedYear, selectedMonth - 1), "MMMM yyyy", { locale: ptBR })}
+                                    </h3>
+                                </div>
+
+                                {/* Botão Próximo */}
+                                <button
+                                    onClick={handleNextMonth}
+                                    className="h-9 w-9 rounded-full bg-muted/50 hover:bg-muted active:bg-muted/80 flex items-center justify-center transition-all group"
+                                    aria-label="Próximo mês"
+                                >
+                                    <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                                </button>
+                            </div>
+
+                            {/* Filtro */}
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs font-medium text-muted-foreground hover:text-foreground">
+                                    <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs font-medium text-muted-foreground hover:text-foreground ml-2">
                                         <Filter className="h-3.5 w-3.5" />
                                         {filterType === 'all' ? 'Todos' : filterType === 'income' ? 'Entradas' : 'Despesas'}
                                     </Button>

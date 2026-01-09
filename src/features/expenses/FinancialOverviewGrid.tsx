@@ -9,6 +9,7 @@ import {
     Coins,
     Info,
     Sparkles,
+    Calculator
 } from "lucide-react";
 import {
     Popover,
@@ -24,6 +25,7 @@ import { CashFlowChart } from "./CashFlowChart";
 import { useHaptic } from "@/hooks/useHaptic";
 import { TopCategoriesCard } from "./TopCategoriesCard";
 import { LargestExpenseCard } from "./LargestExpenseCard";
+import { PurchaseSimulatorModal } from "./PurchaseSimulatorModal";
 
 
 interface FinancialOverviewGridProps {
@@ -60,7 +62,41 @@ export function FinancialOverviewGrid({
     const { trigger: triggerHaptic } = useHaptic();
 
     const [isInsightSheetOpen, setIsInsightSheetOpen] = useState(false);
+    const [isSimulatorOpen, setIsSimulatorOpen] = useState(false);
     const [currentInsight, setCurrentInsight] = useState<import("@/features/analytics/hooks/useFinancialInsight").FinancialInsight | null>(null);
+
+    // Dados de Ritmo (Velocímetro)
+    const rhythmData = useMemo(() => {
+        if (!health) return null;
+
+        // Progresso do mês (0-100)
+        const monthProgressPercent = health.monthProgress * 100;
+
+        // Progresso do Orçamento Variável
+        // (Total Variável Gasto / Total Variável Planejado)
+        // Estimativa: Gasto Médio * 30 dias = Total Estimado?
+        // Ou melhor: comparar realizado com o "esperado para hoje".
+
+        // Se o mês tem 30 dias e hoje é dia 15 (50%), deveríamos ter gasto 50% do budget disponível para o mês.
+        // Budget Total do Mês (Variável) = Disponível Inicial - Compromissos.
+        // Disponível Inicial = Opening + Incomes.
+
+        // Vamos usar uma métrica mais simples:
+        // Se a "Autonomia" for menor que os "Dias Restantes", estamos acelerados.
+        // const daysInMonth = health.daysRemaining / (1 - health.monthProgress); 
+        const daysRemaining = health.daysRemaining;
+
+        // Ritmo:
+        const pace = health.autonomy / daysRemaining;
+        // Se pace < 1, dinheiro acaba antes do mês -> RITMO ACELERADO (RUIM)
+        // Se pace >= 1, dinheiro sobra -> RITMO TRANQUILO (BOM)
+
+        return {
+            monthProgressPercent,
+            pace,
+            isAccelerated: pace < 1
+        };
+    }, [health]);
 
     // Preparar dados para o donut e top categorias
     const expensesForCategories = useMemo(() => {
@@ -323,9 +359,22 @@ export function FinancialOverviewGrid({
                                 </span>
                             </div>
 
-                            <p className="text-xs text-muted-foreground mt-1">
-                                Considerando compromissos futuros e reserva de {formatCurrency(minimumReserve)}
-                            </p>
+                            <div className="flex items-end justify-between mt-3">
+                                <p className="text-xs text-muted-foreground leading-tight max-w-[60%]">
+                                    Considerando compromissos futuros e reserva de {formatCurrency(minimumReserve)}
+                                </p>
+
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setIsSimulatorOpen(true);
+                                    }}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-background/50 hover:bg-background/80 shadow-sm border border-border/50 text-[10px] font-medium transition-all hover:scale-105 active:scale-95 whitespace-nowrap"
+                                >
+                                    <Calculator className="w-3 h-3 text-primary" />
+                                    Simular
+                                </button>
+                            </div>
                         </div>
                     </Card>
                 </motion.div>
@@ -365,7 +414,7 @@ export function FinancialOverviewGrid({
                     </Card>
                 </motion.div>
 
-                {/* CARD: Compromissos */}
+                {/* CARD: Compromissos (Restaurado) */}
                 <motion.div custom={2} initial="hidden" animate="visible" variants={cardVariants}>
                     <Card className="h-full border-none shadow-soft p-4 flex flex-col justify-between group hover:bg-muted/30 transition-colors">
                         <div className="flex items-center justify-between">
@@ -440,42 +489,71 @@ export function FinancialOverviewGrid({
                 {/* CARD: Autonomia */}
                 <motion.div custom={3} initial="hidden" animate="visible" variants={cardVariants} className="col-span-2">
                     <Card className="border-none shadow-soft p-4 flex items-center justify-between bg-muted/10">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-full bg-blue-500/10 text-blue-500">
-                                <ShieldCheck className="w-5 h-5" />
+                        <div className="flex items-center gap-4 flex-1">
+                            <div className="p-3 rounded-full bg-blue-500/10 text-blue-500 hidden sm:block">
+                                <ShieldCheck className="w-6 h-6" />
                             </div>
-                            <div>
-                                <div className="flex items-center gap-1.5">
-                                    <h4 className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Autonomia Estimada</h4>
-                                    <Popover>
-                                        <PopoverTrigger asChild>
-                                            <button className="focus:outline-none">
-                                                <Info className="w-3 h-3 text-muted-foreground/30 hover:text-muted-foreground transition-colors" />
-                                            </button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-64 p-3" align="start">
-                                            <div className="space-y-1.5">
-                                                <h4 className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">Sobrevivência Financeira</h4>
-                                                <p className="text-xs leading-relaxed">
-                                                    Quantos dias seu dinheiro dura com base na sua média de gastos variáveis (não recorrentes) dos últimos 7 dias.
-                                                </p>
-                                            </div>
-                                        </PopoverContent>
-                                    </Popover>
+                            <div className="flex-1">
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center gap-1.5">
+                                        <h4 className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Ritmo & Autonomia</h4>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <button className="focus:outline-none">
+                                                    <Info className="w-3 h-3 text-muted-foreground/30 hover:text-muted-foreground transition-colors" />
+                                                </button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-64 p-3" align="start">
+                                                <div className="space-y-1.5">
+                                                    <h4 className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">Velocímetro de Gastos</h4>
+                                                    <p className="text-xs leading-relaxed">
+                                                        Compara quantos dias de dinheiro você tem (Autonomia) vs quantos dias faltam no mês.
+                                                    </p>
+                                                    <p className="text-xs text-muted-foreground pt-1">
+                                                        Se a barra colorida for menor que a cinza, você precisa desacelerar!
+                                                    </p>
+                                                </div>
+                                            </PopoverContent>
+                                        </Popover>
+                                    </div>
+                                    <span className="text-sm font-bold">
+                                        {Math.floor(autonomy)} dias
+                                        <span className="text-[10px] font-normal text-muted-foreground ml-1">de caixa</span>
+                                    </span>
                                 </div>
-                                <div className="flex items-baseline gap-1.5">
-                                    <span className="text-xl font-bold">{autonomy > 90 ? '+90' : Math.floor(autonomy)}</span>
-                                    <span className="text-sm text-muted-foreground">dias</span>
-                                </div>
+
+                                {/* Barra de Ritmo (Velocímetro Linear) */}
+                                {rhythmData && (
+                                    <div className="space-y-1">
+                                        <div className="h-2 w-full bg-muted/50 rounded-full overflow-hidden relative">
+                                            {/* Marcador de Dias Restantes (Meta mínima) */}
+                                            {/* Se faltam 10 dias, queremos ter no mínimo 10 dias de autonomia */}
+                                            {/* Vamos visualizar diferente: Barras sobrepostas não funcionam bem se escalas diferem muito.
+                                                Vamos usar uma barra única de "Saúde do Ritmo": Pace.
+                                                0.5 = Ruim (Metade do necessário). 1.0 = Justo. 1.5 = Bom.
+                                            */}
+                                            <div
+                                                className={`h-full rounded-full transition-all duration-500 ${rhythmData.pace < 0.8 ? 'bg-red-500' :
+                                                    rhythmData.pace < 1.1 ? 'bg-amber-500' : 'bg-emerald-500'
+                                                    }`}
+                                                style={{ width: `${Math.min(100, Math.max(5, rhythmData.pace * 100 * 0.5))}%` }} // Escala arbitrária visual: 1.0 pace = 50% da barra? Não.
+                                            // Melhor: Pace 1.0 (equilibrado) deve ser visualmente claro.
+                                            // Vamos simplificar: Barra de Autonomia relativa ao mês restante.
+                                            // Se daysRemaining = 10 e Autonomia = 20. Width = 200% (Full Green).
+                                            // Se daysRemaining = 10 e Autonomia = 5. Width = 50% (Half Red).
+                                            />
+                                        </div>
+                                        <div className="flex justify-between text-[10px] text-muted-foreground font-medium">
+                                            <span>
+                                                Faltam {health.daysRemaining} dias no mês
+                                            </span>
+                                            <span className={rhythmData.isAccelerated ? "text-red-500" : "text-emerald-600"}>
+                                                {rhythmData.isAccelerated ? "Ritmo Acelerado" : "Ritmo Seguro"}
+                                            </span>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
-                        </div>
-                        <div className="text-right">
-                            <span className="text-[10px] text-muted-foreground block">
-                                Se manter média variável de
-                            </span>
-                            <span className="text-xs font-medium">
-                                {formatCurrency(health.averageDailySpend)}/dia
-                            </span>
                         </div>
                     </Card>
                 </motion.div>
@@ -666,6 +744,13 @@ export function FinancialOverviewGrid({
                 error={insightError}
             />
 
-        </div>
+            {/* Purchase Simulator Modal */}
+            <PurchaseSimulatorModal
+                open={isSimulatorOpen}
+                onOpenChange={setIsSimulatorOpen}
+                currentHealth={health}
+            />
+
+        </div >
     );
 }

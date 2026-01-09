@@ -41,6 +41,14 @@ export function ShoppingCard({ totalItems, urgentItems = 0 }: ShoppingCardProps)
               <span className="font-medium">{urgentItems} urgente{urgentItems !== 1 ? "s" : ""}</span>
             </div>
           )}
+
+          <div className="pt-2 border-t border-border/50 mt-1">
+            <span className="text-[10px] text-muted-foreground block mb-1">Ações rápidas</span>
+            <button className="w-full flex items-center justify-center gap-1.5 text-[10px] font-medium text-muted-foreground bg-muted/50 hover:bg-muted hover:text-foreground py-1.5 rounded-md transition-colors">
+              <ShoppingCart className="w-3 h-3" />
+              Ver lista completa
+            </button>
+          </div>
         </div>
       </div>
     </BentoCard>

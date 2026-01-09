@@ -2,6 +2,9 @@ import { TasksSummaryCard } from "./TasksSummaryCard";
 import { BalanceCard } from "./BalanceCard";
 import { ShoppingCard } from "./ShoppingCard";
 import { RankingCard } from "./RankingCard";
+import { UpcomingBillsCard } from "@/features/expenses/UpcomingBillsCard";
+import { TimelineItem } from "@/features/expenses/useFinancialBalance";
+import { useNavigate } from "react-router-dom";
 
 interface DashboardGridProps {
   tasksData: {
@@ -10,9 +13,8 @@ interface DashboardGridProps {
     myTasks: number;
   };
   balanceData: {
-    balance: number;
-    monthBudget?: number;
-    totalSpent?: number;
+    availableBalance: number;
+    dailySpendingPower: number;
   };
   shoppingData: {
     totalItems: number;
@@ -24,14 +26,18 @@ interface DashboardGridProps {
     currentUserPosition?: number;
     currentUserPoints?: number;
   };
+  timeline: TimelineItem[];
 }
 
-export function DashboardGrid({ 
-  tasksData, 
-  balanceData, 
-  shoppingData, 
-  rankingData 
+export function DashboardGrid({
+  tasksData,
+  balanceData,
+  shoppingData,
+  rankingData,
+  timeline
 }: DashboardGridProps) {
+  const navigate = useNavigate();
+
   return (
     <div className="grid grid-cols-2 gap-3 md:gap-4 mb-8 animate-stagger">
       {/* Card grande de tarefas - destaque principal */}
@@ -42,16 +48,23 @@ export function DashboardGrid({
           myTasks={tasksData.myTasks}
         />
       </div>
-      
+
+      {/* Próximas Contas - Destaque financeiro (NOVO) */}
+      <div className="col-span-2">
+        <UpcomingBillsCard
+          transactions={timeline}
+          onViewAll={() => navigate("/expenses")}
+        />
+      </div>
+
       {/* Card de saldo - pequeno mas importante */}
       <div className="col-span-1">
         <BalanceCard
-          balance={balanceData.balance}
-          monthBudget={balanceData.monthBudget}
-          totalSpent={balanceData.totalSpent}
+          availableBalance={balanceData.availableBalance}
+          dailySpendingPower={balanceData.dailySpendingPower}
         />
       </div>
-      
+
       {/* Card de lista de compras - pequeno */}
       <div className="col-span-1">
         <ShoppingCard
@@ -59,7 +72,7 @@ export function DashboardGrid({
           urgentItems={shoppingData.urgentItems}
         />
       </div>
-      
+
       {/* Card de ranking - médio destaque */}
       <div className="col-span-2">
         <RankingCard

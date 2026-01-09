@@ -9,7 +9,6 @@ import { DashboardGrid } from "@/components/dashboard/DashboardGrid";
 import { TasksSummary } from "@/components/dashboard/TasksSummary";
 import { useTasksQuery } from "@/features/tasks/useTasksQuery";
 import { useProfileQuery } from "@/features/auth/useProfileQuery";
-import { useUserBalanceQuery } from "@/features/expenses/useUserBalanceQuery";
 import { useShoppingItemsQuery } from "@/features/shopping/useShoppingItemsQuery";
 import { useRankingQuery } from "@/features/gamification/useRankingQuery";
 import { PageHeader } from "@/components/ui/page-header";
@@ -18,6 +17,8 @@ import { AddExpenseSheet } from "@/features/expenses/AddExpenseSheet";
 import { AddItemSheet } from "@/features/shopping/AddItemSheet";
 import { useAddShoppingItem } from "@/features/shopping/useAddShoppingItem";
 import { ShoppingCategory } from "@/features/shopping/types";
+import { useFinancialHealth } from "@/features/analytics/hooks/useFinancialHealth";
+import { useFinancialTimeline } from "@/features/expenses/useFinancialBalance";
 
 
 export default function TodayScreen() {
@@ -35,10 +36,22 @@ export default function TodayScreen() {
 
   const { data: allTasks } = useTasksQuery({ onlyMyTasks: false });
 
-  const { data: balance } = useUserBalanceQuery(
-    user?.id,
-    profile?.household_id ?? undefined
+  // Data for Balance & Bills
+  const todayDate = new Date();
+  const currentMonth = todayDate.getMonth() + 1;
+  const currentYear = todayDate.getFullYear();
+
+  const health = useFinancialHealth({
+    householdId: profile?.household_id || undefined,
+    userId: user?.id,
+  });
+
+  const { data: timeline } = useFinancialTimeline(
+    profile?.household_id || undefined,
+    currentMonth,
+    currentYear
   );
+
   const { data: shoppingItems } = useShoppingItemsQuery(
     profile?.household_id ?? undefined
   );
@@ -46,7 +59,8 @@ export default function TodayScreen() {
 
   const handleRefresh = async () => {
     await queryClient.invalidateQueries({ queryKey: ["tasks"] });
-    await queryClient.invalidateQueries({ queryKey: ["balance"] });
+    await queryClient.invalidateQueries({ queryKey: ["financialBalance"] });
+    await queryClient.invalidateQueries({ queryKey: ["financialTimeline"] });
     await queryClient.invalidateQueries({ queryKey: ["shopping"] });
     await queryClient.invalidateQueries({ queryKey: ["ranking"] });
     await queryClient.invalidateQueries({ queryKey: ["household"] });
@@ -79,21 +93,24 @@ export default function TodayScreen() {
     month: "long",
   });
 
+  // Calculate specific balance metrics
+  const totalScheduled = (health?.futureCommitments || 0) + (health?.flexibleCommitments || 0);
+  const availableBalance = (health?.currentBalance || 0) - totalScheduled;
+
   // Prepare dashboard data
   const dashboardData = {
     tasksData: {
       total: allTasks?.length || 0,
-      completed: 0, // Tasks are filtered to show only pending ones
+      completed: 0,
       myTasks: allTasks?.length || 0,
     },
     balanceData: {
-      balance: balance?.net_balance ?? 0,
-      monthBudget: undefined, // Could be fetched from settings
-      totalSpent: undefined, // Could be fetched from expenses
+      availableBalance: availableBalance,
+      dailySpendingPower: health?.dailyBudget || 0,
     },
     shoppingData: {
       totalItems: shoppingItems?.length || 0,
-      urgentItems: 0, // Not implemented yet
+      urgentItems: 0,
     },
     rankingData: {
       topUserName: ranking?.[0]?.nome || "Ninguém",
@@ -143,12 +160,13 @@ export default function TodayScreen() {
             balanceData={dashboardData.balanceData}
             shoppingData={dashboardData.shoppingData}
             rankingData={dashboardData.rankingData}
+            timeline={timeline || []}
           />
 
           {/* Resumo de Tarefas */}
           <TasksSummary maxTasks={5} />
-        </div>
-      </PullToRefreshWrapper>
+        </div >
+      </PullToRefreshWrapper >
 
       <TaskFormDialog
         open={showCreateDialog}
